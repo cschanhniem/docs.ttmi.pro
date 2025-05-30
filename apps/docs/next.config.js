@@ -5,8 +5,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/erp-docs' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/erp-docs/' : '',
+  // Only set basePath for GitHub Pages, not for Cloudflare Pages
+  basePath: process.env.GITHUB_PAGES === 'true' ? '/erp-docs' : '',
+  assetPrefix: process.env.GITHUB_PAGES === 'true' ? '/erp-docs/' : '',
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   experimental: {
     mdxRs: false,

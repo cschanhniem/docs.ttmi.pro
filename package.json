@@ -10,7 +10,8 @@
   "packageManager": "pnpm@8.15.0",
   "scripts": {
     "dev": "pnpm --filter docs dev",
-    "build": "pnpm --filter docs build",
+    "build": "pnpm --filter docs build && cp -r apps/docs/out ./out",
+    "build:cloudflare": "pnpm --filter docs build",
     "start": "pnpm --filter docs start",
     "lint": "pnpm --filter docs lint",
     "export": "pnpm --filter docs export",
