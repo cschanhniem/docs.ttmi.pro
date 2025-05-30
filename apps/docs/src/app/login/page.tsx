@@ -16,6 +16,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -23,7 +25,7 @@ export default function LoginPage() {
 
     try {
       const success = login(password);
-      
+
       if (success) {
         router.push('/');
         router.refresh();
@@ -63,22 +65,22 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
             </div>
-            
+
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
+
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isLoading}
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Default password: <code className="bg-muted px-1 py-0.5 rounded">admin123</code></p>
             <p className="mt-1">Change this in production by setting NEXT_PUBLIC_DOCS_PASSWORD</p>
