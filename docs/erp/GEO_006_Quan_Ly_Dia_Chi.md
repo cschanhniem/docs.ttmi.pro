@@ -1,0 +1,370 @@
+# GEO_006_Geography_Quản Lý Địa Chỉ
+
+*Phiên bản: 1.0*
+*Người tạo: Cline*
+*Ngày tạo: 13/05/2025*
+*Cập nhật lần cuối: 13/05/2025*
+*Người cập nhật: Cline*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Nghiệp vụ này cho phép quản lý thông tin địa chỉ chi tiết trong hệ thống ERP. Một địa chỉ đầy đủ bao gồm thông tin số nhà, đường phố, xã/phường, quận/huyện, tỉnh/thành phố, và quốc gia. Nó cũng có thể bao gồm mã bưu điện, tọa độ địa lý (kinh độ, vĩ độ) và các ghi chú liên quan. Địa chỉ là thông tin cơ bản được sử dụng rộng rãi trong nhiều phân hệ như quản lý khách hàng, nhà cung cấp, giao vận, nhân sự, v.v.
+
+### 1.2. Phạm Vi Áp Dụng
+Áp dụng cho tất cả các bộ phận và quy trình nghiệp vụ cần sử dụng hoặc lưu trữ thông tin địa chỉ. Người dùng có quyền quản trị hệ thống hoặc được phân quyền cụ thể mới có thể thực hiện các thao tác quản lý trực tiếp danh mục địa chỉ gốc (nếu có). Thông thường, địa chỉ sẽ được tạo và quản lý trong ngữ cảnh của một đối tượng cụ thể (ví dụ: địa chỉ khách hàng).
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Địa Chỉ Đầy Đủ (dia_chi_day_du) | Chuỗi văn bản mô tả đầy đủ địa chỉ, thường được hệ thống tự động ghép từ các thành phần. |
+| Số Nhà, Đường Phố (so_nha_duong_pho) | Thông tin chi tiết về số nhà và tên đường. |
+| Xã/Phường (xa_phuong) | Xã/phường mà địa chỉ này thuộc về. Liên kết tới `XaPhuongModel`. |
+| Quận/Huyện (quan_huyen) | Quận/huyện mà địa chỉ này thuộc về (thông qua `XaPhuongModel`). |
+| Tỉnh/Thành Phố (tinh_thanh) | Tỉnh/thành phố mà địa chỉ này thuộc về (thông qua `XaPhuongModel`). |
+| Quốc Gia (quoc_gia) | Quốc gia mà địa chỉ này thuộc về (thông qua `XaPhuongModel`). |
+| Khu Vực (khu_vuc) | Khu vực địa lý mà địa chỉ này có thể thuộc về (thông qua `TinhThanhModel`, tùy chọn). |
+| Mã Bưu Điện (ma_buu_dien) | Mã bưu chính của địa chỉ (tùy chọn). |
+| Kinh Độ (kinh_do) | Tọa độ kinh độ của địa chỉ (tùy chọn). |
+| Vĩ Độ (vi_do) | Tọa độ vĩ độ của địa chỉ (tùy chọn). |
+| Ghi Chú (ghi_chu) | Thông tin bổ sung về địa chỉ. |
+| Trạng Thái (status) | Trạng thái của địa chỉ (ví dụ: 1 - Hoạt động, 0 - Không hoạt động). |
+| Entity (Đơn vị) | Đơn vị/Công ty sử dụng hệ thống ERP. Mỗi địa chỉ được quản lý trong phạm vi một Entity cụ thể. |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | GEO_001 | Quản Lý Quốc Gia | Cung cấp thông tin Quốc Gia. |
+| 2   | GEO_002 | Quản Lý Tỉnh Thành | Cung cấp thông tin Tỉnh Thành. |
+| 3   | GEO_003 | Quản Lý Quận Huyện | Cung cấp thông tin Quận Huyện. |
+| 4   | GEO_004 | Quản Lý Xã Phường | Cung cấp thông tin Xã Phường, là thành phần cơ sở của Địa Chỉ. |
+| 5   | GEO_005 | Quản Lý Khu Vực | Cung cấp thông tin Khu Vực (tùy chọn). |
+| 6   | SAL_001 | Quản Lý Khách Hàng | Khách hàng có thể có nhiều địa chỉ. |
+| 7   | PUR_001 | Quản Lý Nhà Cung Cấp | Nhà cung cấp có thể có nhiều địa chỉ. |
+| 8   | GEO_007 | Quản Lý Địa Chỉ Nhận Hàng | Chuyên biệt hóa quản lý địa chỉ cho mục đích giao nhận. |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình quản lý địa chỉ bao gồm việc tạo mới một địa chỉ bằng cách cung cấp các thành phần chi tiết (số nhà, đường phố, chọn xã/phường), xem, cập nhật và xóa (logic) địa chỉ. Hệ thống sẽ tự động tổng hợp thông tin quận/huyện, tỉnh/thành, quốc gia từ xã/phường được chọn.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Người dùng yêu cầu thao tác quản lý địa chỉ] --> B{Chọn thao tác};
+    B -->|Thêm mới| C[Nhập thông tin địa chỉ (Số nhà, đường, chọn Xã/Phường, Mã bưu điện, ...)];
+    B -->|Cập nhật| D[Chọn địa chỉ & Nhập thông tin mới];
+    B -->|Xóa (Logic/Ẩn)| E[Chọn địa chỉ & Xác nhận];
+    B -->|Xem danh sách| F[Hệ thống hiển thị danh sách địa chỉ (có thể lọc)];
+    B -->|Xem chi tiết| G[Chọn địa chỉ & Hệ thống hiển thị chi tiết];
+    C --> H[Hệ thống kiểm tra dữ liệu (Xã/Phường tồn tại, ...)];
+    D --> H;
+    H -->|Hợp lệ| I[Hệ thống tạo/cập nhật chuỗi địa chỉ đầy đủ & Lưu thông tin vào CSDL];
+    H -->|Không hợp lệ| J[Thông báo lỗi];
+    I --> K[Thông báo thành công];
+    E --> L[Hệ thống kiểm tra ràng buộc (Địa chỉ đang được sử dụng?)];
+    L -->|Không có ràng buộc nghiêm trọng / Cho phép xóa logic| M[Cập nhật trạng thái địa chỉ (ví dụ: không hoạt động) hoặc xóa nếu không còn tham chiếu];
+    L -->|Có ràng buộc không thể xóa| N[Thông báo lỗi không thể xóa];
+    M --> K;
+    F --> Z[Kết thúc];
+    G --> Z;
+    J --> A;
+    K --> A;
+    N --> A;
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Thêm Mới Địa Chỉ
+- **Mô tả**: Người dùng cung cấp thông tin chi tiết để tạo một địa chỉ mới.
+- **Đầu vào**: Số nhà/đường phố, UUID của xã/phường, mã bưu điện (tùy chọn), kinh độ (tùy chọn), vĩ độ (tùy chọn), ghi chú (tùy chọn), trạng thái (mặc định là hoạt động).
+- **Đầu ra**: Địa chỉ mới được tạo trong hệ thống, bao gồm chuỗi địa chỉ đầy đủ được tự động tạo.
+- **Người thực hiện**: Người dùng có quyền (thường trong ngữ cảnh tạo Khách hàng, NCC, etc.).
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập. Xã/phường liên kết phải tồn tại.
+- **Xử lý ngoại lệ**:
+    - Nếu xã/phường không tồn tại: Thông báo lỗi.
+    - Nếu thông tin không hợp lệ: Thông báo lỗi.
+    - Hệ thống có thể kiểm tra sự trùng lặp địa chỉ dựa trên các thành phần để gợi ý sử dụng địa chỉ đã có.
+
+#### 2.3.2. Cập Nhật Thông Tin Địa Chỉ
+- **Mô tả**: Người dùng thay đổi thông tin của một địa chỉ đã tồn tại.
+- **Đầu vào**: UUID của địa chỉ cần cập nhật, thông tin mới.
+- **Đầu ra**: Thông tin địa chỉ được cập nhật trong hệ thống.
+- **Người thực hiện**: Người dùng có quyền.
+- **Điều kiện tiên quyết**: Địa chỉ tồn tại trong hệ thống.
+- **Xử lý ngoại lệ**:
+    - Nếu địa chỉ không tồn tại: Thông báo lỗi.
+    - Nếu thông tin không hợp lệ: Thông báo lỗi.
+
+#### 2.3.3. Xóa Địa Chỉ
+- **Mô tả**: Người dùng xóa một địa chỉ khỏi hệ thống. Thường là xóa logic (đánh dấu không hoạt động) nếu địa chỉ đã được sử dụng.
+- **Đầu vào**: UUID của địa chỉ cần xóa.
+- **Đầu ra**: Địa chỉ bị xóa (hoặc đánh dấu không hoạt động).
+- **Người thực hiện**: Người dùng có quyền.
+- **Điều kiện tiên quyết**: Địa chỉ tồn tại trong hệ thống.
+- **Xử lý ngoại lệ**:
+    - Nếu địa chỉ không tồn tại: Thông báo lỗi.
+    - Nếu địa chỉ đang được tham chiếu bởi các đối tượng quan trọng (ví dụ: hóa đơn đã phát hành): Cân nhắc chỉ cho phép xóa logic hoặc không cho xóa.
+
+#### 2.3.4. Xem Danh Sách Địa Chỉ
+- **Mô tả**: Người dùng xem danh sách các địa chỉ (thường trong ngữ cảnh của một đối tượng, ví dụ: địa chỉ của một khách hàng, hoặc tìm kiếm địa chỉ chung).
+- **Đầu vào**: Entity slug, tùy chọn: các tiêu chí lọc (đường phố, xã/phường UUID, quận/huyện UUID, tỉnh/thành UUID, etc.), phân trang.
+- **Đầu ra**: Danh sách các địa chỉ thỏa mãn điều kiện.
+- **Người thực hiện**: Bất kỳ người dùng nào có quyền truy cập chức năng.
+
+#### 2.3.5. Xem Chi Tiết Địa Chỉ
+- **Mô tả**: Người dùng xem thông tin chi tiết của một địa chỉ cụ thể.
+- **Đầu vào**: UUID của địa chỉ.
+- **Đầu ra**: Thông tin chi tiết của địa chỉ, bao gồm các thành phần địa lý liên quan.
+- **Người thực hiện**: Bất kỳ người dùng nào có quyền truy cập chức năng.
+- **Điều kiện tiên quyết**: Địa chỉ tồn tại trong hệ thống.
+- **Xử lý ngoại lệ**: Nếu địa chỉ không tồn tại: Thông báo lỗi.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram) - Thêm Mới Địa Chỉ
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant System as Hệ thống (API)
+    participant Service as DiaChiModelService
+    participant Repository as DiaChiRepository
+    participant XaPhuongRepo as XaPhuongRepository
+    participant DB as Cơ sở dữ liệu
+
+    User->>System: POST /api/{entity_slug}/dia-chi/ (data: so_nha_duong_pho, xa_phuong_uuid, ...)
+    System->>Service: create_dia_chi(entity_slug, data)
+    Service->>Service: _get_entity_model(entity_slug)
+    Service-->>Service: entity_model
+    Service->>XaPhuongRepo: get_xa_phuong_by_uuid_for_entity(data['xa_phuong_uuid'], entity_model)
+    XaPhuongRepo->>DB: SELECT xp.*, qh.*, tt.*, qg.* FROM XaPhuongModel xp JOIN QuanHuyenModel qh ... WHERE xp.uuid = ... AND xp.entity_id = ...
+    DB-->>XaPhuongRepo: xa_phuong_model_with_parents (or null)
+    XaPhuongRepo-->>Service: xa_phuong_model_with_parents (or null)
+    alt Xã/Phường không tồn tại hoặc không thuộc Entity
+        Service-->>System: Error: "Ward/Commune not found or invalid"
+        System-->>User: Response 400 (Error message)
+    else Xã/Phường tồn tại
+        Service->>Service: validate_dia_chi_data(data)
+        Service-->>Service: validated_data
+        Service->>Service: construct_dia_chi_day_du(validated_data, xa_phuong_model_with_parents)
+        Service-->>Service: dia_chi_day_du_string
+        Service->>Repository: create_dia_chi(entity_model, validated_data, xa_phuong_model_with_parents.id, dia_chi_day_du_string)
+        Repository->>DB: INSERT INTO DiaChiModel (...) VALUES (...)
+        DB-->>Repository: new_dia_chi_object
+        Repository-->>Service: new_dia_chi_object
+        Service-->>System: new_dia_chi_object_with_details
+        System-->>User: Response 201 (new_dia_chi_data)
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Tìm kiếm địa chỉ**: Người dùng có thể tìm kiếm địa chỉ theo chuỗi địa chỉ đầy đủ, hoặc theo các thành phần.
+- **Chọn địa chỉ từ danh sách gợi ý**: Khi nhập, hệ thống có thể gợi ý các địa chỉ đã tồn tại để tránh tạo trùng.
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | GEO_006_F01 | Thêm mới địa chỉ | Cho phép tạo một địa chỉ mới với các thông tin chi tiết. | Cao |
+| 2   | GEO_006_F02 | Cập nhật địa chỉ | Cho phép sửa thông tin của một địa chỉ đã có. | Cao |
+| 3   | GEO_006_F03 | Xóa địa chỉ | Cho phép xóa (logic hoặc vật lý) một địa chỉ. | Cao |
+| 4   | GEO_006_F04 | Xem danh sách địa chỉ | Hiển thị danh sách các địa chỉ, hỗ trợ phân trang và lọc. | Cao |
+| 5   | GEO_006_F05 | Xem chi tiết địa chỉ | Hiển thị thông tin chi tiết của một địa chỉ. | Cao |
+| 6   | GEO_006_F06 | Tìm kiếm địa chỉ | Cho phép tìm kiếm địa chỉ dựa trên các thành phần hoặc chuỗi đầy đủ. | Cao |
+| 7   | GEO_006_F07 | Lấy địa chỉ theo UUID | Lấy thông tin địa chỉ cụ thể bằng UUID. | Cao |
+| 8   | GEO_006_F08 | Tự động tạo chuỗi địa chỉ đầy đủ | Hệ thống tự động ghép các thành phần để tạo chuỗi `dia_chi_day_du`. | Cao |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. GEO_006_F01: Thêm mới địa chỉ
+- **Mô tả**: Chức năng cho phép người dùng tạo mới một địa chỉ.
+- **Đầu vào**:
+    - `entity_slug`: Slug của Entity.
+    - `data`: Đối tượng chứa thông tin địa chỉ:
+        - `so_nha_duong_pho` (bắt buộc): Số nhà, đường phố (string, max 500).
+        - `xa_phuong_uuid` (bắt buộc): UUID của Xã/Phường.
+        - `ma_buu_dien` (tùy chọn): Mã bưu điện (string, max 20).
+        - `kinh_do` (tùy chọn): Kinh độ (Decimal).
+        - `vi_do` (tùy chọn): Vĩ độ (Decimal).
+        - `ghi_chu` (tùy chọn): Ghi chú (text).
+        - `status` (tùy chọn): Trạng thái (integer). Mặc định là 1.
+- **Đầu ra**: Đối tượng DiaChiModel vừa được tạo, bao gồm `dia_chi_day_du` và thông tin cha (quận, tỉnh, quốc gia).
+- **Điều kiện tiên quyết**: `entity_slug` và `xa_phuong_uuid` hợp lệ.
+- **Luồng xử lý chính**:
+  1. Service lấy `EntityModel` và `XaPhuongModel` (kèm theo Quận, Tỉnh, Quốc gia).
+  2. Service validate dữ liệu.
+  3. Service tạo chuỗi `dia_chi_day_du`.
+  4. Service gọi Repository để tạo mới.
+- **Giao diện liên quan**: Form thêm mới địa chỉ (thường là một phần của form khác như Khách hàng, NCC).
+
+#### 3.2.2. GEO_006_F02: Cập nhật địa chỉ
+- **Mô tả**: Cập nhật thông tin địa chỉ.
+- **Đầu vào**:
+    - `entity_slug`: Slug của Entity.
+    - `uuid`: UUID của địa chỉ.
+    - `data`: Thông tin cập nhật.
+- **Đầu ra**: Đối tượng DiaChiModel đã cập nhật.
+- **Giao diện liên quan**: Form cập nhật địa chỉ.
+
+#### 3.2.3. GEO_006_F03: Xóa địa chỉ
+- **Mô tả**: Xóa một địa chỉ.
+- **Đầu vào**: `entity_slug`, `uuid` của địa chỉ.
+- **Đầu ra**: HTTP 204 No Content (nếu xóa vật lý) hoặc đối tượng địa chỉ đã cập nhật trạng thái.
+- **Điều kiện tiên quyết**: Địa chỉ tồn tại. Kiểm tra ràng buộc tham chiếu.
+- **Giao diện liên quan**: Nút xóa.
+
+#### 3.2.4. GEO_006_F04: Xem danh sách địa chỉ
+- **Mô tả**: Lấy danh sách địa chỉ, có phân trang và lọc.
+- **Đầu vào**: `entity_slug`, `page`, `page_size`, các tham số lọc (ví dụ: `xa_phuong_uuid`, `search_term`).
+- **Đầu ra**: Danh sách DiaChiModel.
+- **Giao diện liên quan**: Trang danh sách địa chỉ (nếu có quản lý tập trung) hoặc kết quả tìm kiếm.
+
+#### 3.2.5. GEO_006_F05: Xem chi tiết địa chỉ
+- **Mô tả**: Lấy chi tiết một địa chỉ.
+- **Đầu vào**: `entity_slug`, `uuid` của địa chỉ.
+- **Đầu ra**: Đối tượng DiaChiModel với đầy đủ thông tin.
+- **Giao diện liên quan**: Hiển thị chi tiết địa chỉ.
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+Sử dụng Views/APIs, Services (`DiaChiModelService`), Repositories (`DiaChiRepository`), Models (`DiaChiModel`, `XaPhuongModel`, `EntityModel`).
+
+### 4.2. API Endpoints
+
+- **Base URL**: `/api/{entity_slug}/dia-chi/`
+- **Endpoints**:
+    - `GET /`: Lấy danh sách địa chỉ. (GEO_006_F04)
+        - Query params: `page`, `page_size`, `xa_phuong_uuid`, `search` (tìm trong `so_nha_duong_pho`, `dia_chi_day_du`), `status`.
+    - `POST /`: Tạo mới địa chỉ. (GEO_006_F01)
+        - Request body: `{ "so_nha_duong_pho": "123 Đường ABC", "xa_phuong_uuid": "uuid_cua_xa_phuong", ... }`
+    - `GET /{uuid}/`: Lấy chi tiết địa chỉ. (GEO_006_F05)
+    - `PUT /{uuid}/`: Cập nhật địa chỉ. (GEO_006_F02)
+    - `PATCH /{uuid}/`: Cập nhật một phần địa chỉ. (GEO_006_F02)
+    - `DELETE /{uuid}/`: Xóa địa chỉ. (GEO_006_F03)
+
+### 4.3. Service Logic (`DiaChiModelService`)
+- Lấy thông tin `XaPhuongModel` và các cấp cha (`QuanHuyen`, `TinhThanh`, `QuocGia`, `KhuVuc`) để xây dựng `dia_chi_day_du`.
+- Kiểm tra sự tồn tại của `XaPhuongModel`.
+- Logic kiểm tra trùng lặp địa chỉ (tùy chọn, có thể phức tạp).
+- Xử lý việc xóa địa chỉ (kiểm tra tham chiếu).
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    ENTITY ||--|{ QUOC_GIA : "quản lý"
+    ENTITY ||--|{ KHU_VUC : "quản lý"
+    ENTITY ||--|{ TINH_THANH : "quản lý"
+    ENTITY ||--|{ QUAN_HUYEN : "quản lý"
+    ENTITY ||--|{ XA_PHUONG : "quản lý"
+    ENTITY ||--|{ DIA_CHI : "quản lý"
+
+    QUOC_GIA ||--o{ KHU_VUC : "có"
+    QUOC_GIA ||--o{ TINH_THANH : "có"
+    KHU_VUC ||--o{ TINH_THANH : "nhóm (tùy chọn)"
+    TINH_THANH ||--o{ QUAN_HUYEN : "có"
+    QUAN_HUYEN ||--o{ XA_PHUONG : "có"
+    XA_PHUONG ||--o{ DIA_CHI : "thuộc"
+
+    KHACH_HANG {
+        uuid uuid PK
+        string ten_kh
+        uuid dia_chi_giao_hang_id FK "Địa chỉ giao hàng"
+        uuid dia_chi_thanh_toan_id FK "Địa chỉ thanh toán"
+        <em>(các trường khác)</em>
+    }
+    KHACH_HANG }o--|| DIA_CHI : "sử dụng (giao hàng)"
+    KHACH_HANG }o--|| DIA_CHI : "sử dụng (thanh toán)"
+
+    ENTITY {
+        uuid uuid PK
+        string slug
+        string name
+        <em>(các trường khác)</em>
+    }
+
+    XA_PHUONG {
+        uuid uuid PK
+        string ma_xa
+        string ten_xa
+        uuid quan_huyen_id FK
+        uuid entity_id FK
+        <em>(các trường khác)</em>
+    }
+
+    DIA_CHI {
+        uuid uuid PK
+        string so_nha_duong_pho "Số nhà, đường phố"
+        string dia_chi_day_du "Địa chỉ đầy đủ (auto-generated)"
+        string ma_buu_dien "Mã bưu điện"
+        decimal kinh_do "Kinh độ"
+        decimal vi_do "Vĩ độ"
+        text ghi_chu "Ghi chú"
+        integer status "Trạng thái"
+        datetime created
+        datetime updated
+        uuid entity_id FK "Khóa ngoại tới ENTITY"
+        uuid xa_phuong_id FK "Khóa ngoại tới XA_PHUONG"
+    }
+```
+*Lưu ý: Các mối quan hệ từ `KHACH_HANG` (ví dụ) đến `DIA_CHI` chỉ là minh họa. Nhiều bảng khác cũng có thể liên kết đến `DIA_CHI`.*
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: `DiaChiModel` (django_ledger_diachimodel)
+- **Mô tả**: Lưu trữ thông tin địa chỉ chi tiết.
+- **Các cột chính**:
+    - `uuid` (UUID, Khóa chính).
+    - `so_nha_duong_pho` (CharField, max_length=500).
+    - `dia_chi_day_du` (TextField, null=True, blank=True, editable=False) - Được tạo tự động.
+    - `ma_buu_dien` (CharField, max_length=20, null=True, blank=True).
+    - `kinh_do` (DecimalField, max_digits=12, decimal_places=9, null=True, blank=True).
+    - `vi_do` (DecimalField, max_digits=12, decimal_places=9, null=True, blank=True).
+    - `ghi_chu` (TextField, null=True, blank=True).
+    - `status` (IntegerField, default=1).
+    - `entity_model` (ForeignKey đến `EntityModel`).
+    - `xa_phuong` (ForeignKey đến `XaPhuongModel`).
+    - `created` (DateTimeField, auto_now_add=True).
+    - `updated` (DateTimeField, auto_now=True).
+- **Indexes**:
+    - Index trên (`entity_model`, `xa_phuong`).
+    - Có thể cân nhắc index trên `dia_chi_day_du` nếu thường xuyên tìm kiếm chính xác, hoặc sử dụng Full-Text Search.
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- CRUD cho Địa Chỉ.
+- Tự động tạo `dia_chi_day_du` từ các thành phần.
+- Validation dữ liệu (bao gồm `xa_phuong_uuid`).
+- Xử lý xóa địa chỉ (kiểm tra tham chiếu).
+- Tìm kiếm địa chỉ.
+
+### 5.2. Kịch Bản Kiểm Thử (Ví dụ)
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | GEO_006_TC01 | Thêm mới địa chỉ thành công | Kiểm tra thêm địa chỉ với dữ liệu hợp lệ. | User đăng nhập, có quyền. Entity "E1", Xã Phường "PBN" (uuid_pbn) thuộc Quận "Q1", Tỉnh "HCM", Quốc gia "VN" tồn tại. | 1. POST `/api/E1/dia-chi/`. 2. Payload: `{"so_nha_duong_pho": "Số 1, Đường Đồng Khởi", "xa_phuong_uuid": "uuid_pbn"}`. | 1. HTTP 201. 2. Dữ liệu địa chỉ được trả về, `dia_chi_day_du` được tạo đúng (ví dụ: "Số 1, Đường Đồng Khởi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh, Việt Nam"). 3. Địa chỉ được lưu vào CSDL. |
+| 2   | GEO_006_TC02 | Thêm mới địa chỉ với xã phường không tồn tại | Kiểm tra thêm địa chỉ với `xa_phuong_uuid` không tồn tại. | Như TC01. `invalid_uuid_xp` không tồn tại. | 1. POST `/api/E1/dia-chi/`. 2. Payload: `{"so_nha_duong_pho": "Số 2, Đường Nguyễn Huệ", "xa_phuong_uuid": "invalid_uuid_xp"}`. | 1. HTTP 400. 2. Lỗi "Ward/Commune not found or invalid". |
+| 3   | GEO_006_TC03 | Cập nhật địa chỉ | Thay đổi số nhà của một địa chỉ. | Địa chỉ "DC1" (uuid_dc1) tồn tại. | 1. PATCH `/api/E1/dia-chi/uuid_dc1/`. 2. Payload: `{"so_nha_duong_pho": "Số 1A, Đường Đồng Khởi"}`. | 1. HTTP 200. 2. `so_nha_duong_pho` và `dia_chi_day_du` được cập nhật. |
+| 4   | GEO_006_TC04 | Xóa địa chỉ đang được sử dụng | Cố gắng xóa địa chỉ "DC1" đang được một Khách hàng "KH1" sử dụng. | Địa chỉ "DC1" được "KH1" tham chiếu. | 1. DELETE `/api/E1/dia-chi/uuid_dc1/`. | 1. HTTP 400 (hoặc 200 nếu là xóa logic). 2. Thông báo lỗi "Address is in use" hoặc trạng thái địa chỉ được cập nhật thành "không hoạt động". |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Mã nguồn Django Ledger: `django_ledger/services/dia_chi/dia_chi.py` (dự kiến)
+- Mã nguồn Django Ledger: `django_ledger/repositories/dia_chi/dia_chi.py` (dự kiến)
+- Mã nguồn Django Ledger: `django_ledger/models/dia_chi.py` (dự kiến)
+
+### 6.2. Danh Mục Thuật Ngữ
+(Đã định nghĩa ở mục 1.3)
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 13/05/2025 | Cline | Tạo mới tài liệu. |

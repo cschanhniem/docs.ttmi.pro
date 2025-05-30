@@ -1,0 +1,212 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T1247,# Sơ Đồ Trạng Thái và Quy Trình Làm Việc
+
+## 1. Trạng Thái Chứng Từ
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft: Tạo mới
+    Draft --> Pending: Gửi duyệt
+    Pending --> Approved: Phê duyệt
+    Pending --> Rejected: Từ chối
+    Rejected --> Draft: Chỉnh sửa
+    Approved --> Posted: Ghi sổ
+    Posted --> [*]
+    
+    Draft --> Cancelled: Hủy
+    Pending --> Cancelled: Hủy
+    Cancelled --> [*]
+```
+
+## 2. Quy Trình Phê Duyệt
+
+```mermaid
+stateDiagram-v2
+    state "Kiểm Tra" as check
+    state "Chờ Duyệt" as pending
+    state "Phê Duyệt" as approve {
+        [*] --> Level1
+        Level1 --> Level2: Vượt hạn mức
+        Level2 --> Level3: Vượt hạn mức
+        Level1 --> [*]: Trong hạn mức
+        Level2 --> [*]: Trong hạn mức
+        Level3 --> [*]
+    }
+
+    [*] --> check
+    check --> pending: Hợp lệ
+    check --> Rejected: Không hợp lệ
+    pending --> approve
+    approve --> Completed
+    Completed --> [*]
+```
+
+## 3. Quy Trình Xuất Hàng
+
+```mermaid
+stateDiagram-v2
+    state "Kiểm Tra Tồn Kho" as check_stock {
+        [*] --> Check
+        Check --> Available
+        Check --> NotAvailable
+        Available --> [*]
+        NotAvailable --> [*]
+    }
+    
+    [*] --> OrderReceived
+    OrderReceived --> check_stock
+    check_stock --> PickingList: Đủ hàng
+    check_stock --> Backorder: Thiếu hàng
+    PickingList --> QC
+    QC --> Packing
+    Packing --> Shipping
+    Shipping --> Delivered
+    Delivered --> [*]
+```
+
+## 4. Quy Trình Sản Xuất
+
+```mermaid
+stateDiagram-v2
+    state "Chuẩn Bị" as prep {
+        [*] --> CheckMaterial
+        CheckMaterial --> ReadyToProduce
+        CheckMaterial --> WaitingMaterial
+        WaitingMaterial --> CheckMaterial
+    }
+    
+    [*] --> ProductionOrder
+    ProductionOrder --> prep
+    prep --> InProduction
+    InProduction --> QC
+    QC --> Finished: Đạt
+    QC --> Rework: Không đạt
+    Rework --> QC
+    Finished --> [*]
+```
+
+## 5. Quy Trình Thanh Toán
+
+```mermaid
+stateDiagram-v2
+    state "Kiểm Tra" as check {
+        [*] --> ValidateAmount
+        ValidateAmount --> ValidateAccount
+        ValidateAccount --> [*]
+    }
+    
+    [*] --> PaymentRequest
+    PaymentRequest --> check
+    check --> PendingApproval: Hợp lệ
+    check --> Rejected: Không hợp lệ
+    PendingApproval --> Approved
+    Approved --> Processing
+    Processing --> Completed
+    Processing --> Failed
+    Failed --> PaymentRequest
+    Completed --> [*]
+```
+
+## 6. Quy Trình Khóa Sổ
+
+```mermaid
+stateDiagram-v2
+    state "Kiểm Tra" as check {
+        [*] --> CheckBalance
+        CheckBalance --> CheckReconciliation
+        CheckReconciliation --> [*]
+    }
+    
+    [*] --> PeriodOpen
+    PeriodOpen --> check
+    check --> TemporaryClosed
+    TemporaryClosed --> Adjusting
+    Adjusting --> check
+    TemporaryClosed --> PermanentClosed
+    PermanentClosed --> [*]
+```
+
+## 7. Quy Trình Tài Sản
+
+```mermaid
+stateDiagram-v2
+    [*] --> Purchased
+    Purchased --> InUse: Ghi nhận
+    InUse --> UnderMaintenance: Bảo trì
+    UnderMaintenance --> InUse: Hoàn thành
+    InUse --> Impaired: Suy giảm
+    Impaired --> InUse: Phục hồi
+    InUse --> ForSale: Quyết định bán
+    ForSale --> Disposed: Thanh lý
+    Disposed --> [*]
+```
+
+## 8. Quy Trình Tính Lương
+
+```mermaid
+stateDiagram-v2
+    state "Tính Toán" as calc {
+        [*] --> BasicSalary
+        BasicSalary --> Allowances
+        Allowances --> Deductions
+        Deductions --> Tax
+        Tax --> [*]
+    }
+    
+    [*] --> TimesheetClosing
+    TimesheetClosing --> calc
+    calc --> PendingApproval
+    PendingApproval --> Approved
+    Approved --> PayrollProcessing
+    PayrollProcessing --> Completed
+    Completed --> [*]
+```
+
+## 9. Quy Trình Báo Cáo
+
+```mermaid
+stateDiagram-v2
+    state "Chuẩn Bị" as prep {
+        [*] --> DataCollection
+        DataCollection --> DataValidation
+        DataValidation --> [*]
+    }
+    
+    [*] --> ReportRequested
+    ReportRequested --> prep
+    prep --> Generating
+    Generating --> Review
+    Review --> Approved
+    Review --> Revision
+    Revision --> prep
+    Approved --> Published
+    Published --> [*]
+```
+
+## 10. Quy Trình Kiểm Toán
+
+```mermaid
+stateDiagram-v2
+    state "Kiểm Tra" as check {
+        [*] --> DocumentCheck
+        DocumentCheck --> BalanceCheck
+        BalanceCheck --> ComplianceCheck
+        ComplianceCheck --> [*]
+    }
+    
+    [*] --> Planning
+    Planning --> check
+    check --> FindingsDraft
+    FindingsDraft --> ManagementReview
+    ManagementReview --> FinalReport
+    FinalReport --> FollowUp
+    FollowUp --> [*]
+6:["slug","erp/diagrams/state_workflow","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/diagrams/state_workflow","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"diagrams\",\"state_workflow\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/diagrams/state_workflow","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

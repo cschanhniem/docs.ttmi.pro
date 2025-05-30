@@ -1,0 +1,374 @@
+# GEO_004_Geography_Quản Lý Xã Phường
+
+*Phiên bản: 1.0*
+*Người tạo: Cline*
+*Ngày tạo: 13/05/2025*
+*Cập nhật lần cuối: 13/05/2025*
+*Người cập nhật: Cline*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Nghiệp vụ này cho phép quản lý thông tin các xã/phường/thị trấn trong hệ thống ERP. Bao gồm việc tạo mới, xem, cập nhật và xóa thông tin xã phường. Thông tin xã phường là cấp địa lý chi tiết nhất, cần thiết cho việc định vị chính xác địa chỉ giao hàng, thu thập dữ liệu dân cư, và các ứng dụng địa lý chuyên sâu.
+
+### 1.2. Phạm Vi Áp Dụng
+Áp dụng cho các bộ phận cần sử dụng thông tin địa lý ở mức độ chi tiết cao nhất, như bộ phận giao vận, chăm sóc khách hàng, nghiên cứu thị trường. Người dùng có quyền quản trị hệ thống hoặc được phân quyền cụ thể mới có thể thực hiện các thao tác quản lý xã phường.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Mã Xã Phường (ma_xa) | Mã định danh duy nhất cho mỗi xã phường trong một quận huyện. |
+| Tên Xã Phường (ten_xa) | Tên chính thức của xã phường. |
+| Tên Xã Phường Khác (ten_xa2) | Tên thay thế hoặc tên tiếng Anh của xã phường. |
+| Quận Huyện (quan_huyen) | Quận huyện mà xã phường này trực thuộc. |
+| Trạng Thái (status) | Trạng thái của xã phường (ví dụ: 1 - Hoạt động, 0 - Không hoạt động). |
+| Entity (Đơn vị) | Đơn vị/Công ty sử dụng hệ thống ERP. Mỗi xã phường được quản lý trong phạm vi một Entity cụ thể. |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | GEO_003 | Quản Lý Quận Huyện | Tài liệu mô tả quy trình quản lý thông tin quận huyện, là cấp cha của xã phường. |
+| 2   | GEO_006 | Quản Lý Địa Chỉ | Tài liệu mô tả quy trình quản lý thông tin địa chỉ, sử dụng thông tin xã phường. |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình quản lý xã phường bao gồm các bước: người dùng yêu cầu thực hiện thao tác (thêm, sửa, xóa, xem danh sách, xem chi tiết), hệ thống kiểm tra dữ liệu và quyền hạn, sau đó thực thi yêu cầu và phản hồi kết quả cho người dùng.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Người dùng yêu cầu thao tác quản lý xã phường] --> B{Chọn thao tác};
+    B -->|Thêm mới| C[Nhập thông tin xã phường (bao gồm chọn Quận Huyện)];
+    B -->|Cập nhật| D[Chọn xã phường & Nhập thông tin mới];
+    B -->|Xóa| E[Chọn xã phường & Xác nhận xóa];
+    B -->|Xem danh sách| F[Hệ thống hiển thị danh sách xã phường (có thể lọc theo Quận Huyện)];
+    B -->|Xem chi tiết| G[Chọn xã phường & Hệ thống hiển thị chi tiết];
+    C --> H[Hệ thống kiểm tra dữ liệu];
+    D --> H;
+    H -->|Hợp lệ| I[Lưu thông tin vào CSDL];
+    H -->|Không hợp lệ| J[Thông báo lỗi];
+    I --> K[Thông báo thành công];
+    E --> L[Hệ thống kiểm tra ràng buộc (ví dụ: Địa Chỉ)];
+    L -->|Không có ràng buộc| M[Xóa xã phường khỏi CSDL];
+    L -->|Có ràng buộc| N[Thông báo lỗi không thể xóa];
+    M --> K;
+    F --> Z[Kết thúc];
+    G --> Z;
+    J --> A;
+    K --> A;
+    N --> A;
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Thêm Mới Xã Phường
+- **Mô tả**: Người dùng cung cấp thông tin để tạo một xã phường mới, liên kết với một quận huyện cụ thể.
+- **Đầu vào**: Mã xã phường, tên xã phường, tên xã phường khác (tùy chọn), UUID của quận huyện, trạng thái (mặc định là hoạt động).
+- **Đầu ra**: Xã phường mới được tạo trong hệ thống.
+- **Người thực hiện**: Quản trị viên hệ thống hoặc người dùng được phân quyền.
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập và có quyền. Quận huyện liên kết phải tồn tại. Mã xã phường không được trùng lặp trong cùng một quận huyện và Entity.
+- **Xử lý ngoại lệ**:
+    - Nếu mã xã phường đã tồn tại trong quận huyện đó: Thông báo lỗi.
+    - Nếu quận huyện không tồn tại: Thông báo lỗi.
+    - Nếu thông tin không hợp lệ: Thông báo lỗi.
+
+#### 2.3.2. Cập Nhật Thông Tin Xã Phường
+- **Mô tả**: Người dùng thay đổi thông tin của một xã phường đã tồn tại.
+- **Đầu vào**: UUID của xã phường cần cập nhật, thông tin mới (mã xã phường, tên xã phường, tên xã phường khác, UUID quận huyện, trạng thái).
+- **Đầu ra**: Thông tin xã phường được cập nhật trong hệ thống.
+- **Người thực hiện**: Quản trị viên hệ thống hoặc người dùng được phân quyền.
+- **Điều kiện tiên quyết**: Xã phường tồn tại trong hệ thống. Người dùng có quyền cập nhật.
+- **Xử lý ngoại lệ**:
+    - Nếu xã phường không tồn tại: Thông báo lỗi.
+    - Nếu mã xã phường mới (nếu thay đổi) đã tồn tại cho một xã phường khác trong cùng quận huyện: Thông báo lỗi.
+    - Nếu thông tin không hợp lệ: Thông báo lỗi.
+
+#### 2.3.3. Xóa Xã Phường
+- **Mô tả**: Người dùng xóa một xã phường khỏi hệ thống.
+- **Đầu vào**: UUID của xã phường cần xóa.
+- **Đầu ra**: Xã phường bị xóa khỏi hệ thống (nếu không có ràng buộc).
+- **Người thực hiện**: Quản trị viên hệ thống hoặc người dùng được phân quyền.
+- **Điều kiện tiên quyết**: Xã phường tồn tại trong hệ thống. Người dùng có quyền xóa.
+- **Xử lý ngoại lệ**:
+    - Nếu xã phường không tồn tại: Thông báo lỗi.
+    - Nếu xã phường đang được sử dụng (ví dụ: có địa chỉ liên kết): Thông báo lỗi không thể xóa.
+
+#### 2.3.4. Xem Danh Sách Xã Phường
+- **Mô tả**: Người dùng xem danh sách các xã phường, có thể lọc theo quận huyện, và phân trang.
+- **Đầu vào**: Entity slug, tùy chọn: UUID quận huyện, trang, kích thước trang, các tiêu chí lọc (tên, mã).
+- **Đầu ra**: Danh sách các xã phường thỏa mãn điều kiện.
+- **Người thực hiện**: Bất kỳ người dùng nào có quyền truy cập chức năng.
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập.
+
+#### 2.3.5. Xem Chi Tiết Xã Phường
+- **Mô tả**: Người dùng xem thông tin chi tiết của một xã phường cụ thể.
+- **Đầu vào**: UUID của xã phường.
+- **Đầu ra**: Thông tin chi tiết của xã phường.
+- **Người thực hiện**: Bất kỳ người dùng nào có quyền truy cập chức năng.
+- **Điều kiện tiên quyết**: Xã phường tồn tại trong hệ thống.
+- **Xử lý ngoại lệ**: Nếu xã phường không tồn tại: Thông báo lỗi.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram) - Thêm Mới Xã Phường
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant System as Hệ thống (API)
+    participant Service as XaPhuongModelService
+    participant Repository as XaPhuongRepository
+    participant QuanHuyenRepo as QuanHuyenRepository
+    participant DB as Cơ sở dữ liệu
+
+    User->>System: POST /api/{entity_slug}/xa-phuong/ (data: ma_xa, ten_xa, quan_huyen_uuid, ...)
+    System->>Service: create_xa_phuong(entity_slug, data)
+    Service->>Service: _get_entity_model(entity_slug)
+    Service-->>Service: entity_model
+    Service->>QuanHuyenRepo: get_quan_huyen_by_uuid(data['quan_huyen_uuid'])
+    QuanHuyenRepo->>DB: SELECT * FROM QuanHuyenModel WHERE uuid = ...
+    DB-->>QuanHuyenRepo: quan_huyen_model (or null)
+    QuanHuyenRepo-->>Service: quan_huyen_model (or null)
+    alt Quận huyện không tồn tại
+        Service-->>System: Error: "District not found"
+        System-->>User: Response 400 (Error message)
+    else Quận huyện tồn tại
+        Service->>Service: validate_xa_phuong_data(data)
+        Service-->>Service: validated_data
+        Service->>Repository: get_xa_phuong_by_code(entity_model, quan_huyen_model, validated_data['ma_xa'])
+        Repository->>DB: SELECT * FROM XaPhuongModel WHERE entity_id = ... AND quan_huyen_id = ... AND ma_xa = ...
+        DB-->>Repository: existing_xa_phuong (or null)
+        Repository-->>Service: existing_xa_phuong (or null)
+        alt Mã xã phường đã tồn tại trong quận huyện
+            Service-->>System: Error: "Ward/Commune code already exists in this district"
+            System-->>User: Response 400 (Error message)
+        else Mã xã phường chưa tồn tại
+            Service->>Repository: create_xa_phuong(validated_data_with_entity_and_quan_huyen)
+            Repository->>DB: INSERT INTO XaPhuongModel (...) VALUES (...)
+            DB-->>Repository: new_xa_phuong_object
+            Repository-->>Service: new_xa_phuong_object
+            Service-->>System: new_xa_phuong_object
+            System-->>User: Response 201 (new_xa_phuong_data)
+        end
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Tìm kiếm xã phường**: Người dùng có thể tìm kiếm xã phường theo tên hoặc theo mã.
+- **Lọc xã phường theo quận huyện**: Người dùng có thể xem danh sách xã phường thuộc một quận huyện cụ thể.
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | GEO_004_F01 | Thêm mới xã phường | Cho phép tạo một xã phường mới, thuộc một quận huyện. | Cao |
+| 2   | GEO_004_F02 | Cập nhật xã phường | Cho phép sửa thông tin của một xã phường đã có. | Cao |
+| 3   | GEO_004_F03 | Xóa xã phường | Cho phép xóa một xã phường khỏi hệ thống. | Cao |
+| 4   | GEO_004_F04 | Xem danh sách xã phường | Hiển thị danh sách các xã phường, hỗ trợ phân trang và lọc (theo quận huyện, tên, mã). | Cao |
+| 5   | GEO_004_F05 | Xem chi tiết xã phường | Hiển thị thông tin chi tiết của một xã phường. | Cao |
+| 6   | GEO_004_F06 | Tìm kiếm xã phường theo tên | Cho phép tìm kiếm xã phường dựa trên tên. | Trung bình |
+| 7   | GEO_004_F07 | Tìm kiếm xã phường theo mã | Cho phép tìm kiếm xã phường dựa trên mã. | Trung bình |
+| 8   | GEO_004_F08 | Lấy danh sách xã phường đang hoạt động | Lấy danh sách các xã phường có trạng thái là "Hoạt động". | Trung bình |
+| 9   | GEO_004_F09 | Lấy danh sách xã phường theo quận huyện | Lấy danh sách các xã phường thuộc một quận huyện cụ thể. | Cao |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. GEO_004_F01: Thêm mới xã phường
+- **Mô tả**: Chức năng cho phép người dùng tạo mới một xã phường.
+- **Đầu vào**:
+    - `entity_slug`: Slug của Entity.
+    - `data`: Đối tượng chứa thông tin xã phường:
+        - `ma_xa` (bắt buộc): Mã xã phường (string, max 100).
+        - `ten_xa` (bắt buộc): Tên xã phường (string, max 255).
+        - `ten_xa2` (tùy chọn): Tên xã phường khác (string, max 255).
+        - `quan_huyen_uuid` (bắt buộc): UUID của Quận Huyện.
+        - `status` (tùy chọn): Trạng thái (integer). Mặc định là 1.
+- **Đầu ra**: Đối tượng XaPhuongModel vừa được tạo.
+- **Điều kiện tiên quyết**: `entity_slug` và `quan_huyen_uuid` hợp lệ. `ma_xa` không trùng trong cùng `entity_slug` và `quan_huyen_uuid`.
+- **Luồng xử lý chính**:
+  1. Service lấy `EntityModel` và `QuanHuyenModel`.
+  2. Service validate dữ liệu (`ma_xa`, `ten_xa`, `quan_huyen_uuid`).
+  3. Service kiểm tra `ma_xa` đã tồn tại trong `Entity` và `QuanHuyen` chưa.
+  4. Nếu chưa, Service gọi Repository để tạo mới.
+- **Giao diện liên quan**: Form thêm mới xã phường.
+
+#### 3.2.2. GEO_004_F02: Cập nhật xã phường
+- **Mô tả**: Cập nhật thông tin xã phường.
+- **Đầu vào**:
+    - `entity_slug`: Slug của Entity.
+    - `uuid`: UUID của xã phường.
+    - `data`: Thông tin cập nhật (tương tự thêm mới, các trường tùy chọn).
+- **Đầu ra**: Đối tượng XaPhuongModel đã cập nhật.
+- **Điều kiện tiên quyết**: Xã phường tồn tại. Nếu `ma_xa` hoặc `quan_huyen_uuid` thay đổi, mã mới không được trùng.
+- **Giao diện liên quan**: Form cập nhật xã phường.
+
+#### 3.2.3. GEO_004_F03: Xóa xã phường
+- **Mô tả**: Xóa một xã phường.
+- **Đầu vào**: `entity_slug`, `uuid` của xã phường.
+- **Đầu ra**: HTTP 204 No Content.
+- **Điều kiện tiên quyết**: Xã phường tồn tại và không có ràng buộc (ví dụ: Địa Chỉ).
+- **Giao diện liên quan**: Nút xóa.
+
+#### 3.2.4. GEO_004_F04: Xem danh sách xã phường
+- **Mô tả**: Lấy danh sách xã phường, có phân trang và lọc.
+- **Đầu vào**: `entity_slug`, `page`, `page_size`, `quan_huyen_uuid` (lọc), `ma_xa`, `ten_xa`.
+- **Đầu ra**: Danh sách XaPhuongModel.
+- **Giao diện liên quan**: Trang danh sách xã phường.
+
+#### 3.2.5. GEO_004_F05: Xem chi tiết xã phường
+- **Mô tả**: Lấy chi tiết một xã phường.
+- **Đầu vào**: `entity_slug`, `uuid` của xã phường.
+- **Đầu ra**: Đối tượng XaPhuongModel.
+- **Giao diện liên quan**: Trang chi tiết xã phường.
+
+#### 3.2.9. GEO_004_F09: Lấy danh sách xã phường theo quận huyện
+- **Mô tả**: Lấy danh sách các xã phường thuộc một quận huyện cụ thể.
+- **Đầu vào**: `entity_slug`, `quan_huyen_uuid`.
+- **Đầu ra**: `QuerySet` các `XaPhuongModel`.
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+Tương tự GEO_003, sử dụng Views/APIs, Services (`XaPhuongModelService`), Repositories (`XaPhuongRepository`), Models (`XaPhuongModel`, `QuanHuyenModel`, `EntityModel`).
+
+### 4.2. API Endpoints
+
+- **Base URL**: `/api/{entity_slug}/xa-phuong/`
+- **Endpoints**:
+    - `GET /`: Lấy danh sách xã phường. (GEO_004_F04)
+        - Query params: `page`, `page_size`, `quan_huyen_uuid`, `ma_xa`, `ten_xa`, `status`.
+    - `POST /`: Tạo mới xã phường. (GEO_004_F01)
+        - Request body: `{ "ma_xa": "PBN", "ten_xa": "Phường Bến Nghé", "quan_huyen_uuid": "uuid_cua_Q1", "status": 1 }`
+    - `GET /{uuid}/`: Lấy chi tiết xã phường. (GEO_004_F05)
+    - `PUT /{uuid}/`: Cập nhật xã phường. (GEO_004_F02)
+    - `PATCH /{uuid}/`: Cập nhật một phần xã phường. (GEO_004_F02)
+    - `DELETE /{uuid}/`: Xóa xã phường. (GEO_004_F03)
+    - `GET /theo-quan-huyen/{quan_huyen_uuid}/`: Lấy xã phường theo quận huyện. (GEO_004_F09)
+
+### 4.3. Service Logic (`XaPhuongModelService`)
+- Tương tự `QuanHuyenModelService` nhưng cho `XaPhuongModel`.
+- Sẽ có thêm logic kiểm tra sự tồn tại của `QuanHuyenModel` khi tạo/cập nhật xã phường.
+- Validate `ma_xa` phải duy nhất trong phạm vi `Entity` và `QuanHuyen`.
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    ENTITY ||--|{ QUOC_GIA : "quản lý"
+    ENTITY ||--|{ TINH_THANH : "quản lý"
+    ENTITY ||--|{ QUAN_HUYEN : "quản lý"
+    ENTITY ||--|{ XA_PHUONG : "quản lý"
+    ENTITY ||--|{ DIA_CHI : "quản lý"
+
+    QUOC_GIA ||--o{ TINH_THANH : "có"
+    TINH_THANH ||--o{ QUAN_HUYEN : "có"
+    QUAN_HUYEN ||--o{ XA_PHUONG : "có"
+    XA_PHUONG ||--o{ DIA_CHI : "thuộc"
+
+    ENTITY {
+        uuid uuid PK
+        string slug
+        string name
+        <em>(các trường khác)</em>
+    }
+
+    QUOC_GIA {
+        uuid uuid PK
+        string ma_qg
+        string ten_qg
+        uuid entity_id FK
+        <em>(các trường khác)</em>
+    }
+
+    TINH_THANH {
+        uuid uuid PK
+        string ma_tinh
+        string ten_tinh
+        uuid quoc_gia_id FK
+        uuid entity_id FK
+        <em>(các trường khác)</em>
+    }
+
+    QUAN_HUYEN {
+        uuid uuid PK
+        string ma_huyen
+        string ten_huyen
+        uuid tinh_thanh_id FK
+        uuid entity_id FK
+        <em>(các trường khác)</em>
+    }
+
+    XA_PHUONG {
+        uuid uuid PK
+        string ma_xa "Mã xã phường (duy nhất trong Quận Huyện & Entity)"
+        string ten_xa "Tên xã phường"
+        string ten_xa2 "Tên xã phường khác"
+        integer status "Trạng thái"
+        datetime created
+        datetime updated
+        uuid entity_id FK "Khóa ngoại tới ENTITY"
+        uuid quan_huyen_id FK "Khóa ngoại tới QUAN_HUYEN"
+    }
+
+    DIA_CHI {
+        uuid uuid PK
+        string dia_chi_day_du
+        uuid xa_phuong_id FK
+        uuid entity_id FK
+        <em>(các trường khác)</em>
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: `XaPhuongModel` (django_ledger_xaphuongmodel)
+- **Mô tả**: Lưu trữ thông tin các xã phường.
+- **Các cột chính**:
+    - `uuid` (UUID, Khóa chính).
+    - `ma_xa` (CharField, max_length=100).
+    - `ten_xa` (CharField, max_length=255).
+    - `ten_xa2` (CharField, max_length=255, null=True, blank=True).
+    - `status` (IntegerField, default=1).
+    - `entity_model` (ForeignKey đến `EntityModel`).
+    - `quan_huyen` (ForeignKey đến `QuanHuyenModel`).
+    - `created` (DateTimeField, auto_now_add=True).
+    - `updated` (DateTimeField, auto_now=True).
+- **Indexes**:
+    - `unique_together = ('entity_model', 'quan_huyen', 'ma_xa')`.
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- CRUD cho Xã Phường.
+- Lọc theo Quận Huyện.
+- Validation dữ liệu (bao gồm `quan_huyen_uuid`).
+- Ràng buộc duy nhất của `ma_xa` theo `entity_model` và `quan_huyen`.
+
+### 5.2. Kịch Bản Kiểm Thử (Ví dụ)
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | GEO_004_TC01 | Thêm mới xã phường thành công | Kiểm tra thêm xã phường với dữ liệu hợp lệ. | User đăng nhập, có quyền. Entity "E1", Quận Huyện "Q1" (uuid_q1) thuộc Tỉnh "HCM" tồn tại. | 1. POST `/api/E1/xa-phuong/`. 2. Payload: `{"ma_xa": "PBN", "ten_xa": "Phường Bến Nghé", "quan_huyen_uuid": "uuid_q1"}`. | 1. HTTP 201. 2. Dữ liệu xã phường được trả về. 3. Xã phường được lưu vào CSDL. |
+| 2   | GEO_004_TC02 | Thêm mới xã phường với mã trùng | Kiểm tra thêm xã phường có `ma_xa` đã tồn tại trong cùng Quận Huyện & Entity. | Như TC01. Xã phường "PBN" thuộc "Q1" đã tồn tại. | 1. POST `/api/E1/xa-phuong/`. 2. Payload: `{"ma_xa": "PBN", "ten_xa": "Phường Bến Nghé Mới", "quan_huyen_uuid": "uuid_q1"}`. | 1. HTTP 400. 2. Lỗi "Ward/Commune code already exists in this district". |
+| 3   | GEO_004_TC03 | Thêm mới xã phường với quận huyện không tồn tại | Kiểm tra thêm xã phường với `quan_huyen_uuid` không tồn tại. | Như TC01. `invalid_uuid_qh` không tồn tại. | 1. POST `/api/E1/xa-phuong/`. 2. Payload: `{"ma_xa": "PDK", "ten_xa": "Phường Đa Kao", "quan_huyen_uuid": "invalid_uuid_qh"}`. | 1. HTTP 400. 2. Lỗi "District not found". |
+| 4   | GEO_004_TC04 | Xem danh sách xã phường theo quận huyện | Lấy danh sách xã phường của quận huyện "Q1". | Như TC01. Có xã "PBN" và "PDK" thuộc "Q1". | 1. GET `/api/E1/xa-phuong/?quan_huyen_uuid=uuid_q1`. | 1. HTTP 200. 2. Danh sách chứa "PBN" và "PDK". |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Mã nguồn Django Ledger: `django_ledger/services/xa_phuong/xa_phuong.py` (dự kiến)
+- Mã nguồn Django Ledger: `django_ledger/repositories/xa_phuong/xa_phuong.py` (dự kiến)
+- Mã nguồn Django Ledger: `django_ledger/models/xa_phuong.py` (dự kiến)
+
+### 6.2. Danh Mục Thuật Ngữ
+(Đã định nghĩa ở mục 1.3)
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 13/05/2025 | Cline | Tạo mới tài liệu. |

@@ -1,0 +1,190 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T1d94,# SAL_001_Quản_Lý_Khách_Hàng
+
+*Phiên bản: 1.0*  
+*Người tạo: [Tên Tác Giả]*  
+*Ngày tạo: [DD/MM/YYYY]*  
+*Cập nhật lần cuối: [DD/MM/YYYY]*  
+*Người cập nhật: [Tên Người Cập Nhật]*
+
+---
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Quản lý toàn bộ thông tin khách hàng (Customer), bao gồm tạo mới, cập nhật, xóa, tìm kiếm, phân loại nhóm khách hàng, quản lý trạng thái hoạt động, liên kết với nhân viên bán hàng, tài khoản, phương thức thanh toán, hạn mức tín dụng, khu vực, thông tin liên hệ, v.v. Đảm bảo dữ liệu khách hàng đầy đủ, chính xác, phục vụ các nghiệp vụ bán hàng, hóa đơn, báo cáo và chăm sóc khách hàng.
+
+### 1.2. Phạm Vi Áp Dụng
+Áp dụng cho bộ phận bán hàng, kế toán, quản lý khách hàng, quản trị hệ thống và các phòng ban liên quan.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+- **Khách hàng (Customer):** Đối tượng mua hàng hóa/dịch vụ của doanh nghiệp.
+- **Nhóm khách hàng:** Phân loại khách hàng theo các tiêu chí (VIP, thường, tiềm năng...)
+- **Hạn mức tín dụng:** Số tiền tối đa khách hàng được nợ.
+- **Trạng thái:** Hoạt động/Không hoạt động/Ẩn trên giao diện.
+
+### 1.4. Tài Liệu Liên Quan
+- [SAL_002_Quản Lý Nhóm Khách Hàng](./SAL_002_Quan_Ly_Nhom_Khach_Hang.md)
+- [SAL_004_Quản Lý Hóa Đơn Bán Hàng](./SAL_004_Quan_Ly_Hoa_Don_Ban_Hang.md)
+
+---
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Khởi tạo, cập nhật, tìm kiếm, phân loại, quản lý trạng thái khách hàng. Kết nối với các nghiệp vụ bán hàng, hóa đơn, báo cáo.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+```mermaid
+flowchart TD
+    A[Khởi tạo khách hàng] --> B{Kiểm tra thông tin bắt buộc}
+    B -- Đầy đủ --> C[Lưu vào hệ thống]
+    B -- Thiếu --> D[Thông báo lỗi]
+    C --> E[Phân loại nhóm khách hàng]
+    E --> F[Liên kết nhân viên phụ trách]
+    F --> G[Quản lý trạng thái]
+    G --> H[Khách hàng sẵn sàng sử dụng cho nghiệp vụ bán hàng]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+1. Nhập thông tin khách hàng (tên, mã, địa chỉ, MST, liên hệ, nhóm, trạng thái...)
+2. Kiểm tra thông tin bắt buộc (tên, mã, trạng thái...)
+3. Lưu dữ liệu vào hệ thống
+4. Phân loại nhóm khách hàng (VIP, thường...)
+5. Liên kết nhân viên phụ trách, tài khoản, phương thức thanh toán
+6. Quản lý trạng thái (hoạt động/không hoạt động/ẩn)
+7. Sử dụng khách hàng cho các nghiệp vụ bán hàng, hóa đơn, báo cáo
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI
+    participant API
+    participant DB
+    User->>UI: Nhập thông tin khách hàng
+    UI->>API: Gửi yêu cầu tạo/cập nhật khách hàng
+    API->>DB: Kiểm tra & lưu dữ liệu
+    DB-->>API: Trả về kết quả
+    API-->>UI: Thông báo thành công/thất bại
+    UI-->>User: Hiển thị kết quả
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- Nếu thông tin bắt buộc thiếu: hệ thống báo lỗi, yêu cầu nhập lại.
+- Nếu mã khách hàng trùng: báo lỗi, không cho lưu.
+- Nếu khách hàng không hoạt động: không cho chọn khi lập hóa đơn mới.
+
+---
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+- Thêm mới khách hàng
+- Cập nhật thông tin khách hàng
+- Xóa khách hàng
+- Tìm kiếm, lọc khách hàng
+- Phân loại nhóm khách hàng
+- Quản lý trạng thái hoạt động/ẩn
+- Liên kết nhân viên phụ trách, tài khoản, phương thức thanh toán
+
+### 3.2. Chi Tiết Chức Năng
+| Chức năng | Mô tả |
+|-----------|-------|
+| Thêm mới | Nhập thông tin, kiểm tra, lưu vào DB |
+| Cập nhật | Sửa thông tin, kiểm tra, lưu lại |
+| Xóa | Xóa mềm (đánh dấu không hoạt động) |
+| Tìm kiếm | Theo tên, mã, nhóm, trạng thái... |
+| Phân loại | Gán nhóm khách hàng |
+| Liên kết | Gán nhân viên, tài khoản, phương thức thanh toán |
+| Quản lý trạng thái | Đổi trạng thái hoạt động/ẩn |
+
+---
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+- Model: `CustomerModel` (file: `django_ledger/models/customer.py`)
+- Service: (nằm trong các nghiệp vụ liên quan, ví dụ: group, payment, ...)
+- Serializer: `CustomerModelSerializer` (file: `django_ledger/api/serializers/customer.py`)
+- API/View: (file: `django_ledger/api/views/customer_erp.py`)
+
+### 4.2. API Endpoints (ví dụ)
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | /api/customers/ | Danh sách khách hàng |
+| POST | /api/customers/ | Thêm mới khách hàng |
+| GET | /api/customers/{uuid}/ | Xem chi tiết khách hàng |
+| PUT/PATCH | /api/customers/{uuid}/ | Cập nhật khách hàng |
+| DELETE | /api/customers/{uuid}/ | Xóa khách hàng |
+
+### 4.3. Service Logic (tóm tắt)
+- Kiểm tra thông tin đầu vào, validate dữ liệu
+- Sinh mã khách hàng tự động nếu chưa có
+- Kiểm tra trùng mã, trạng thái
+- Lưu dữ liệu, cập nhật liên kết nhóm, nhân viên, tài khoản, phương thức thanh toán
+
+### 4.4. Mô Hình Dữ Liệu (trích yếu)
+| Trường | Kiểu | Mô tả |
+|--------|------|-------|
+| uuid | UUID | Khóa chính |
+| customer_name | str | Tên khách hàng |
+| customer_code | str | Mã khách hàng |
+| address | str | Địa chỉ |
+| tax_code | str | Mã số thuế |
+| contact_person | str | Người liên hệ |
+| sales_rep | FK | Nhân viên phụ trách |
+| account | FK | Tài khoản mặc định |
+| payment_term | FK | Điều kiện thanh toán |
+| payment_method | FK | Hình thức thanh toán |
+| credit_limit | decimal | Hạn mức tín dụng |
+| region | FK | Khu vực |
+| phone | str | Điện thoại |
+| email | str | Email |
+| status | str | Trạng thái |
+| ... | ... | ... |
+
+---
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- Thêm, sửa, xóa, tìm kiếm, phân loại, đổi trạng thái khách hàng
+
+### 5.2. Kịch Bản Kiểm Thử (ví dụ)
+| STT | Bước kiểm thử | Kết quả mong đợi |
+|-----|---------------|------------------|
+| 1 | Thêm mới khách hàng với đủ thông tin | Thành công |
+| 2 | Thêm mới thiếu trường bắt buộc | Báo lỗi |
+| 3 | Thêm mới trùng mã khách hàng | Báo lỗi |
+| 4 | Sửa thông tin khách hàng | Thành công |
+| 5 | Xóa khách hàng | Không còn trong danh sách hoạt động |
+| 6 | Tìm kiếm theo tên/mã | Đúng kết quả |
+| 7 | Đổi trạng thái hoạt động/ẩn | Đúng trạng thái |
+
+---
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Source code: `django_ledger/models/customer.py`, `django_ledger/api/serializers/customer.py`, `django_ledger/api/views/customer_erp.py`
+- Tài liệu nghiệp vụ liên quan: [SAL_002_Quản Lý Nhóm Khách Hàng](./SAL_002_Quan_Ly_Nhom_Khach_Hang.md)
+
+### 6.2. Danh Mục Thuật Ngữ
+- Customer, Group, Sales Rep, Payment Term, Payment Method, Credit Limit, Region, ...
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+| Ngày | Người thay đổi | Nội dung |
+|------|----------------|----------|
+| [DD/MM/YYYY] | [Tên] | Tạo mới |
+
+
+</rewritten_file> 6:["slug","erp/SAL_001_Quan_Ly_Khach_Hang","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/SAL_001_Quan_Ly_Khach_Hang","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"SAL_001_Quan_Ly_Khach_Hang\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/SAL_001_Quan_Ly_Khach_Hang","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

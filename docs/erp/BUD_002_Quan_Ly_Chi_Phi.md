@@ -1,0 +1,315 @@
+# BUD_002_Budget_Quản Lý Chi Phí
+
+*Phiên bản: 1.0*
+*Người tạo: Gemini AI Assistant*
+*Ngày tạo: 2024-07-30*
+*Cập nhật lần cuối: 2024-07-30*
+*Người cập nhật: Gemini AI Assistant*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Nghiệp vụ Quản Lý Chi Phí (trong mã nguồn là `ChiPhiModel`) cho phép người dùng định nghĩa, theo dõi và quản lý các khoản mục chi phí phát sinh trong một đơn vị (entity). Mỗi khoản mục chi phí bao gồm mã chi phí, tên, loại chi phí, loại phân bổ, trạng thái và có thể liên kết với một chứng từ gốc. Nghiệp vụ này giúp doanh nghiệp ghi nhận, phân loại và kiểm soát các chi phí, phục vụ cho công tác kế toán và quản trị.
+
+### 1.2. Phạm Vi Áp Dụng
+- Áp dụng cho từng Đơn vị (Entity) trong hệ thống.
+- Kế toán viên, kế toán tổng hợp, kế toán trưởng, và các bộ phận liên quan đến việc ghi nhận và quản lý chi phí.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Chi Phí (CP) | Một khoản chi tiêu phát sinh được ghi nhận trong hệ thống. Trong mã nguồn được gọi là `ChiPhiModel`. |
+| Đơn vị (Entity) | Tổ chức hoặc công ty mà chi phí được ghi nhận. |
+| `ma_cp` | Mã định danh duy nhất cho một khoản mục chi phí trong một đơn vị. |
+| `ten_cp` | Tên mô tả của khoản mục chi phí. |
+| `loai_cp` | Phân loại chi phí (ví dụ: chi phí sản xuất, chi phí bán hàng, chi phí quản lý doanh nghiệp). |
+| `loai_pb` | Phương thức phân bổ chi phí (ví dụ: trực tiếp, gián tiếp theo tiêu thức). |
+| `truoc_hq_yn` | (Boolean) Chỉ định chi phí này có được tính trước khi hạch toán quỹ hay không. |
+| `ma_ct` | (ForeignKey) Liên kết đến `ChungTuModel`, là chứng từ gốc của chi phí (nếu có). |
+| `status` | Trạng thái của khoản mục chi phí (ví dụ: '1' = hoạt động, '0' = không hoạt động). |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | `django_ledger/models/chi_phi.py` | Model Định Nghĩa Chi Phí | Định nghĩa cấu trúc dữ liệu cho `ChiPhiModel`. |
+| 2   | `django_ledger/api/views/chi_phi.py` | API Endpoints Chi Phí | Các điểm cuối API để tương tác với nghiệp vụ Quản Lý Chi Phí. |
+| 3   | `django_ledger/api/serializers/chi_phi.py` | Serializers Chi Phí | Định dạng dữ liệu JSON cho API và thực hiện validation cơ bản. |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Người dùng (kế toán viên) sẽ tương tác với hệ thống thông qua giao diện người dùng hoặc API để thực hiện các thao tác CRUD (Create, Read, Update, Delete) trên các Khoản Mục Chi Phí. Hệ thống, thông qua `ChiPhiViewSet` và `ChiPhiModelSerializer`, sẽ validate dữ liệu đầu vào, tương tác với `ChiPhiModel` để lưu trữ hoặc truy xuất dữ liệu từ cơ sở dữ liệu.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Người dùng yêu cầu thao tác Chi Phí] --> B{API Gateway nhận yêu cầu};
+    B --> C[Xác thực & Ủy quyền];
+    C --> D[ChiPhiViewSet];
+    D --> E[ChiPhiModelSerializer (Validate)];
+    E -- Dữ liệu hợp lệ --> F[ChiPhiModel (ORM)];
+    F --> G[(Cơ sở dữ liệu)];
+    G --> F;
+    F --> D;
+    E -- Dữ liệu không hợp lệ --> D[Báo lỗi cho ViewSet];
+    D --> B;
+    B --> A[Trả kết quả cho người dùng];
+
+    subgraph \"Thao tác Chi Phí\"
+        direction LR
+        AA[Tạo mới Chi Phí] --> AB{Validate dữ liệu (Serializer)};
+        AB -- hợp lệ --> AC[Lưu Chi Phí (Model)];
+        AB -- không hợp lệ --> AD[Báo lỗi];
+        AE[Xem danh sách/chi tiết Chi Phí] --> AF[Truy vấn Chi Phí (Model QuerySet)];
+        AG[Cập nhật Chi Phí] --> AH{Validate dữ liệu (Serializer)};
+        AH -- hợp lệ --> AI[Cập nhật Chi Phí (Model)];
+        AH -- không hợp lệ --> AD;
+        AJ[Xóa Chi Phí] --> AK[Xóa Chi Phí (Model)];
+    end
+    D --> AA & AE & AG & AJ
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Tạo Mới Khoản Mục Chi Phí
+- **Mô tả**: Người dùng nhập thông tin để tạo một khoản mục chi phí mới.
+- **Đầu vào**: Dữ liệu chi phí (`ma_cp`, `ten_cp`, `loai_cp`, `loai_pb`, `truoc_hq_yn`, `ma_ct` (optional), `status`). `entity_model` được xác định từ URL.
+- **Đầu ra**: Khoản mục chi phí mới được tạo hoặc thông báo lỗi.
+- **Người thực hiện**: Kế toán viên.
+- **Điều kiện tiên quyết**: Đăng nhập, có quyền tạo chi phí cho đơn vị. `ma_cp` phải là duy nhất trong đơn vị. Các trường bắt buộc (`ma_cp`, `ten_cp`, `loai_cp`, `loai_pb`) phải được cung cấp.
+- **Xử lý ngoại lệ**: Dữ liệu không hợp lệ (thiếu trường, sai định dạng), `ma_cp` đã tồn tại, đơn vị không tồn tại.
+
+#### 2.3.2. Xem/Tìm Kiếm Khoản Mục Chi Phí
+- **Mô tả**: Người dùng xem danh sách hoặc chi tiết một khoản mục chi phí. `ChiPhiViewSet` hỗ trợ các filter mặc định của DRF (nếu được cấu hình, ví dụ: `filterset_fields`, `search_fields`).
+- **Đầu vào**: UUID của chi phí (để xem chi tiết), hoặc các tham số query để lọc/tìm kiếm, thông tin phân trang.
+- **Đầu ra**: Danh sách hoặc chi tiết khoản mục chi phí.
+- **Người thực hiện**: Người dùng có quyền xem.
+- **Điều kiện tiên quyết**: Đăng nhập vào hệ thống.
+- **Xử lý ngoại lệ**: Chi phí không tồn tại.
+
+#### 2.3.3. Cập Nhật Khoản Mục Chi Phí
+- **Mô tả**: Người dùng thay đổi thông tin của một khoản mục chi phí đã có.
+- **Đầu vào**: UUID của chi phí và dữ liệu cần cập nhật.
+- **Đầu ra**: Khoản mục chi phí được cập nhật hoặc thông báo lỗi.
+- **Người thực hiện**: Kế toán viên.
+- **Điều kiện tiên quyết**: Đăng nhập, có quyền sửa. Chi phí phải tồn tại. Nếu `ma_cp` thay đổi, mã mới không được trùng.
+- **Xử lý ngoại lệ**: Dữ liệu không hợp lệ, chi phí không tồn tại, `ma_cp` mới bị trùng.
+
+#### 2.3.4. Xóa Khoản Mục Chi Phí
+- **Mô tả**: Người dùng xóa một khoản mục chi phí.
+- **Đầu vào**: UUID của chi phí.
+- **Đầu ra**: Thông báo xóa thành công (HTTP 204) hoặc lỗi.
+- **Người thực hiện**: Kế toán viên.
+- **Điều kiện tiên quyết**: Đăng nhập, có quyền xóa. Chi phí phải tồn tại.
+- **Xử lý ngoại lệ**: Chi phí không tồn tại.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram) - Tạo mới Khoản Mục Chi Phí
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant APIView as ChiPhiViewSet
+    participant Serializer as ChiPhiModelSerializer
+    participant Model as ChiPhiModel
+    participant DB as Database
+
+    User->>APIView: POST /api/{entity_slug}/expenses/ (data)
+    APIView->>Serializer: serializer_class(data=request.data)
+    Serializer->>Serializer: is_valid(raise_exception=True)
+    alt Dữ liệu không hợp lệ
+        Serializer-->>APIView: Raise ValidationError
+        APIView-->>User: HTTP 400 (Error details)
+    else Dữ liệu hợp lệ
+        APIView->>APIView: perform_create(serializer)
+        APIView->>Serializer: save(entity_model=entity)
+        Serializer->>Model: objects.create(validated_data_with_entity)
+        Model->>DB: INSERT INTO chi_phi
+        DB-->>Model: created_instance
+        Model-->>Serializer: created_instance
+        Serializer-->>APIView: created_instance
+        APIView-->>User: HTTP 201 (serialized_instance_data)
+    end
+```
+*(Lưu ý: `perform_create` trong `EntityRelatedViewSet` sẽ tự động gán `entity_model`)*
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Cập nhật `ma_cp`**: Khi cập nhật `ma_cp`, `ModelViewSet` (thông qua `ChiPhiModel`) sẽ kiểm tra tính duy nhất của `ma_cp` mới trong phạm vi `entity_model` do có `unique_together = [('entity_model', 'ma_cp')]`.
+- **Phân trang**: `ChiPhiViewSet` sử dụng `ERPPagination` để phân trang danh sách.
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+(Dựa trên các actions tiêu chuẩn của `ModelViewSet` trong DRF)
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | BUD002-CP-LIST | Xem danh sách Chi Phí | Lấy danh sách các khoản mục chi phí cho một đơn vị, hỗ trợ phân trang. | Cao |
+| 2   | BUD002-CP-CREATE | Tạo mới Chi Phí | Tạo một khoản mục chi phí mới. | Cao |
+| 3   | BUD002-CP-RETRIEVE | Xem chi tiết Chi Phí | Lấy thông tin chi tiết của một khoản mục chi phí bằng UUID. | Cao |
+| 4   | BUD002-CP-UPDATE | Cập nhật Chi Phí | Cập nhật toàn bộ thông tin của một khoản mục chi phí đã có. | Cao |
+| 5   | BUD002-CP-PARTIAL-UPDATE | Cập nhật một phần Chi Phí | Cập nhật một phần thông tin của một khoản mục chi phí đã có. | Cao |
+| 6   | BUD002-CP-DELETE | Xóa Chi Phí | Xóa một khoản mục chi phí. | Cao |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. BUD002-CP-CREATE: Tạo mới Chi Phí
+- **Mô tả**: Cho phép tạo một khoản mục chi phí mới.
+- **Đầu vào**: Dữ liệu JSON chứa: `ma_cp`, `ten_cp`, `loai_cp`, `loai_pb`, `truoc_hq_yn` (optional, default False), `ma_ct` (optional UUID), `status` (optional, default '1').
+- **Đầu ra**: Dữ liệu JSON của chi phí vừa tạo và trường `ma_ct_data` (nếu `ma_ct` có).
+- **Điều kiện tiên quyết**: `ma_cp`, `ten_cp`, `loai_cp`, `loai_pb` không được để trống. `ma_cp` phải duy nhất trong đơn vị.
+- **Luồng xử lý chính** (qua `ModelViewSet.create` và `ChiPhiModelSerializer`):
+  1. `ChiPhiViewSet` nhận request POST.
+  2. `ChiPhiModelSerializer` được khởi tạo với dữ liệu.
+  3. `serializer.is_valid()` được gọi:
+     a. Các hàm `validate_<field>()` trong serializer được thực thi (ví dụ `validate_ma_cp`).
+     b. Kiểm tra tính duy nhất của `(entity_model, ma_cp)` ở tầng model/DB khi lưu.
+  4. `viewset.perform_create(serializer)` được gọi, trong đó `serializer.save()` sẽ gán `entity_model` (từ `EntityRelatedViewSet`).
+  5. Trả về dữ liệu đã serialize của instance mới tạo với HTTP status 201.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  - Dữ liệu không hợp lệ (theo validation của serializer hoặc model): Trả về HTTP 400.
+  - `entity_slug` không hợp lệ: Trả về HTTP 404 (xử lý bởi `EntityRelatedViewSet`).
+- **Giao diện liên quan**: Form tạo mới Chi Phí.
+
+*(Các chức năng LIST, RETRIEVE, UPDATE, DELETE được cung cấp bởi `ModelViewSet` và sử dụng `ChiPhiModelSerializer` tương tự.)*
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+Nghiệp vụ này chủ yếu dựa vào các thành phần tiêu chuẩn của Django và Django REST framework:
+- **View Layer**: `ChiPhiViewSet` (kế thừa từ `EntityRelatedViewSet`, có thể là `ModelViewSet`) xử lý HTTP requests, ủy quyền, và sử dụng serializer.
+- **Serializer Layer**: `ChiPhiModelSerializer` đảm nhận việc validate dữ liệu, chuyển đổi giữa Python objects và JSON.
+- **Model Layer**: `ChiPhiModel` định nghĩa cấu trúc dữ liệu, các ràng buộc (`unique_together`), và cung cấp các method quản lý (`objects`, `ChiPhiModelManager`).
+- **Database Layer**: Django ORM tương tác với cơ sở dữ liệu.
+
+```mermaid
+graph TD
+    Client --> Nginx --> Gunicorn
+    Gunicorn --> DjangoApp[Django Application]
+
+    subgraph DjangoApp
+        APILayer[API Layer: ChiPhiViewSet]
+        SerializerLayer[Serializer Layer: ChiPhiModelSerializer]
+        ModelLayer[Model Layer: ChiPhiModel, ChiPhiModelManager]
+        Database[(PostgreSQL Database)]
+
+        APILayer -->|uses| SerializerLayer
+        SerializerLayer -->|interacts with| ModelLayer
+        APILayer -->|queries via ORM| ModelLayer
+        ModelLayer -->|maps to| Database
+    end
+```
+*(Do không có Service/Repository layer riêng biệt, ViewSet và Serializer tương tác trực tiếp hơn với Model)*
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Quản Lý Chi Phí (`ChiPhiModel`)
+- **Mô tả**: CRUD các khoản mục chi phí.
+- **Base URL**: `/api/{entity_slug}/expenses/` (Giả định `expenses` là slug đã đăng ký trong `urls.py` cho `ChiPhiViewSet`)
+- **Endpoints** (cung cấp bởi `ModelViewSet`):
+  - `GET /`: Lấy danh sách chi phí (hỗ trợ phân trang `ERPPagination`).
+    - `ChiPhiViewSet` có `get_queryset` để lọc theo `entity_slug`.
+  - `POST /`: Tạo chi phí mới.
+  - `GET /{uuid}/`: Lấy chi tiết chi phí.
+  - `PUT /{uuid}/`: Cập nhật toàn bộ chi phí.
+  - `PATCH /{uuid}/`: Cập nhật một phần chi phí.
+  - `DELETE /{uuid}/`: Xóa chi phí.
+
+### 4.3. Service Logic
+Không có lớp Service riêng biệt cho `ChiPhiModel`. Logic nghiệp vụ được xử lý chủ yếu trong:
+- `ChiPhiViewSet`: Xử lý request, gọi serializer, lọc queryset theo `entity_slug`.
+- `ChiPhiModelSerializer`: Validate dữ liệu, cung cấp `ma_ct_data`.
+- `ChiPhiModel` và `ChiPhiModelManager`: Các phương thức truy vấn (`active`, `for_entity`, `by_code`), ràng buộc dữ liệu (`unique_together`).
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    EntityModel ||--o{ ChiPhiModel : \"has_expenses\"
+    ChungTu ||--o{ ChiPhiModel : \"related_to_expense\" (optional)
+
+    EntityModel {
+        UUID uuid PK
+        string slug
+        # ... other fields
+    }
+
+    ChungTu {
+        UUID uuid PK
+        string so_ct \"Số chứng từ\"
+        # ... other fields
+    }
+
+    ChiPhiModel {
+        UUID uuid PK
+        UUID entity_model_id FK
+        string ma_cp \"Mã chi phí (unique per entity)\"
+        string ten_cp \"Tên chi phí\"
+        string ten_cp2 \"Tên chi phí 2 (alt)\"
+        boolean truoc_hq_yn \"Trước hạch quỹ?\"
+        string loai_cp \"Loại chi phí\"
+        string loai_pb \"Loại phân bổ\"
+        UUID ma_ct_id FK \"Chứng từ gốc (optional)\"
+        string status \"Trạng thái (0/1)\"
+        datetime created
+        datetime updated
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: `chi_phi` (mapped from `ChiPhiModel`)
+- **Mô tả**: Lưu trữ thông tin các khoản mục chi phí.
+- **Các cột chính**:
+  - `uuid` (PK, UUID): Định danh duy nhất.
+  - `entity_model_id` (FK, UUID): Liên kết đến bảng `entity`.
+  - `ma_cp` (CharField(50)): Mã chi phí.
+  - `truoc_hq_yn` (BooleanField, nullable, default False): Trước hạch quỹ.
+  - `ten_cp` (CharField(255)): Tên chi phí.
+  - `ten_cp2` (CharField(255), nullable): Tên thay thế.
+  - `loai_cp` (CharField(50)): Loại chi phí.
+  - `loai_pb` (CharField(10)): Loại phân bổ.
+  - `ma_ct_id` (FK, UUID, nullable): Liên kết đến bảng `chung_tu`.
+  - `status` (CharField(10), default '1'): Trạng thái.
+  - `created` (DateTimeField): Thời điểm tạo.
+  - `updated` (DateTimeField): Thời điểm cập nhật cuối.
+- **Indexes**: (`entity_model`, `ma_cp`), (`entity_model`, `ten_cp`), (`loai_cp`), (`status`).
+- **Unique Together**: (`entity_model`, `ma_cp`).
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- Kiểm thử các chức năng CRUD cho Chi Phí (`ChiPhiModel`) thông qua API.
+- Kiểm thử validation dữ liệu đầu vào (trường bắt buộc, định dạng, tính duy nhất của `ma_cp` trong entity).
+- Kiểm thử API endpoints (status codes, response format, pagination).
+- Kiểm thử việc hiển thị `ma_ct_data` (dữ liệu chứng từ liên quan).
+- Kiểm thử lọc theo `entity_slug`.
+
+### 5.2. Kịch Bản Kiểm Thử
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC_BUD002_CP_001 | Tạo Chi Phí thành công | Kiểm tra tạo mới Chi Phí với dữ liệu hợp lệ. | User đăng nhập, có quyền. `entity_slug` hợp lệ. | 1. Gửi POST request tới `/api/{entity_slug}/expenses/` với data (`ma_cp`, `ten_cp`, `loai_cp`, `loai_pb`) hợp lệ. | 1. Response status 201. 2. Response body chứa thông tin Chi Phí đã tạo. 3. Dữ liệu được lưu đúng trong DB. |
+| 2   | TC_BUD002_CP_002 | Tạo Chi Phí thất bại - `ma_cp` trùng | Kiểm tra không cho tạo Chi Phí nếu `ma_cp` đã tồn tại trong entity. | User đăng nhập. `ma_cp` đã tồn tại cho entity. | 1. Gửi POST request với `ma_cp` đã có. | 1. Response status 400. 2. Thông báo lỗi về `ma_cp` bị trùng. |
+| 3   | TC_BUD002_CP_003 | Tạo Chi Phí thất bại - thiếu trường | Kiểm tra lỗi khi thiếu trường bắt buộc (vd: `ten_cp`). | User đăng nhập. | 1. Gửi POST request thiếu `ten_cp`. | 1. Response status 400. 2. Thông báo lỗi về trường `ten_cp` bị thiếu. |
+| 4   | TC_BUD002_CP_004 | Lấy danh sách Chi Phí | Kiểm tra lấy danh sách Chi Phí, có phân trang. | Có sẵn vài Chi Phí cho entity. | 1. Gửi GET request tới `/api/{entity_slug}/expenses/?page=1&page_size=2`. | 1. Response status 200. 2. Response body chứa danh sách Chi Phí (tối đa 2), thông tin phân trang. |
+| 5   | TC_BUD002_CP_005 | Lấy Chi Phí với `ma_ct_data` | Kiểm tra Chi Phí có liên kết chứng từ hiển thị `ma_ct_data`. | Chi Phí có `ma_ct` hợp lệ. | 1. Gửi GET request tới `/api/{entity_slug}/expenses/{uuid_chi_phi}/`. | 1. Response status 200. 2. `ma_ct_data` chứa thông tin của chứng từ liên quan. |
+| ... | ...          | ...            | ...   | ...                 | ...      | ...               |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Mã nguồn dự án ERP-BE (các file đã liệt kê ở mục 1.4).
+- Tài liệu Django REST framework.
+
+### 6.2. Danh Mục Thuật Ngữ
+(Xem mục 1.3)
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+| Phiên bản | Ngày       | Người thực hiện      | Mô tả thay đổi                         |
+|-----------|------------|----------------------|----------------------------------------|
+| 1.0       | 2024-07-30 | Gemini AI Assistant  | Tạo tài liệu ban đầu dựa trên source code. |
+
+
+</rewritten_file> 

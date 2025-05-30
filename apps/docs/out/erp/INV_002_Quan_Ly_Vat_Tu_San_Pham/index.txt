@@ -1,0 +1,465 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T565d,# INV_002_Quản Lý Vật Tư Sản Phẩm
+
+*Phiên bản: 1.0*  
+*Người tạo: Auto Generated*  
+*Ngày tạo: 25/07/2023*  
+*Cập nhật lần cuối: 25/07/2023*  
+*Người cập nhật: Auto Generated*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Quản lý vật tư sản phẩm là quy trình thiết lập và quản lý thông tin về các vật tư, hàng hóa, sản phẩm trong doanh nghiệp. Quy trình này bao gồm việc phân loại, mã hóa, thiết lập thuộc tính và định nghĩa các đặc điểm của sản phẩm/vật tư. Quản lý vật tư sản phẩm hiệu quả giúp doanh nghiệp theo dõi chính xác hàng tồn kho, tối ưu hóa quá trình mua hàng, sản xuất và bán hàng, đồng thời cung cấp thông tin chính xác cho các báo cáo tài chính và quản trị.
+
+### 1.2. Phạm Vi Áp Dụng
+Quy trình này áp dụng cho việc quản lý tất cả các loại vật tư, sản phẩm trong doanh nghiệp, bao gồm:
+- Bộ phận kho vận
+- Bộ phận mua hàng
+- Bộ phận bán hàng
+- Bộ phận sản xuất
+- Bộ phận kế toán
+- Ban lãnh đạo
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Vật tư | Nguyên vật liệu, hàng hóa, sản phẩm được quản lý trong hệ thống |
+| Mã vật tư | Mã định danh duy nhất cho mỗi vật tư trong hệ thống |
+| Loại vật tư | Phân loại vật tư theo nhóm, chủng loại |
+| Đơn vị tính | Đơn vị đo lường của vật tư (cái, thùng, kg...) |
+| Theo dõi lô | Tính năng theo dõi vật tư theo lô, hạn sử dụng |
+| Cách tính giá tồn kho | Phương pháp tính giá hàng tồn kho (FIFO, LIFO, bình quân...) |
+| Tài khoản kho | Tài khoản kế toán dùng để hạch toán giá trị hàng tồn kho |
+
+### 1.4. Tài Liệu Liên Quan
+
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | INV_001 | Quản Lý Kho Hàng | Quy trình thiết lập và quản lý kho hàng |
+| 2   | INV_003 | Quản Lý Loại Vật Tư | Quy trình phân loại và quản lý loại vật tư |
+| 3   | INV_004 | Quản Lý Đơn Vị Tính | Quy trình quản lý đơn vị tính và quy đổi đơn vị |
+| 4   | INV_005 | Quản Lý Nhập Xuất Kho | Quy trình nhập xuất kho |
+| 5   | PUR_004 | Quản Lý Giá Mua | Quy trình thiết lập và quản lý giá mua |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình quản lý vật tư sản phẩm bao gồm việc thiết lập thông tin cơ bản, cấu hình thuộc tính, thiết lập đơn vị tính, thiết lập giá và các thông số kế toán, kích hoạt sử dụng, và theo dõi, đánh giá định kỳ. Quy trình đảm bảo thông tin vật tư được định nghĩa đầy đủ và chính xác trước khi đưa vào sử dụng trong các nghiệp vụ khác như nhập kho, xuất kho, bán hàng.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Bắt đầu] --> B[Xác định nhu cầu thêm vật tư mới]
+    B --> C[Kiểm tra vật tư đã tồn tại]
+    C --> D{Đã tồn tại?}
+    D -->|Có| E[Cập nhật thông tin vật tư]
+    D -->|Không| F[Tạo vật tư mới]
+    F --> G[Nhập thông tin cơ bản]
+    G --> H[Chọn loại vật tư]
+    H --> I[Thiết lập đơn vị tính]
+    I --> J[Thiết lập tài khoản kế toán]
+    J --> K[Thiết lập cách tính giá tồn kho]
+    K --> L[Thiết lập thuộc tính theo dõi]
+    L --> M[Thiết lập kho mặc định]
+    E --> N[Xem xét các thuộc tính cần cập nhật]
+    N --> O[Thực hiện cập nhật]
+    M --> P[Kích hoạt trong hệ thống]
+    O --> P
+    P --> Q[Sử dụng trong giao dịch]
+    Q --> R[Theo dõi và đánh giá định kỳ]
+    R --> S{Cần điều chỉnh?}
+    S -->|Có| E
+    S -->|Không| T[Tiếp tục sử dụng]
+    T --> U[Kết thúc]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Xác định nhu cầu và kiểm tra vật tư
+- **Mô tả**: Xác định nhu cầu thêm vật tư mới và kiểm tra xem vật tư đã tồn tại trong hệ thống chưa
+- **Đầu vào**: Thông tin yêu cầu vật tư mới, thông tin tìm kiếm
+- **Đầu ra**: Kết quả kiểm tra (tồn tại/không tồn tại)
+- **Người thực hiện**: Nhân viên quản lý vật tư, nhân viên mua hàng
+- **Điều kiện tiên quyết**: Có nhu cầu thêm vật tư mới
+- **Xử lý ngoại lệ**: Nếu không chắc chắn về việc vật tư đã tồn tại, cần kiểm tra kỹ với nhiều tiêu chí tìm kiếm khác nhau
+
+#### 2.3.2. Tạo vật tư mới và nhập thông tin cơ bản
+- **Mô tả**: Tạo vật tư mới và nhập các thông tin cơ bản
+- **Đầu vào**: Thông tin vật tư (tên, mã, mô tả, loại vật tư...)
+- **Đầu ra**: Vật tư mới được tạo với thông tin cơ bản
+- **Người thực hiện**: Nhân viên quản lý vật tư
+- **Điều kiện tiên quyết**: Vật tư chưa tồn tại trong hệ thống
+- **Xử lý ngoại lệ**: Kiểm tra trùng lặp mã vật tư, đảm bảo thông tin đầy đủ và chính xác
+
+#### 2.3.3. Thiết lập đơn vị tính và kế toán
+- **Mô tả**: Thiết lập đơn vị tính, tài khoản kế toán và cách tính giá tồn kho
+- **Đầu vào**: Thông tin đơn vị tính, tài khoản kế toán, phương pháp tính giá
+- **Đầu ra**: Vật tư được cấu hình đầy đủ các thông số
+- **Người thực hiện**: Nhân viên quản lý vật tư, kế toán
+- **Điều kiện tiên quyết**: Vật tư đã được tạo với thông tin cơ bản
+- **Xử lý ngoại lệ**: Đảm bảo đơn vị tính phù hợp, tài khoản kế toán chính xác
+
+#### 2.3.4. Kích hoạt và sử dụng
+- **Mô tả**: Kích hoạt vật tư trong hệ thống và đưa vào sử dụng
+- **Đầu vào**: Vật tư đã cấu hình đầy đủ
+- **Đầu ra**: Vật tư được kích hoạt và sẵn sàng sử dụng
+- **Người thực hiện**: Nhân viên quản lý vật tư
+- **Điều kiện tiên quyết**: Vật tư đã được cấu hình đầy đủ các thông số
+- **Xử lý ngoại lệ**: Kiểm tra lại toàn bộ thông tin trước khi kích hoạt
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant System as Hệ thống
+    participant VatTu as VatTuService
+    participant LoaiVatTu as LoaiVatTuService
+    participant DonViTinh as DonViTinhService
+    participant DB as Database
+    
+    User->>System: Yêu cầu tạo vật tư mới
+    System->>VatTu: Chuyển yêu cầu
+    VatTu->>DB: Kiểm tra vật tư đã tồn tại
+    DB-->>VatTu: Kết quả kiểm tra
+    
+    alt Vật tư chưa tồn tại
+        VatTu->>LoaiVatTu: Lấy danh sách loại vật tư
+        LoaiVatTu->>DB: Truy vấn dữ liệu
+        DB-->>LoaiVatTu: Trả về dữ liệu
+        LoaiVatTu-->>VatTu: Danh sách loại vật tư
+        
+        VatTu->>DonViTinh: Lấy danh sách đơn vị tính
+        DonViTinh->>DB: Truy vấn dữ liệu
+        DB-->>DonViTinh: Trả về dữ liệu
+        DonViTinh-->>VatTu: Danh sách đơn vị tính
+        
+        VatTu-->>System: Hiển thị form nhập liệu
+        System-->>User: Hiển thị form cho người dùng
+        
+        User->>System: Nhập thông tin vật tư
+        System->>VatTu: Gửi dữ liệu
+        VatTu->>VatTu: Validate dữ liệu
+        VatTu->>DB: Lưu vật tư mới
+        DB-->>VatTu: Xác nhận lưu thành công
+        
+        User->>System: Thêm đơn vị tính
+        System->>DonViTinh: Gửi dữ liệu
+        DonViTinh->>DB: Lưu đơn vị tính
+        DB-->>DonViTinh: Xác nhận lưu thành công
+        
+        User->>System: Kích hoạt vật tư
+        System->>VatTu: Cập nhật trạng thái
+        VatTu->>DB: Lưu trạng thái
+        DB-->>VatTu: Xác nhận lưu thành công
+        VatTu-->>System: Thông báo thành công
+        System-->>User: Hiển thị thông báo
+    else Vật tư đã tồn tại
+        VatTu-->>System: Thông báo đã tồn tại
+        System-->>User: Hiển thị thông tin vật tư
+        User->>System: Yêu cầu cập nhật
+        System->>VatTu: Gửi dữ liệu cập nhật
+        VatTu->>DB: Cập nhật thông tin
+        DB-->>VatTu: Xác nhận cập nhật thành công
+        VatTu-->>System: Thông báo thành công
+        System-->>User: Hiển thị thông báo
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Nhập hàng loạt**: Thay vì tạo từng vật tư một, người dùng có thể nhập hàng loạt nhiều vật tư cùng lúc thông qua file Excel
+- **Sao chép vật tư**: Tạo vật tư mới bằng cách sao chép từ vật tư đã có và chỉnh sửa một số thông tin
+- **Ngừng sử dụng vật tư**: Khi vật tư không còn được sử dụng, có thể chuyển trạng thái sang "Ngừng sử dụng" thay vì xóa khỏi hệ thống
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | PROD_LIST | Xem danh sách vật tư | Hiển thị danh sách vật tư với các bộ lọc và tìm kiếm | Cao |
+| 2   | PROD_CREATE | Tạo vật tư mới | Thêm vật tư mới vào hệ thống | Cao |
+| 3   | PROD_UPDATE | Cập nhật vật tư | Chỉnh sửa thông tin vật tư | Cao |
+| 4   | PROD_VIEW | Xem chi tiết vật tư | Xem toàn bộ thông tin chi tiết của vật tư | Cao |
+| 5   | PROD_UOM | Quản lý đơn vị tính | Thêm, sửa, xóa đơn vị tính cho vật tư | Cao |
+| 6   | PROD_STATUS | Thay đổi trạng thái | Đánh dấu vật tư là active/inactive | Cao |
+| 7   | PROD_IMPORT | Nhập dữ liệu hàng loạt | Nhập nhiều vật tư từ file Excel | Trung bình |
+| 8   | PROD_EXPORT | Xuất dữ liệu | Xuất danh sách vật tư ra file | Thấp |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. PROD_CREATE: Tạo vật tư mới
+- **Mô tả**: Cho phép người dùng tạo vật tư mới trong hệ thống
+- **Đầu vào**: Thông tin vật tư (tên, mã, mô tả, loại vật tư, đơn vị tính, tài khoản kế toán, v.v.)
+- **Đầu ra**: Bản ghi vật tư mới trong hệ thống
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập và có quyền tạo vật tư
+- **Luồng xử lý chính**:
+  1. Người dùng chọn "Tạo vật tư mới"
+  2. Hệ thống hiển thị form nhập thông tin
+  3. Người dùng nhập thông tin cơ bản (tên, mã, mô tả)
+  4. Người dùng chọn loại vật tư
+  5. Người dùng chọn đơn vị tính chính
+  6. Người dùng thiết lập tài khoản kế toán và cách tính giá tồn kho
+  7. Người dùng chọn kho mặc định (nếu có)
+  8. Người dùng nhấn "Lưu"
+  9. Hệ thống kiểm tra tính hợp lệ của dữ liệu
+  10. Hệ thống lưu vật tư mới
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu dữ liệu không hợp lệ, hiển thị thông báo lỗi
+  2. Nếu mã vật tư đã tồn tại, yêu cầu nhập mã khác
+- **Giao diện liên quan**: Form tạo vật tư mới
+
+#### 3.2.2. PROD_UOM: Quản lý đơn vị tính
+- **Mô tả**: Cho phép quản lý đơn vị tính cho vật tư
+- **Đầu vào**: ID vật tư, thông tin đơn vị tính (mã, tên, hệ số quy đổi)
+- **Đầu ra**: Đơn vị tính được thêm, sửa hoặc xóa
+- **Điều kiện tiên quyết**: Vật tư đã tồn tại trong hệ thống
+- **Luồng xử lý chính**:
+  1. Người dùng chọn vật tư cần quản lý đơn vị tính
+  2. Hệ thống hiển thị danh sách đơn vị tính hiện tại
+  3. Người dùng có thể thêm, sửa hoặc xóa đơn vị tính
+  4. Khi thêm đơn vị tính, người dùng nhập tên và hệ số quy đổi
+  5. Người dùng nhấn "Lưu"
+  6. Hệ thống cập nhật thông tin đơn vị tính
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Không thể xóa đơn vị tính đang được sử dụng trong giao dịch
+  2. Kiểm tra tính hợp lệ của hệ số quy đổi
+- **Giao diện liên quan**: Màn hình quản lý đơn vị tính
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+
+```mermaid
+flowchart TD
+    A[Client] --> B[API Gateway]
+    B --> C[VatTuService]
+    C --> D[VatTuRepository]
+    C --> E[LoaiVatTuService]
+    E --> F[LoaiVatTuRepository]
+    C --> G[DonViTinhService]
+    G --> H[DonViTinhRepository]
+    D --> I[(Database)]
+    F --> I
+    H --> I
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Lấy danh sách vật tư
+- **Mô tả**: Trả về danh sách vật tư theo điều kiện lọc
+- **URL**: `GET /api/v1/entity/{entity_slug}/vat-tu/`
+- **Query Parameters**:
+  - `trang_thai`: Lọc theo trạng thái active (1/0)
+  - `loai_vat_tu`: Lọc theo loại vật tư
+  - `kho`: Lọc theo kho mặc định
+  - `search`: Từ khóa tìm kiếm (tên, mã vật tư)
+  - `page`: Số trang
+  - `page_size`: Số bản ghi trên mỗi trang
+  - `ordering`: Trường sắp xếp
+- **Response**: Danh sách vật tư, phân trang
+
+#### 4.2.2. Lấy chi tiết vật tư
+- **Mô tả**: Trả về thông tin chi tiết của một vật tư
+- **URL**: `GET /api/v1/entity/{entity_slug}/vat-tu/{uuid}/`
+- **Response**: Chi tiết vật tư
+
+#### 4.2.3. Tạo vật tư mới
+- **Mô tả**: Tạo vật tư mới trong hệ thống
+- **URL**: `POST /api/v1/entity/{entity_slug}/vat-tu/`
+- **Request Body**: Thông tin vật tư
+- **Response**: Thông tin vật tư đã tạo
+
+#### 4.2.4. Cập nhật vật tư
+- **Mô tả**: Cập nhật thông tin vật tư
+- **URL**: `PUT /api/v1/entity/{entity_slug}/vat-tu/{uuid}/`
+- **Request Body**: Thông tin cập nhật
+- **Response**: Thông tin vật tư đã cập nhật
+
+#### 4.2.5. Quản lý đơn vị tính
+- **Mô tả**: Quản lý đơn vị tính cho vật tư
+- **URL**: `POST /api/v1/entity/{entity_slug}/vat-tu/{uuid}/don-vi-tinh/`
+- **Request Body**: Thông tin đơn vị tính
+- **Response**: Kết quả cập nhật
+
+### 4.3. Service Logic
+
+#### 4.3.1. VatTuService
+- **Mô tả**: Xử lý logic nghiệp vụ liên quan đến quản lý vật tư
+- **Chức năng chính**:
+  1. Tạo và quản lý vật tư
+  2. Cập nhật thông tin vật tư
+  3. Quản lý đơn vị tính
+  4. Quản lý trạng thái vật tư
+- **Các dependencies**:
+  1. VatTuRepository
+  2. LoaiVatTuService
+  3. DonViTinhService
+- **Sơ đồ luồng xử lý**:
+
+```mermaid
+flowchart TD
+    A[Nhận request] --> B[Validate dữ liệu]
+    B --> C{Dữ liệu hợp lệ?}
+    C -->|Có| D[Xử lý business logic]
+    C -->|Không| E[Trả về lỗi]
+    D --> F{Loại thao tác?}
+    F -->|Tạo| G[Tạo vật tư mới]
+    F -->|Cập nhật| H[Cập nhật vật tư]
+    F -->|Quản lý đơn vị tính| I[Xử lý đơn vị tính]
+    G --> J[Kiểm tra trùng lặp]
+    J --> K{Trùng lặp?}
+    K -->|Có| L[Thông báo lỗi]
+    K -->|Không| M[Lưu vật tư mới]
+    H --> N[Lưu thay đổi]
+    I --> O[Cập nhật đơn vị tính]
+    M --> P[Ghi log]
+    N --> P
+    O --> P
+    L --> P
+    P --> Q[Trả về kết quả]
+    E --> P
+```
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    EntityModel ||--o{ VatTuModel : "có"
+    LoaiVatTuModel ||--o{ VatTuModel : "phân loại"
+    KhoHangModel ||--o{ VatTuModel : "là kho mặc định của"
+    VatTuModel ||--o{ VatTuSanPhamDonViTinhModel : "có"
+    DonViTinhModel ||--o{ VatTuSanPhamDonViTinhModel : "sử dụng trong"
+    
+    VatTuModel {
+        UUID uuid PK
+        FK EntityModel entity_model
+        String ma_vat_tu
+        String ten_vat_tu
+        String mo_ta
+        FK LoaiVatTuModel loai_vat_tu
+        FK KhoHangModel ma_kho_mac_dinh
+        FK AccountModel tk_kho
+        FK AccountModel tk_doanh_thu
+        FK AccountModel tk_gia_von
+        FK ThueSuatModel ma_thue_mac_dinh
+        String barcode
+        Boolean theo_doi_lo
+        Integer cach_tinh_gia_ton_kho
+        Integer trang_thai
+        DateTime created
+        DateTime updated
+    }
+    
+    VatTuSanPhamDonViTinhModel {
+        UUID uuid PK
+        FK VatTuModel vat_tu_san_pham_id
+        FK DonViTinhModel don_vi_tinh_id
+        String ten_dvt
+        Decimal he_so
+        DateTime created
+        DateTime updated
+    }
+    
+    LoaiVatTuModel {
+        UUID uuid PK
+        String ma_loai_vat_tu
+        String ten_loai_vat_tu
+        String ten_khac
+        FK AccountModel tk_kho
+        FK AccountModel tk_doanh_thu
+        FK AccountModel tk_gia_von
+        Integer trang_thai
+        DateTime created
+        DateTime updated
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: VatTuModel
+- **Mô tả**: Lưu trữ thông tin về vật tư, sản phẩm
+- **Các trường chính**:
+  - `uuid`: Khóa chính, định danh duy nhất
+  - `entity_model`: Khóa ngoại tham chiếu đến EntityModel
+  - `ma_vat_tu`: Mã vật tư
+  - `ten_vat_tu`: Tên vật tư
+  - `mo_ta`: Mô tả chi tiết
+  - `loai_vat_tu`: Khóa ngoại tham chiếu đến LoaiVatTuModel
+  - `ma_kho_mac_dinh`: Khóa ngoại tham chiếu đến kho mặc định (KhoHangModel)
+  - `tk_kho`: Khóa ngoại tham chiếu đến tài khoản kho (AccountModel)
+  - `tk_doanh_thu`: Khóa ngoại tham chiếu đến tài khoản doanh thu (AccountModel)
+  - `tk_gia_von`: Khóa ngoại tham chiếu đến tài khoản giá vốn (AccountModel)
+  - `ma_thue_mac_dinh`: Khóa ngoại tham chiếu đến thuế mặc định (ThueSuatModel)
+  - `barcode`: Mã vạch
+  - `theo_doi_lo`: Có theo dõi theo lô hay không
+  - `cach_tinh_gia_ton_kho`: Phương pháp tính giá tồn kho
+  - `trang_thai`: Trạng thái (1: active, 0: inactive)
+  - `created`: Thời gian tạo
+  - `updated`: Thời gian cập nhật
+
+##### Bảng: VatTuSanPhamDonViTinhModel
+- **Mô tả**: Lưu trữ thông tin về đơn vị tính của vật tư
+- **Các trường chính**:
+  - `uuid`: Khóa chính, định danh duy nhất
+  - `vat_tu_san_pham_id`: Khóa ngoại tham chiếu đến VatTuModel
+  - `don_vi_tinh_id`: Khóa ngoại tham chiếu đến DonViTinhModel
+  - `ten_dvt`: Tên đơn vị tính
+  - `he_so`: Hệ số quy đổi
+  - `created`: Thời gian tạo
+  - `updated`: Thời gian cập nhật
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+Kiểm thử sẽ bao gồm tất cả các chức năng liên quan đến quản lý vật tư sản phẩm, bao gồm:
+- Tạo mới vật tư sản phẩm
+- Cập nhật thông tin vật tư sản phẩm
+- Quản lý đơn vị tính
+- Tìm kiếm và lọc vật tư sản phẩm
+- Thay đổi trạng thái vật tư sản phẩm
+- Nhập dữ liệu vật tư hàng loạt
+- Kiểm tra tích hợp với các phân hệ liên quan (mua hàng, kho, kế toán)
+
+### 5.2. Kịch Bản Kiểm Thử
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC_PROD_C01 | Tạo vật tư mới thành công | Kiểm tra việc tạo vật tư mới | Người dùng đã đăng nhập và có quyền | 1. Truy cập form tạo vật tư<br>2. Nhập thông tin hợp lệ<br>3. Nhấn Lưu | Vật tư mới được tạo thành công |
+| 2   | TC_PROD_C02 | Tạo vật tư với mã trùng | Kiểm tra validate mã vật tư trùng | Đã có vật tư trong hệ thống | 1. Truy cập form tạo vật tư<br>2. Nhập mã vật tư đã tồn tại<br>3. Nhấn Lưu | Hiển thị thông báo lỗi về mã vật tư trùng |
+| 3   | TC_PROD_U01 | Cập nhật thông tin vật tư | Kiểm tra cập nhật thông tin | Vật tư đã tồn tại | 1. Mở form cập nhật<br>2. Thay đổi thông tin<br>3. Nhấn Lưu | Thông tin được cập nhật thành công |
+| 4   | TC_PROD_UOM01 | Thêm đơn vị tính | Kiểm tra thêm đơn vị tính | Vật tư đã tồn tại | 1. Chọn vật tư<br>2. Thêm đơn vị tính mới<br>3. Nhập hệ số quy đổi<br>4. Lưu | Đơn vị tính mới được thêm thành công |
+| 5   | TC_PROD_S01 | Thay đổi trạng thái vật tư | Kiểm tra thay đổi trạng thái | Vật tư đang hoạt động | 1. Chọn vật tư<br>2. Đổi trạng thái sang không hoạt động<br>3. Lưu | Trạng thái được cập nhật, vật tư không xuất hiện trong danh sách mặc định |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+1. Tài liệu thiết kế cơ sở dữ liệu ERP
+2. Tài liệu API đặc tả
+3. Quy định về quản lý vật tư của doanh nghiệp
+
+### 6.2. Danh Mục Thuật Ngữ
+- **VatTuModel**: Mô hình dữ liệu lưu trữ thông tin vật tư
+- **LoaiVatTuModel**: Mô hình dữ liệu phân loại vật tư
+- **VatTuSanPhamDonViTinhModel**: Mô hình dữ liệu đơn vị tính của vật tư
+- **FIFO**: First In First Out - Phương pháp tính giá tồn kho nhập trước xuất trước
+- **LIFO**: Last In First Out - Phương pháp tính giá tồn kho nhập sau xuất trước
+- **Bình quân**: Phương pháp tính giá tồn kho theo giá trị bình quân
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 25/07/2023 | Auto Generated | Tạo tài liệu ban đầu |6:["slug","erp/INV_002_Quan_Ly_Vat_Tu_San_Pham","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/INV_002_Quan_Ly_Vat_Tu_San_Pham","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"INV_002_Quan_Ly_Vat_Tu_San_Pham\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/INV_002_Quan_Ly_Vat_Tu_San_Pham","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

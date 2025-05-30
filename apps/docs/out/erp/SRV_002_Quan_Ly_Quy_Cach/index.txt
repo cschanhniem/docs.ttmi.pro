@@ -1,0 +1,308 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T4630,# SRV_002_Service_Quản Lý Quy Cách
+
+*Phiên bản: 1.0*
+*Người tạo: Gemini AI Assistant*
+*Ngày tạo: 2024-07-31*
+*Cập nhật lần cuối: 2024-07-31*
+*Người cập nhật: Gemini AI Assistant*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Nghiệp vụ Quản Lý Quy Cách (trong mã nguồn là `QuyCachModel`) cho phép người dùng định nghĩa và quản lý các quy cách chi tiết của dịch vụ hoặc sản phẩm trong hệ thống. Quy cách là các đặc điểm kỹ thuật và tiêu chuẩn áp dụng cho dịch vụ hoặc sản phẩm, giúp mô tả chi tiết và phân loại chúng. Mỗi quy cách bao gồm các thông tin như mã quy cách, ID quy cách, mô tả chi tiết, và trạng thái. Mục đích là cung cấp một bộ tiêu chuẩn rõ ràng để đảm bảo tính nhất quán trong cung cấp và quản lý dịch vụ/sản phẩm.
+
+### 1.2. Phạm Vi Áp Dụng
+- Áp dụng cho từng Đơn vị (Entity) trong hệ thống.
+- Các bộ phận liên quan đến quản lý dịch vụ, sản phẩm, và bảo đảm chất lượng.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Quy Cách | Đặc điểm kỹ thuật và tiêu chuẩn áp dụng cho dịch vụ hoặc sản phẩm. Trong mã nguồn là `QuyCachModel`. |
+| Đơn vị (Entity) | Tổ chức hoặc công ty mà quy cách được định nghĩa và áp dụng. |
+| `code_specs` | Mã quy cách duy nhất cho một quy cách trong một đơn vị. |
+| `id_specs` | ID quy cách trong hệ thống (dạng số nguyên). |
+| `id` | ID tổng quát của quy cách. |
+| `text` | Mô tả chi tiết về quy cách sản phẩm/dịch vụ. |
+| `status` | Trạng thái của quy cách: 1 (Active - Hoạt động), 0 (Inactive - Không hoạt động). |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | `django_ledger/models/quy_cach.py` | Model Định Nghĩa Quy Cách | Định nghĩa cấu trúc dữ liệu cho `QuyCachModel`. |
+| 2   | `django_ledger/api/views/quy_cach.py` | API Endpoints Quy Cách | Các điểm cuối API để tương tác với nghiệp vụ Quản Lý Quy Cách. |
+| 3   | `django_ledger/api/serializers/quy_cach.py` | Serializers Quy Cách | Định dạng dữ liệu JSON cho API, thực hiện validation. |
+| 4   | `django_ledger/api/urls.py` | URL Configuration | Đăng ký endpoint `/api/{entity_slug}/specifications/` cho Quy Cách. |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Người dùng có thẩm quyền (ví dụ: quản trị viên, quản lý) tương tác với hệ thống thông qua giao diện người dùng hoặc API để thực hiện các thao tác CRUD (Create, Read, Update, Delete) đối với các Quy Cách. Hệ thống sẽ xử lý các yêu cầu này thông qua `QuyCachViewSet` và gọi các phương thức ORM của `QuyCachModel` để tương tác với cơ sở dữ liệu. Dữ liệu đầu vào sẽ được kiểm tra (validate) bởi `QuyCachModelSerializer` và các phương thức clean của model.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Người dùng yêu cầu thao tác Quy Cách] --> B{API Gateway nhận yêu cầu};
+    B --> C[Xác thực & Ủy quyền (IsAuthenticated)];
+    C --> D[QuyCachViewSet];
+    D --> E[QuyCachModel Manager/Queryset];
+    E --> F[(Cơ sở dữ liệu - Bảng quy_cach)];
+    F --> E;
+    E --> D;
+    subgraph "Validation"
+        direction LR
+        G[Request Data] --> H[QuyCachModelSerializer];
+        H --> I[QuyCachModel.clean];
+    end
+    D --> G;
+    I -- Dữ liệu hợp lệ --> E;
+    I -- Dữ liệu không hợp lệ --> J[Báo lỗi cho ViewSet];
+    J --> B;
+    D --> K[Trả kết quả cho người dùng];
+    B --> K;
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Tạo Mới Quy Cách
+- **Mô tả**: Người dùng cung cấp thông tin để tạo một Quy Cách mới cho một Đơn vị.
+- **Đầu vào**: Dữ liệu Quy Cách (`code_specs`, `id_specs`, `id`, `text` và trạng thái). `entity_slug` được lấy từ URL.
+- **Đầu ra**: Quy Cách mới được tạo thành công hoặc thông báo lỗi.
+- **Người thực hiện**: Quản trị viên, quản lý.
+- **Điều kiện tiên quyết**: Đăng nhập hệ thống, có quyền truy cập vào Đơn vị. `code_specs` phải là duy nhất trong Đơn vị đó.
+- **Xử lý ngoại lệ**: Dữ liệu không hợp lệ (thiếu trường, sai định dạng, `code_specs` bị trùng), Đơn vị không tồn tại.
+
+#### 2.3.2. Xem/Tìm Kiếm Quy Cách
+- **Mô tả**: Người dùng xem danh sách các Quy Cách của một Đơn vị hoặc chi tiết một Quy Cách cụ thể. Hỗ trợ phân trang.
+- **Đầu vào**: `entity_slug` (từ URL). Tùy chọn: `uuid` của Quy Cách (để xem chi tiết), tham số phân trang (`page`, `page_size`).
+- **Đầu ra**: Danh sách các Quy Cách hoặc thông tin chi tiết của một Quy Cách.
+- **Người thực hiện**: Mọi người dùng có quyền xem.
+- **Điều kiện tiên quyết**: Đăng nhập hệ thống.
+- **Xử lý ngoại lệ**: Quy Cách không tồn tại, Đơn vị không tồn tại.
+
+#### 2.3.3. Cập Nhật Quy Cách
+- **Mô tả**: Người dùng thay đổi thông tin của một Quy Cách đã tồn tại.
+- **Đầu vào**: `entity_slug`, `uuid` của Quy Cách, và dữ liệu cần cập nhật.
+- **Đầu ra**: Quy Cách được cập nhật thành công hoặc thông báo lỗi.
+- **Người thực hiện**: Quản trị viên, quản lý.
+- **Điều kiện tiên quyết**: Đăng nhập, Quy Cách phải tồn tại và thuộc Đơn vị chỉ định. Nếu `code_specs` thay đổi, mã mới không được trùng.
+- **Xử lý ngoại lệ**: Dữ liệu không hợp lệ, Quy Cách không tồn tại, `code_specs` mới bị trùng.
+
+#### 2.3.4. Xóa Quy Cách
+- **Mô tả**: Người dùng xóa một Quy Cách khỏi hệ thống.
+- **Đầu vào**: `entity_slug`, `uuid` của Quy Cách.
+- **Đầu ra**: Thông báo xóa thành công hoặc thông báo lỗi.
+- **Người thực hiện**: Quản trị viên, quản lý.
+- **Điều kiện tiên quyết**: Đăng nhập, Quy Cách phải tồn tại và thuộc Đơn vị chỉ định. (Cần xem xét ràng buộc nếu Quy Cách đang được sử dụng).
+- **Xử lý ngoại lệ**: Quy Cách không tồn tại, Quy Cách đang được sử dụng.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram) - Tạo mới Quy Cách
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant APIView as QuyCachViewSet
+    participant Serializer as QuyCachModelSerializer
+    participant Manager as QuyCachModelManager
+    participant Model as QuyCachModel
+    participant DB as Database
+
+    User->>APIView: POST /api/{entity_slug}/specifications/ (data)
+    APIView->>Serializer: validate(data)
+    Serializer-->>APIView: validated_data
+    
+    alt Validation fails
+        Serializer-->>APIView: Validation errors
+        APIView-->>User: HTTP 400 (Error details)
+    else Validation succeeds
+        APIView->>Model: Prepare data for creation
+        Model->>Model: clean() - Validate and format data
+        APIView->>Manager: Create Model instance
+        Manager->>DB: INSERT INTO quy_cach
+        DB-->>Manager: Success response
+        Manager-->>APIView: Created instance
+        APIView->>Serializer: Serialize instance
+        Serializer-->>APIView: Serialized data
+        APIView-->>User: HTTP 201 (serialized_data)
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Lọc theo trạng thái**: Người dùng có thể lọc Quy Cách theo trạng thái (hoạt động/không hoạt động) sử dụng các phương thức `active()` và `inactive()` của Queryset.
+- **Xem chỉ quy cách hoạt động**: Hệ thống có thể chỉ hiển thị các quy cách đang hoạt động (status=1) để đảm bảo người dùng chỉ áp dụng các quy cách hiện được phê duyệt.
+- **Phê duyệt quy cách**: Quy trình có thể mở rộng để bao gồm việc phê duyệt quy cách trước khi đánh dấu là hoạt động.
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | SRV002-LIST | Xem danh sách Quy Cách | Lấy danh sách Quy Cách theo Đơn vị, hỗ trợ phân trang. | Cao |
+| 2   | SRV002-CREATE | Tạo mới Quy Cách | Tạo một Quy Cách mới cho một Đơn vị. | Cao |
+| 3   | SRV002-RETRIEVE | Xem chi tiết Quy Cách | Lấy thông tin chi tiết của một Quy Cách bằng UUID. | Cao |
+| 4   | SRV002-UPDATE | Cập nhật Quy Cách | Cập nhật thông tin của một Quy Cách đã có (PUT). | Cao |
+| 5   | SRV002-PARTIAL-UPDATE | Cập nhật một phần Quy Cách | Cập nhật một phần thông tin của một Quy Cách đã có (PATCH). | Trung bình |
+| 6   | SRV002-DELETE | Xóa Quy Cách | Xóa một Quy Cách. | Cao |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. SRV002-CREATE: Tạo mới Quy Cách
+- **Mô tả**: Cho phép tạo một Quy Cách mới.
+- **Đầu vào**: `entity_slug` (trong URL). Dữ liệu JSON body: `code_specs` (string, bắt buộc), `id_specs` (integer, bắt buộc), `id` (integer, bắt buộc), `text` (string, bắt buộc), `status` (integer, tùy chọn, default 1).
+- **Đầu ra**: Dữ liệu JSON của Quy Cách vừa tạo.
+- **Điều kiện tiên quyết**: `code_specs` phải là duy nhất cho `entity_model`.
+- **Luồng xử lý chính**:
+  1. `QuyCachViewSet.create()` nhận dữ liệu từ request.
+  2. Serializer validate dữ liệu.
+  3. ViewSet lấy EntityModel từ entity_slug.
+  4. ViewSet tạo instance với validated_data và entity_model.
+  5. ViewSet trả về HTTP 201 với dữ liệu Quy Cách đã tạo.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  - Validation thất bại: Trả về HTTP 400 với chi tiết lỗi.
+  - `entity_slug` không hợp lệ: Trả về HTTP 404.
+  - `code_specs` bị trùng: Trả về HTTP 400 với thông báo trùng code_specs.
+- **Giao diện liên quan**: Form tạo mới Quy Cách.
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+Nghiệp vụ này tuân theo kiến trúc cơ bản của Django với sự tích hợp của Django REST framework:
+- **View (API Layer)**: `QuyCachViewSet` xử lý HTTP request/response, xác thực, phân trang, và tương tác với model.
+- **Model Layer**: `QuyCachModel` định nghĩa cấu trúc dữ liệu, bao gồm các trường, ràng buộc và custom manager/queryset.
+- **Serializer Layer**: `QuyCachModelSerializer` chịu trách nhiệm serialize/deserialize dữ liệu, validate và chuyển đổi giữa JSON và model instance.
+
+```mermaid
+graph TD
+    Client --> Nginx --> Gunicorn
+    Gunicorn --> DjangoApp[Django Application]
+
+    subgraph DjangoApp
+        APILayer[API Layer: QuyCachViewSet]
+        SerializerLayer[Serializer Layer: QuyCachModelSerializer]
+        ModelLayer[Model Layer: QuyCachModel]
+        Database[(PostgreSQL Database - quy_cach table)]
+
+        APILayer -->|uses| SerializerLayer
+        SerializerLayer -->|validates| ModelLayer
+        ModelLayer -->|maps to| Database
+    end
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Quy Cách (`QuyCachModel`)
+- **Mô tả**: Quản lý các quy cách.
+- **Base URL**: `/api/{entity_slug}/specifications/`
+- **Endpoints**:
+  - `GET /`: Lấy danh sách Quy Cách (hỗ trợ phân trang `ERPPagination`).
+    - Query params: `page`, `page_size`.
+  - `POST /`: Tạo một Quy Cách mới.
+  - `GET /{uuid}/`: Lấy chi tiết một Quy Cách.
+  - `PUT /{uuid}/`: Cập nhật toàn bộ một Quy Cách.
+  - `PATCH /{uuid}/`: Cập nhật một phần một Quy Cách.
+  - `DELETE /{uuid}/`: Xóa một Quy Cách.
+
+### 4.3. Model Logic (`QuyCachModel`)
+- **Mô tả**: Định nghĩa cấu trúc dữ liệu và hành vi cho Quy Cách.
+- **Các thành phần chính**:
+  1. `QuyCachModelQueryset`: Queryset tùy chỉnh với các phương thức:
+     - `for_entity(entity_model)`: Lọc quy cách theo entity.
+     - `active()`: Lọc các quy cách đang hoạt động.
+     - `inactive()`: Lọc các quy cách không hoạt động.
+  2. `QuyCachModelManager`: Manager tùy chỉnh cung cấp interface cho các truy vấn DB:
+     - `for_entity(entity_model)`: Lấy quy cách cho entity.
+     - `active()`: Lấy quy cách đang hoạt động.
+     - `inactive()`: Lấy quy cách không hoạt động.
+  3. `QuyCachModelAbstract`: Class abstract chứa định nghĩa field và logic:
+     - `clean()`: Làm sạch dữ liệu (trim trường text và code_specs).
+  4. `QuyCachModel`: Class cụ thể kế thừa từ abstract class, thiết lập meta options.
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    EntityModel ||--o{ QuyCachModel : "has"
+
+    EntityModel {
+        UUID uuid PK
+        string slug
+        string name
+        # ... other fields
+    }
+
+    QuyCachModel {
+        UUID uuid PK
+        UUID entity_model_id FK
+        string code_specs "Unique code for specification"
+        int id_specs "Specification ID"
+        int id "General ID"
+        string text "Description of specification"
+        int status "Status (1=active, 0=inactive)"
+        datetime created
+        datetime updated
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: `quy_cach` (mapped from `QuyCachModel`)
+- **Mô tả**: Lưu trữ thông tin các quy cách.
+- **Các cột chính**:
+  - `uuid` (PK, UUIDField): Định danh duy nhất.
+  - `entity_model_id` (FK, UUIDField): Liên kết đến bảng `entity`.
+  - `code_specs` (CharField(100)): Mã quy cách.
+  - `id_specs` (IntegerField): ID quy cách.
+  - `id` (IntegerField): ID tổng quát.
+  - `text` (CharField(255)): Mô tả chi tiết về quy cách.
+  - `status` (IntegerField, default 1): Trạng thái (1=hoạt động, 0=không hoạt động).
+  - `created` (DateTimeField): Thời điểm tạo.
+  - `updated` (DateTimeField): Thời điểm cập nhật cuối.
+- **Indexes**: (`entity_model`, `code_specs`), (`code_specs`), (`status`), (`entity_model`).
+- **Unique Together**: (`entity_model`, `code_specs`).
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- Kiểm thử các chức năng CRUD cho Quy Cách qua API endpoints.
+- Kiểm thử validation dữ liệu đầu vào (các trường bắt buộc, tính duy nhất của `code_specs`).
+- Kiểm thử logic phân quyền (người dùng chỉ thao tác được Quy Cách của Entity mình có quyền).
+- Kiểm thử API endpoints (status codes, response format, pagination).
+- Kiểm thử các phương thức lọc (active, inactive).
+
+### 5.2. Kịch Bản Kiểm Thử
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC_SRV002_001 | Tạo Quy Cách thành công | Kiểm tra tạo mới Quy Cách với dữ liệu hợp lệ. | User đăng nhập, có quyền. `entity_slug` hợp lệ. | 1. Gửi POST request tới `/api/{entity_slug}/specifications/` với data hợp lệ. | 1. Response status 201. 2. Response body chứa thông tin Quy Cách đã tạo. 3. Dữ liệu được lưu đúng trong DB. |
+| 2   | TC_SRV002_002 | Tạo Quy Cách thất bại - `code_specs` trùng | Kiểm tra không cho tạo Quy Cách nếu `code_specs` đã tồn tại cho entity. | User đăng nhập. `code_specs` đã tồn tại cho entity. | 1. Gửi POST request với `code_specs` đã có. | 1. Response status 400. 2. Thông báo lỗi về `code_specs` bị trùng. |
+| 3   | TC_SRV002_003 | Xem danh sách Quy Cách | Kiểm tra lấy danh sách Quy Cách, có phân trang. | Có sẵn vài Quy Cách. | 1. Gửi GET request tới `/api/{entity_slug}/specifications/?page=1&page_size=2`. | 1. Response status 200. 2. Response body chứa danh sách Quy Cách (tối đa 2), thông tin phân trang. |
+| 4   | TC_SRV002_004 | Cập nhật Quy Cách | Kiểm tra cập nhật thông tin Quy Cách. | Quy Cách tồn tại. | 1. Gửi PUT request tới `/api/{entity_slug}/specifications/{uuid}/` với data mới. | 1. Response status 200. 2. Dữ liệu Quy Cách được cập nhật trong DB. |
+| 5   | TC_SRV002_005 | Xóa Quy Cách | Kiểm tra xóa Quy Cách. | Quy Cách tồn tại. | 1. Gửi DELETE request tới `/api/{entity_slug}/specifications/{uuid}/`. | 1. Response status 204. 2. Quy Cách bị xóa khỏi DB. |
+| 6   | TC_SRV002_006 | Lọc Quy Cách theo trạng thái | Kiểm tra lọc Quy Cách theo trạng thái hoạt động. | Có sẵn cả Quy Cách đang hoạt động và không hoạt động. | 1. Sử dụng phương thức `active()` để lấy Quy Cách. | 1. Chỉ trả về các Quy Cách có status=1. |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Mã nguồn dự án ERP-BE (các file đã liệt kê ở mục 1.4).
+- Tài liệu Django REST framework.
+- Tài liệu drf-spectacular (cho schema generation).
+
+### 6.2. Danh Mục Thuật Ngữ
+(Xem mục 1.3)
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+| Phiên bản | Ngày       | Người thực hiện      | Mô tả thay đổi                         |
+|-----------|------------|----------------------|----------------------------------------|
+| 1.0       | 2024-07-31 | Gemini AI Assistant  | Tạo tài liệu ban đầu dựa trên source code. | 6:["slug","erp/SRV_002_Quan_Ly_Quy_Cach","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/SRV_002_Quan_Ly_Quy_Cach","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"SRV_002_Quan_Ly_Quy_Cach\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/SRV_002_Quan_Ly_Quy_Cach","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

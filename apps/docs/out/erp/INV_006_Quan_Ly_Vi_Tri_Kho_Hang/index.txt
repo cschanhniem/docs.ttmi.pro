@@ -1,0 +1,528 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T5af8,# INV_006_Quản Lý Vị Trí Kho Hàng
+
+*Phiên bản: 1.0*  
+*Người tạo: [Tên Tác Giả]*  
+*Ngày tạo: [DD/MM/YYYY]*  
+*Cập nhật lần cuối: [DD/MM/YYYY]*  
+*Người cập nhật: [Tên Người Cập Nhật]*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Quản lý vị trí kho hàng là nghiệp vụ cho phép thiết lập, kiểm soát, phân loại và truy vết các vị trí lưu trữ vật tư, hàng hóa trong từng kho. Hệ thống hỗ trợ quản lý chi tiết từng vị trí (kệ, tầng, dãy, ô, ...), giúp tối ưu hóa không gian, kiểm soát tồn kho chính xác, giảm thất thoát và nâng cao hiệu quả vận hành kho.
+
+### 1.2. Phạm Vi Áp Dụng
+Áp dụng cho các bộ phận: Kho, Kế toán, Quản trị hệ thống, Sản xuất, ...
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Vị trí kho hàng | Đơn vị lưu trữ nhỏ nhất trong kho (kệ, ô, tầng, dãy, ...)|
+| Mã vị trí | Định danh duy nhất cho từng vị trí trong kho |
+| Tên vị trí | Tên mô tả vị trí trong kho |
+| Mã kho | Định danh kho chứa vị trí |
+| Trạng thái | Hoạt động/Không hoạt động |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | INV_001     | Quản Lý Kho Hàng | Thiết lập, quản lý thông tin kho |
+| 2   | INV_005     | Quản Lý Nhập Xuất Kho | Quản lý nhập xuất liên quan vị trí |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình quản lý vị trí kho hàng gồm: tạo mới, cập nhật, phân loại, kích hoạt/vô hiệu hóa, truy vấn, xóa vị trí.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Tạo vị trí kho hàng] --> B[Kiểm tra thông tin vị trí]
+    B --> C[Lưu vị trí vào hệ thống]
+    C --> D[Phân loại vị trí theo kho]
+    D --> E[Kích hoạt/Vô hiệu hóa vị trí]
+    E --> F[Truy vấn, báo cáo vị trí]
+    F --> G[Xóa vị trí (nếu cần)]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Tạo vị trí kho hàng
+- **Mô tả**: Tạo mới vị trí lưu trữ trong kho
+- **Đầu vào**: Mã kho, mã vị trí, tên vị trí, trạng thái, ghi chú
+- **Đầu ra**: Vị trí kho hàng mới
+- **Người thực hiện**: Quản lý kho, quản trị hệ thống
+- **Điều kiện tiên quyết**: Có quyền tạo vị trí
+- **Xử lý ngoại lệ**: Thiếu thông tin bắt buộc, mã vị trí trùng
+
+#### 2.3.2. Cập nhật thông tin vị trí
+- **Mô tả**: Sửa đổi thông tin vị trí kho hàng
+- **Đầu vào**: Thông tin vị trí cần cập nhật
+- **Đầu ra**: Vị trí đã cập nhật
+- **Người thực hiện**: Quản lý kho, quản trị hệ thống
+- **Điều kiện tiên quyết**: Có quyền cập nhật
+- **Xử lý ngoại lệ**: Vị trí không tồn tại
+
+#### 2.3.3. Phân loại vị trí theo kho
+- **Mô tả**: Gán vị trí cho kho cụ thể
+- **Đầu vào**: Mã kho, mã vị trí
+- **Đầu ra**: Vị trí thuộc kho
+- **Người thực hiện**: Quản lý kho
+- **Điều kiện tiên quyết**: Kho tồn tại
+- **Xử lý ngoại lệ**: Kho không tồn tại
+
+#### 2.3.4. Kích hoạt/Vô hiệu hóa vị trí
+- **Mô tả**: Đổi trạng thái vị trí (hoạt động/không hoạt động)
+- **Đầu vào**: Mã vị trí, trạng thái mới
+- **Đầu ra**: Vị trí đã cập nhật trạng thái
+- **Người thực hiện**: Quản lý kho
+- **Điều kiện tiên quyết**: Có quyền cập nhật
+- **Xử lý ngoại lệ**: Vị trí không tồn tại
+
+#### 2.3.5. Truy vấn, báo cáo vị trí
+- **Mô tả**: Tra cứu, thống kê vị trí kho hàng
+- **Đầu vào**: Tiêu chí truy vấn (kho, trạng thái, ...)
+- **Đầu ra**: Danh sách vị trí phù hợp
+- **Người thực hiện**: Quản lý kho, kế toán
+- **Điều kiện tiên quyết**: Có quyền truy vấn
+- **Xử lý ngoại lệ**: Không có dữ liệu phù hợp
+
+#### 2.3.6. Xóa vị trí kho hàng
+- **Mô tả**: Xóa vị trí không còn sử dụng
+- **Đầu vào**: Mã vị trí
+- **Đầu ra**: Vị trí đã xóa
+- **Người thực hiện**: Quản trị hệ thống
+- **Điều kiện tiên quyết**: Vị trí không liên kết dữ liệu khác
+- **Xử lý ngoại lệ**: Vị trí đang được sử dụng
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant U as Quản lý kho
+    participant S as Hệ thống
+    participant DB as Cơ sở dữ liệu
+
+    U->>S: Tạo vị trí kho hàng
+    S->>DB: Lưu vị trí mới
+    DB-->>S: Xác nhận lưu
+    S-->>U: Thông báo thành công
+
+    U->>S: Cập nhật vị trí
+    S->>DB: Cập nhật thông tin
+    DB-->>S: Xác nhận cập nhật
+    S-->>U: Thông báo thành công
+
+    U->>S: Truy vấn vị trí
+    S->>DB: Truy vấn dữ liệu
+    DB-->>S: Trả về danh sách
+    S-->>U: Hiển thị kết quả
+
+    alt Trường hợp lỗi
+        S-->>U: Thông báo lỗi
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+    A[Bắt đầu] --> B[Thiết kế cấu trúc vị trí kho]
+    B --> C[Tạo danh sách vị trí]
+    C --> D[Gán thông tin cho vị trí]
+    D --> E[Kiểm tra và kích hoạt vị trí]
+    E --> F[Sử dụng vị trí trong nhập/xuất kho]
+    F --> G[Theo dõi hàng hóa theo vị trí]
+    G --> H[Phân tích hiệu quả sử dụng vị trí]
+    H --> I{Cần điều chỉnh?}
+    I -->|Có| J[Tối ưu hóa vị trí]
+    J --> F
+    I -->|Không| K[Tiếp tục sử dụng]
+    K --> L[Đánh giá định kỳ]
+    L --> I
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Thiết kế cấu trúc vị trí kho
+- **Mô tả**: Xác định cấu trúc vị trí trong kho dựa trên đặc điểm kho và hàng hóa
+- **Đầu vào**: Thông tin kho, loại hàng hóa lưu trữ, quy định về bảo quản
+- **Đầu ra**: Cấu trúc vị trí kho (khu vực, dãy, tầng, ô...)
+- **Người thực hiện**: Quản lý kho, chuyên gia tư vấn logistics
+- **Điều kiện tiên quyết**: Đã có kho hàng và kế hoạch lưu trữ
+- **Xử lý ngoại lệ**: Điều chỉnh cấu trúc nếu không phù hợp với đặc điểm kho thực tế
+
+#### 2.3.2. Tạo danh sách vị trí và gán thông tin
+- **Mô tả**: Tạo danh sách các vị trí trong kho và gán các thông tin liên quan
+- **Đầu vào**: Cấu trúc vị trí kho, thông tin chi tiết (kích thước, tải trọng...)
+- **Đầu ra**: Danh sách vị trí kho với thông tin đầy đủ
+- **Người thực hiện**: Nhân viên quản lý kho, nhân viên IT
+- **Điều kiện tiên quyết**: Đã có cấu trúc vị trí kho
+- **Xử lý ngoại lệ**: Kiểm tra trùng lặp mã vị trí, xử lý vị trí đặc biệt
+
+#### 2.3.3. Kiểm tra và kích hoạt vị trí
+- **Mô tả**: Kiểm tra các vị trí đã tạo và kích hoạt để sử dụng
+- **Đầu vào**: Danh sách vị trí kho
+- **Đầu ra**: Vị trí kho đã được kích hoạt
+- **Người thực hiện**: Quản lý kho
+- **Điều kiện tiên quyết**: Đã có danh sách vị trí kho
+- **Xử lý ngoại lệ**: Vô hiệu hóa các vị trí không phù hợp
+
+#### 2.3.4. Sử dụng vị trí trong nhập/xuất kho
+- **Mô tả**: Sử dụng thông tin vị trí trong các hoạt động nhập/xuất kho
+- **Đầu vào**: Thông tin nhập/xuất kho, danh sách vị trí
+- **Đầu ra**: Hàng hóa được lưu trữ/lấy đúng vị trí
+- **Người thực hiện**: Nhân viên kho
+- **Điều kiện tiên quyết**: Vị trí kho đã được kích hoạt
+- **Xử lý ngoại lệ**: Xử lý trường hợp vị trí đã đầy hoặc không còn phù hợp
+
+#### 2.3.5. Theo dõi và tối ưu hóa
+- **Mô tả**: Theo dõi hiệu quả sử dụng vị trí và tối ưu hóa nếu cần
+- **Đầu vào**: Dữ liệu sử dụng vị trí, thống kê tần suất xuất/nhập
+- **Đầu ra**: Kế hoạch tối ưu hóa vị trí kho
+- **Người thực hiện**: Quản lý kho
+- **Điều kiện tiên quyết**: Vị trí kho đã được sử dụng một thời gian
+- **Xử lý ngoại lệ**: Xử lý các trường hợp vị trí không hiệu quả
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant Admin as Quản trị viên
+    participant System as Hệ thống
+    participant WH as Quản lý kho
+    participant Staff as Nhân viên kho
+    
+    Admin->>System: Thiết lập cấu trúc vị trí
+    System-->>Admin: Hiển thị form thiết lập
+    Admin->>System: Nhập thông tin cấu trúc
+    System-->>Admin: Xác nhận cấu trúc
+    
+    Admin->>System: Tạo danh sách vị trí
+    System-->>Admin: Hiển thị form tạo vị trí
+    Admin->>System: Nhập thông tin vị trí
+    System->>System: Kiểm tra trùng lặp
+    System-->>Admin: Xác nhận tạo vị trí
+    
+    WH->>System: Kiểm tra vị trí
+    System-->>WH: Hiển thị danh sách vị trí
+    WH->>System: Kích hoạt vị trí
+    System-->>WH: Xác nhận kích hoạt
+    
+    Staff->>System: Nhập kho với vị trí
+    System->>System: Kiểm tra vị trí hợp lệ
+    System-->>Staff: Xác nhận nhập kho
+    
+    Staff->>System: Xuất kho từ vị trí
+    System->>System: Kiểm tra vị trí và tồn kho
+    System-->>Staff: Xác nhận xuất kho
+    
+    WH->>System: Yêu cầu báo cáo sử dụng vị trí
+    System-->>WH: Hiển thị báo cáo
+    WH->>System: Thiết lập tối ưu hóa vị trí
+    System-->>WH: Xác nhận cập nhật
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Vị trí tạm thời**: Trong trường hợp khẩn cấp hoặc quá tải, có thể thiết lập các vị trí tạm thời
+- **Chuyển vị trí hàng hóa**: Quy trình di chuyển hàng hóa từ vị trí này sang vị trí khác
+- **Gộp/tách vị trí**: Gộp nhiều vị trí nhỏ thành vị trí lớn hoặc tách vị trí lớn thành nhiều vị trí nhỏ
+- **Vô hiệu hóa vị trí**: Đánh dấu vị trí không sử dụng do sửa chữa, bảo trì hoặc không còn phù hợp
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | LOC_LIST | Xem danh sách vị trí | Hiển thị danh sách vị trí kho với các bộ lọc và tìm kiếm | Cao |
+| 2   | LOC_CREATE | Tạo vị trí mới | Thêm vị trí mới vào hệ thống | Cao |
+| 3   | LOC_UPDATE | Cập nhật vị trí | Chỉnh sửa thông tin vị trí | Cao |
+| 4   | LOC_VIEW | Xem chi tiết vị trí | Xem toàn bộ thông tin chi tiết của vị trí | Cao |
+| 5   | LOC_STATUS | Thay đổi trạng thái | Đánh dấu vị trí là active/inactive | Cao |
+| 6   | LOC_ASSIGN | Gán hàng hóa vào vị trí | Gán hàng hóa vào vị trí kho | Cao |
+| 7   | LOC_MOVE | Di chuyển hàng giữa vị trí | Di chuyển hàng hóa từ vị trí này sang vị trí khác | Trung bình |
+| 8   | LOC_REPORT | Báo cáo sử dụng vị trí | Tạo báo cáo về tình hình sử dụng vị trí kho | Trung bình |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. LOC_CREATE: Tạo vị trí mới
+- **Mô tả**: Cho phép người dùng tạo vị trí kho mới trong hệ thống
+- **Đầu vào**: Thông tin vị trí (mã vị trí, khu vực, dãy, tầng, ô, kích thước, tải trọng, trạng thái...)
+- **Đầu ra**: Bản ghi vị trí kho mới trong hệ thống
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập và có quyền tạo vị trí
+- **Luồng xử lý chính**:
+  1. Người dùng chọn "Tạo vị trí mới"
+  2. Hệ thống hiển thị form nhập thông tin
+  3. Người dùng nhập thông tin vị trí
+  4. Người dùng nhấn "Lưu"
+  5. Hệ thống kiểm tra tính hợp lệ của dữ liệu
+  6. Hệ thống kiểm tra trùng lặp mã vị trí
+  7. Hệ thống lưu vị trí mới
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu dữ liệu không hợp lệ, hiển thị thông báo lỗi
+  2. Nếu mã vị trí đã tồn tại, yêu cầu nhập mã khác
+- **Giao diện liên quan**: Form tạo vị trí mới
+
+#### 3.2.2. LOC_ASSIGN: Gán hàng hóa vào vị trí
+- **Mô tả**: Cho phép gán hàng hóa vào vị trí kho
+- **Đầu vào**: ID vị trí, ID hàng hóa, số lượng
+- **Đầu ra**: Liên kết giữa hàng hóa và vị trí
+- **Điều kiện tiên quyết**: Vị trí và hàng hóa đã tồn tại trong hệ thống
+- **Luồng xử lý chính**:
+  1. Người dùng chọn vị trí cần gán hàng
+  2. Người dùng chọn hàng hóa
+  3. Người dùng nhập số lượng
+  4. Người dùng nhấn "Lưu"
+  5. Hệ thống kiểm tra tính hợp lệ của dữ liệu
+  6. Hệ thống kiểm tra sức chứa của vị trí
+  7. Hệ thống lưu thông tin gán hàng
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu vị trí đã đầy, hiển thị thông báo lỗi
+  2. Nếu hàng hóa không phù hợp với vị trí, hiển thị cảnh báo
+- **Giao diện liên quan**: Form gán hàng hóa vào vị trí
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+
+```mermaid
+flowchart TD
+    A[Client] --> B[API Gateway]
+    B --> C[ViTriKhoService]
+    C --> D[ViTriKhoRepository]
+    C --> E[KhoHangService]
+    E --> F[KhoHangRepository]
+    C --> G[VatTuService]
+    G --> H[VatTuRepository]
+    D --> I[(Database)]
+    F --> I
+    H --> I
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Lấy danh sách vị trí kho
+- **Mô tả**: Trả về danh sách vị trí kho theo điều kiện lọc
+- **URL**: `GET /api/v1/entity/{entity_slug}/vi-tri-kho/`
+- **Query Parameters**:
+  - `kho`: ID kho hàng
+  - `khu_vuc`: Khu vực
+  - `status`: Trạng thái (active/inactive)
+  - `available`: Chỉ lấy các vị trí còn trống
+  - `search`: Từ khóa tìm kiếm
+  - `page`: Số trang
+  - `page_size`: Số bản ghi trên mỗi trang
+  - `ordering`: Trường sắp xếp
+- **Response**: Danh sách vị trí kho, phân trang
+
+#### 4.2.2. Lấy chi tiết vị trí kho
+- **Mô tả**: Trả về thông tin chi tiết của một vị trí kho
+- **URL**: `GET /api/v1/entity/{entity_slug}/vi-tri-kho/{uuid}/`
+- **Response**: Chi tiết vị trí kho và danh sách hàng hóa được lưu trữ
+
+#### 4.2.3. Tạo vị trí kho mới
+- **Mô tả**: Tạo vị trí kho mới trong hệ thống
+- **URL**: `POST /api/v1/entity/{entity_slug}/vi-tri-kho/`
+- **Request Body**: Thông tin vị trí kho
+- **Response**: Thông tin vị trí kho đã tạo
+
+#### 4.2.4. Cập nhật vị trí kho
+- **Mô tả**: Cập nhật thông tin vị trí kho
+- **URL**: `PUT /api/v1/entity/{entity_slug}/vi-tri-kho/{uuid}/`
+- **Request Body**: Thông tin cập nhật
+- **Response**: Thông tin vị trí kho đã cập nhật
+
+#### 4.2.5. Gán hàng hóa vào vị trí
+- **Mô tả**: Gán hàng hóa vào vị trí kho
+- **URL**: `POST /api/v1/entity/{entity_slug}/vi-tri-kho/{uuid}/assign/`
+- **Request Body**: Thông tin hàng hóa và số lượng
+- **Response**: Thông tin gán hàng đã tạo
+
+#### 4.2.6. Di chuyển hàng giữa vị trí
+- **Mô tả**: Di chuyển hàng hóa từ vị trí này sang vị trí khác
+- **URL**: `POST /api/v1/entity/{entity_slug}/vi-tri-kho/move/`
+- **Request Body**: Thông tin vị trí nguồn, vị trí đích, hàng hóa và số lượng
+- **Response**: Kết quả di chuyển
+
+### 4.3. Service Logic
+
+#### 4.3.1. ViTriKhoService
+- **Mô tả**: Xử lý logic nghiệp vụ liên quan đến quản lý vị trí kho
+- **Chức năng chính**:
+  1. Tạo và quản lý vị trí kho
+  2. Cập nhật thông tin vị trí kho
+  3. Quản lý trạng thái vị trí kho
+  4. Gán hàng hóa vào vị trí
+  5. Di chuyển hàng hóa giữa các vị trí
+  6. Báo cáo sử dụng vị trí
+- **Các dependencies**:
+  1. ViTriKhoRepository
+  2. KhoHangService
+  3. VatTuService
+- **Sơ đồ luồng xử lý**:
+
+```mermaid
+flowchart TD
+    A[Nhận request] --> B[Validate dữ liệu]
+    B --> C{Dữ liệu hợp lệ?}
+    C -->|Có| D[Xử lý business logic]
+    C -->|Không| E[Trả về lỗi]
+    D --> F{Loại thao tác?}
+    F -->|Tạo| G[Tạo vị trí mới]
+    F -->|Cập nhật| H[Cập nhật vị trí]
+    F -->|Gán hàng| I[Xử lý gán hàng]
+    F -->|Di chuyển| J[Xử lý di chuyển]
+    G --> K[Kiểm tra trùng lặp]
+    K --> L{Trùng lặp?}
+    L -->|Có| M[Thông báo lỗi]
+    L -->|Không| N[Lưu vị trí mới]
+    H --> O[Kiểm tra hợp lệ]
+    O --> P{Hợp lệ?}
+    P -->|Có| Q[Lưu thay đổi]
+    P -->|Không| R[Thông báo lỗi]
+    I --> S[Kiểm tra sức chứa]
+    S --> T{Đủ chỗ?}
+    T -->|Có| U[Lưu thông tin gán hàng]
+    T -->|Không| V[Thông báo lỗi]
+    J --> W[Kiểm tra vị trí nguồn và đích]
+    W --> X{Hợp lệ?}
+    X -->|Có| Y[Xử lý di chuyển]
+    X -->|Không| Z[Thông báo lỗi]
+    N --> AA[Ghi log]
+    Q --> AA
+    U --> AA
+    Y --> AA
+    M --> AA
+    R --> AA
+    V --> AA
+    Z --> AA
+    AA --> AB[Trả về kết quả]
+    E --> AA
+```
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    EntityModel ||--o{ ViTriKhoHangModel : "có"
+    KhoHangModel ||--o{ ViTriKhoHangModel : "chứa"
+    ViTriKhoHangModel ||--o{ HangHoaViTriModel : "chứa"
+    VatTuModel ||--o{ HangHoaViTriModel : "được lưu ở"
+    
+    ViTriKhoHangModel {
+        UUID uuid PK
+        FK EntityModel entity_model
+        FK KhoHangModel kho_hang
+        String ma_vi_tri
+        String ten_vi_tri
+        String khu_vuc
+        String day
+        String tang
+        String o
+        Decimal chieu_dai
+        Decimal chieu_rong
+        Decimal chieu_cao
+        Decimal tai_trong_toi_da
+        Decimal the_tich_toi_da
+        String ghi_chu
+        Integer trang_thai
+        DateTime created
+        DateTime updated
+    }
+    
+    HangHoaViTriModel {
+        UUID uuid PK
+        FK ViTriKhoHangModel vi_tri_kho
+        FK VatTuModel vat_tu
+        Decimal so_luong
+        String lo_hang
+        DateTime ngay_nhap
+        String ghi_chu
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: ViTriKhoHangModel
+- **Mô tả**: Lưu trữ thông tin về vị trí trong kho hàng
+- **Các trường chính**:
+  - `uuid`: Khóa chính, định danh duy nhất
+  - `entity_model`: Khóa ngoại tham chiếu đến EntityModel
+  - `kho_hang`: Khóa ngoại tham chiếu đến KhoHangModel
+  - `ma_vi_tri`: Mã vị trí kho
+  - `ten_vi_tri`: Tên vị trí kho
+  - `khu_vuc`: Khu vực trong kho
+  - `day`: Dãy kệ trong kho
+  - `tang`: Tầng kệ trong kho
+  - `o`: Ô chứa hàng trong kệ
+  - `chieu_dai`: Chiều dài của vị trí (đơn vị: m)
+  - `chieu_rong`: Chiều rộng của vị trí (đơn vị: m)
+  - `chieu_cao`: Chiều cao của vị trí (đơn vị: m)
+  - `tai_trong_toi_da`: Tải trọng tối đa của vị trí (đơn vị: kg)
+  - `the_tich_toi_da`: Thể tích tối đa của vị trí (đơn vị: m³)
+  - `ghi_chu`: Ghi chú về vị trí
+  - `trang_thai`: Trạng thái vị trí (1: active, 0: inactive)
+  - `created`: Thời gian tạo
+  - `updated`: Thời gian cập nhật
+
+##### Bảng: HangHoaViTriModel
+- **Mô tả**: Lưu trữ thông tin về hàng hóa được lưu trữ tại vị trí
+- **Các trường chính**:
+  - `uuid`: Khóa chính, định danh duy nhất
+  - `vi_tri_kho`: Khóa ngoại tham chiếu đến ViTriKhoHangModel
+  - `vat_tu`: Khóa ngoại tham chiếu đến VatTuModel
+  - `so_luong`: Số lượng hàng hóa tại vị trí
+  - `lo_hang`: Mã lô hàng (nếu có)
+  - `ngay_nhap`: Ngày nhập hàng vào vị trí
+  - `ghi_chu`: Ghi chú về hàng hóa tại vị trí
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+Kiểm thử sẽ bao gồm tất cả các chức năng liên quan đến quản lý vị trí kho hàng, bao gồm:
+- Tạo mới vị trí kho
+- Cập nhật thông tin vị trí kho
+- Tìm kiếm và lọc vị trí kho
+- Thay đổi trạng thái vị trí kho
+- Gán hàng hóa vào vị trí
+- Di chuyển hàng hóa giữa các vị trí
+- Báo cáo sử dụng vị trí kho
+
+### 5.2. Kịch Bản Kiểm Thử
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC_LOC_C01 | Tạo vị trí kho mới thành công | Kiểm tra việc tạo vị trí kho mới | Người dùng đã đăng nhập và có quyền | 1. Truy cập form tạo vị trí<br>2. Nhập thông tin hợp lệ<br>3. Nhấn Lưu | Vị trí kho mới được tạo thành công |
+| 2   | TC_LOC_C02 | Tạo vị trí với mã trùng | Kiểm tra validate mã vị trí trùng | Đã có vị trí trong hệ thống | 1. Truy cập form tạo vị trí<br>2. Nhập mã vị trí đã tồn tại<br>3. Nhấn Lưu | Hiển thị thông báo lỗi về mã vị trí trùng |
+| 3   | TC_LOC_U01 | Cập nhật thông tin vị trí | Kiểm tra cập nhật thông tin | Vị trí đã tồn tại | 1. Mở form cập nhật<br>2. Thay đổi thông tin<br>3. Nhấn Lưu | Thông tin được cập nhật thành công |
+| 4   | TC_LOC_A01 | Gán hàng hóa vào vị trí | Kiểm tra chức năng gán hàng | Vị trí và hàng hóa đã tồn tại | 1. Chọn vị trí<br>2. Chọn hàng hóa<br>3. Nhập số lượng<br>4. Nhấn Lưu | Hàng hóa được gán vào vị trí thành công |
+| 5   | TC_LOC_M01 | Di chuyển hàng giữa vị trí | Kiểm tra chức năng di chuyển | Hàng đang ở vị trí nguồn | 1. Chọn vị trí nguồn<br>2. Chọn vị trí đích<br>3. Chọn hàng và số lượng<br>4. Nhấn Di chuyển | Hàng được di chuyển thành công |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+1. Tài liệu thiết kế cơ sở dữ liệu ERP
+2. Tài liệu API đặc tả
+3. Quy định về quản lý kho của doanh nghiệp
+
+### 6.2. Danh Mục Thuật Ngữ
+- **ViTriKhoHangModel**: Mô hình dữ liệu lưu trữ thông tin vị trí kho
+- **HangHoaViTriModel**: Mô hình dữ liệu lưu trữ thông tin hàng hóa tại vị trí
+- **Khu vực**: Phân chia không gian lớn trong kho
+- **Dãy/Tầng/Ô**: Cấu trúc phân chia chi tiết vị trí trong kho
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 25/07/2023 | Auto Generated | Tạo tài liệu ban đầu |6:["slug","erp/INV_006_Quan_Ly_Vi_Tri_Kho_Hang","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/INV_006_Quan_Ly_Vi_Tri_Kho_Hang","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"INV_006_Quan_Ly_Vi_Tri_Kho_Hang\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/INV_006_Quan_Ly_Vi_Tri_Kho_Hang","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

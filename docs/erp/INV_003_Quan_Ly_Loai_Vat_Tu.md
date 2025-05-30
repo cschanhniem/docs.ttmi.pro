@@ -1,0 +1,383 @@
+# INV_003_Quản Lý Loại Vật Tư
+
+*Phiên bản: 1.0*  
+*Người tạo: Auto Generated*  
+*Ngày tạo: 25/07/2023*  
+*Cập nhật lần cuối: 25/07/2023*  
+*Người cập nhật: Auto Generated*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Quản lý loại vật tư là quy trình thiết lập và quản lý các loại, nhóm vật tư trong doanh nghiệp. Quy trình này giúp phân loại, phân nhóm các vật tư, sản phẩm theo đặc tính, mục đích sử dụng hoặc các tiêu chí phân loại khác. Việc phân loại vật tư hiệu quả sẽ giúp doanh nghiệp tổ chức quản lý hàng hóa tốt hơn, tìm kiếm nhanh chóng, và tạo các báo cáo phân tích theo nhóm hàng.
+
+### 1.2. Phạm Vi Áp Dụng
+Quy trình này áp dụng cho việc quản lý tất cả các loại, nhóm vật tư trong doanh nghiệp, bao gồm:
+- Bộ phận kho vận
+- Bộ phận mua hàng
+- Bộ phận bán hàng
+- Bộ phận kế toán
+- Ban lãnh đạo
+- Các đơn vị có nhu cầu phân loại vật tư trong hệ thống
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Loại vật tư | Là cách phân loại, nhóm các vật tư theo tiêu chí nhất định |
+| Mã loại vật tư | Mã định danh duy nhất cho mỗi loại vật tư trong hệ thống |
+| Tài khoản kho | Tài khoản kế toán dùng để hạch toán giá trị hàng tồn kho cho loại vật tư |
+| Tài khoản doanh thu | Tài khoản kế toán dùng để hạch toán doanh thu bán hàng cho loại vật tư |
+| Tài khoản giá vốn | Tài khoản kế toán dùng để hạch toán giá vốn hàng bán cho loại vật tư |
+| Entity | Đơn vị doanh nghiệp sở hữu loại vật tư |
+
+### 1.4. Tài Liệu Liên Quan
+
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | INV_002 | Quản Lý Vật Tư Sản Phẩm | Quy trình quản lý vật tư và sản phẩm |
+| 2   | ACC_001 | Sơ Đồ Tài Khoản | Quy trình thiết lập và quản lý hệ thống tài khoản kế toán |
+| 3   | INV_005 | Quản Lý Nhập Xuất Kho | Quy trình nhập xuất kho |
+| 4   | INV_001 | Quản Lý Kho Hàng | Quy trình thiết lập và quản lý kho hàng |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình quản lý loại vật tư bao gồm việc thiết lập, cập nhật, quản lý trạng thái và sử dụng các loại vật tư trong hệ thống. Quy trình này đảm bảo thông tin về loại vật tư được định nghĩa đầy đủ và chính xác, làm cơ sở cho việc phân loại vật tư và áp dụng các chính sách kế toán phù hợp.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Bắt đầu] --> B[Xác định nhu cầu thêm loại vật tư mới]
+    B --> C[Kiểm tra loại vật tư đã tồn tại]
+    C --> D{Đã tồn tại?}
+    D -->|Có| E[Cập nhật thông tin loại vật tư]
+    D -->|Không| F[Tạo loại vật tư mới]
+    F --> G[Nhập thông tin cơ bản]
+    G --> H[Thiết lập tài khoản kế toán]
+    H --> I[Lưu thông tin]
+    E --> J[Xem xét các thuộc tính cần cập nhật]
+    J --> K[Thực hiện cập nhật]
+    I --> L[Kích hoạt trong hệ thống]
+    K --> L
+    L --> M[Sử dụng để phân loại vật tư]
+    M --> N[Theo dõi và đánh giá định kỳ]
+    N --> O{Cần điều chỉnh?}
+    O -->|Có| E
+    O -->|Không| P[Tiếp tục sử dụng]
+    P --> Q[Kết thúc]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Xác định nhu cầu và kiểm tra loại vật tư
+- **Mô tả**: Xác định nhu cầu thêm loại vật tư mới và kiểm tra xem loại vật tư đã tồn tại trong hệ thống chưa
+- **Đầu vào**: Thông tin yêu cầu loại vật tư mới, thông tin tìm kiếm
+- **Đầu ra**: Kết quả kiểm tra (tồn tại/không tồn tại)
+- **Người thực hiện**: Nhân viên quản lý vật tư, kế toán
+- **Điều kiện tiên quyết**: Có nhu cầu thêm loại vật tư mới
+- **Xử lý ngoại lệ**: Nếu có nhiều loại vật tư tương tự, cần xác định rõ tiêu chí phân loại để tránh trùng lặp
+
+#### 2.3.2. Tạo loại vật tư mới và nhập thông tin
+- **Mô tả**: Tạo loại vật tư mới và nhập các thông tin cần thiết
+- **Đầu vào**: Thông tin loại vật tư (mã, tên, tên khác, tài khoản kế toán liên quan)
+- **Đầu ra**: Loại vật tư mới được tạo với đầy đủ thông tin
+- **Người thực hiện**: Nhân viên quản lý vật tư, kế toán
+- **Điều kiện tiên quyết**: Loại vật tư chưa tồn tại trong hệ thống
+- **Xử lý ngoại lệ**: Kiểm tra trùng lặp mã loại vật tư, đảm bảo thông tin tài khoản kế toán chính xác
+
+#### 2.3.3. Kích hoạt và sử dụng
+- **Mô tả**: Kích hoạt loại vật tư trong hệ thống và sử dụng để phân loại vật tư
+- **Đầu vào**: Loại vật tư đã đủ thông tin
+- **Đầu ra**: Loại vật tư được kích hoạt và sẵn sàng sử dụng
+- **Người thực hiện**: Nhân viên quản lý vật tư
+- **Điều kiện tiên quyết**: Loại vật tư đã được nhập đầy đủ thông tin
+- **Xử lý ngoại lệ**: Kiểm tra lại tính hợp lệ của tài khoản kế toán trước khi kích hoạt
+
+#### 2.3.4. Theo dõi và đánh giá
+- **Mô tả**: Theo dõi việc sử dụng loại vật tư và đánh giá hiệu quả của cách phân loại
+- **Đầu vào**: Dữ liệu sử dụng loại vật tư trong hệ thống
+- **Đầu ra**: Báo cáo đánh giá, đề xuất điều chỉnh nếu cần
+- **Người thực hiện**: Nhân viên quản lý vật tư, quản lý kho
+- **Điều kiện tiên quyết**: Loại vật tư đã được sử dụng một thời gian
+- **Xử lý ngoại lệ**: Nếu phát hiện cách phân loại không phù hợp, cần lập kế hoạch điều chỉnh
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant System as Hệ thống
+    participant LoaiVatTu as LoaiVatTuService
+    participant Account as AccountService
+    participant DB as Database
+    
+    User->>System: Yêu cầu tạo loại vật tư mới
+    System->>LoaiVatTu: Chuyển yêu cầu
+    LoaiVatTu->>DB: Kiểm tra loại vật tư đã tồn tại
+    DB-->>LoaiVatTu: Kết quả kiểm tra
+    
+    alt Loại vật tư chưa tồn tại
+        LoaiVatTu->>Account: Lấy danh sách tài khoản kế toán
+        Account->>DB: Truy vấn dữ liệu
+        DB-->>Account: Trả về dữ liệu
+        Account-->>LoaiVatTu: Danh sách tài khoản
+        
+        LoaiVatTu-->>System: Hiển thị form nhập liệu
+        System-->>User: Hiển thị form cho người dùng
+        
+        User->>System: Nhập thông tin loại vật tư
+        System->>LoaiVatTu: Gửi dữ liệu
+        LoaiVatTu->>LoaiVatTu: Validate dữ liệu
+        LoaiVatTu->>DB: Lưu loại vật tư mới
+        DB-->>LoaiVatTu: Xác nhận lưu thành công
+        
+        User->>System: Kích hoạt loại vật tư
+        System->>LoaiVatTu: Cập nhật trạng thái
+        LoaiVatTu->>DB: Lưu trạng thái
+        DB-->>LoaiVatTu: Xác nhận lưu thành công
+        LoaiVatTu-->>System: Thông báo thành công
+        System-->>User: Hiển thị thông báo
+    else Loại vật tư đã tồn tại
+        LoaiVatTu-->>System: Thông báo đã tồn tại
+        System-->>User: Hiển thị thông tin loại vật tư
+        User->>System: Yêu cầu cập nhật
+        System->>LoaiVatTu: Gửi dữ liệu cập nhật
+        LoaiVatTu->>DB: Cập nhật thông tin
+        DB-->>LoaiVatTu: Xác nhận cập nhật thành công
+        LoaiVatTu-->>System: Thông báo thành công
+        System-->>User: Hiển thị thông báo
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Nhập hàng loạt**: Thay vì tạo từng loại vật tư một, người dùng có thể nhập hàng loạt nhiều loại vật tư cùng lúc thông qua file Excel
+- **Ngừng sử dụng loại vật tư**: Khi loại vật tư không còn phù hợp, có thể đánh dấu là không hoạt động thay vì xóa
+- **Gộp/tách loại vật tư**: Trong trường hợp cần tái cấu trúc cách phân loại, có thể gộp nhiều loại thành một hoặc tách một loại thành nhiều loại nhỏ hơn
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | CAT_LIST | Xem danh sách loại vật tư | Hiển thị danh sách loại vật tư với các bộ lọc và tìm kiếm | Cao |
+| 2   | CAT_CREATE | Tạo loại vật tư mới | Thêm loại vật tư mới vào hệ thống | Cao |
+| 3   | CAT_UPDATE | Cập nhật loại vật tư | Chỉnh sửa thông tin loại vật tư | Cao |
+| 4   | CAT_VIEW | Xem chi tiết loại vật tư | Xem toàn bộ thông tin chi tiết của loại vật tư | Cao |
+| 5   | CAT_STATUS | Thay đổi trạng thái | Đánh dấu loại vật tư là active/inactive | Cao |
+| 6   | CAT_IMPORT | Nhập dữ liệu hàng loạt | Nhập nhiều loại vật tư từ file Excel | Trung bình |
+| 7   | CAT_EXPORT | Xuất dữ liệu | Xuất danh sách loại vật tư ra file | Thấp |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. CAT_CREATE: Tạo loại vật tư mới
+- **Mô tả**: Cho phép người dùng tạo loại vật tư mới trong hệ thống
+- **Đầu vào**: Thông tin loại vật tư (mã loại vật tư, tên loại vật tư, tên khác, tài khoản kho, tài khoản doanh thu, tài khoản giá vốn)
+- **Đầu ra**: Bản ghi loại vật tư mới trong hệ thống
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập và có quyền tạo loại vật tư
+- **Luồng xử lý chính**:
+  1. Người dùng chọn "Tạo loại vật tư mới"
+  2. Hệ thống hiển thị form nhập thông tin
+  3. Người dùng nhập thông tin cơ bản (mã, tên, tên khác)
+  4. Người dùng chọn các tài khoản kế toán liên quan
+  5. Người dùng nhấn "Lưu"
+  6. Hệ thống kiểm tra tính hợp lệ của dữ liệu
+  7. Hệ thống kiểm tra trùng lặp mã loại vật tư
+  8. Hệ thống lưu loại vật tư mới
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu dữ liệu không hợp lệ, hiển thị thông báo lỗi
+  2. Nếu mã loại vật tư đã tồn tại, yêu cầu nhập mã khác
+- **Giao diện liên quan**: Form tạo loại vật tư mới
+
+#### 3.2.2. CAT_STATUS: Thay đổi trạng thái
+- **Mô tả**: Cho phép thay đổi trạng thái hoạt động của loại vật tư
+- **Đầu vào**: ID loại vật tư, trạng thái mới
+- **Đầu ra**: Loại vật tư với trạng thái đã cập nhật
+- **Điều kiện tiên quyết**: Loại vật tư đã tồn tại trong hệ thống
+- **Luồng xử lý chính**:
+  1. Người dùng chọn loại vật tư cần thay đổi trạng thái
+  2. Người dùng chọn trạng thái mới (active/inactive)
+  3. Người dùng nhấn "Lưu"
+  4. Hệ thống kiểm tra xem có vật tư nào đang sử dụng loại vật tư này không
+  5. Hệ thống cập nhật trạng thái loại vật tư
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu loại vật tư đang được sử dụng và chuyển sang inactive, hiển thị cảnh báo
+- **Giao diện liên quan**: Màn hình quản lý loại vật tư
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+
+```mermaid
+flowchart TD
+    A[Client] --> B[API Gateway]
+    B --> C[LoaiVatTuService]
+    C --> D[LoaiVatTuRepository]
+    C --> E[AccountService]
+    E --> F[AccountRepository]
+    D --> G[(Database)]
+    F --> G
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Lấy danh sách loại vật tư
+- **Mô tả**: Trả về danh sách loại vật tư theo điều kiện lọc
+- **URL**: `GET /api/v1/entity/{entity_slug}/loai-vat-tu/`
+- **Query Parameters**:
+  - `trang_thai`: Lọc theo trạng thái active (1/0)
+  - `search`: Từ khóa tìm kiếm (tên, mã loại vật tư)
+  - `page`: Số trang
+  - `page_size`: Số bản ghi trên mỗi trang
+  - `ordering`: Trường sắp xếp
+- **Response**: Danh sách loại vật tư, phân trang
+
+#### 4.2.2. Lấy chi tiết loại vật tư
+- **Mô tả**: Trả về thông tin chi tiết của một loại vật tư
+- **URL**: `GET /api/v1/entity/{entity_slug}/loai-vat-tu/{uuid}/`
+- **Response**: Chi tiết loại vật tư
+
+#### 4.2.3. Tạo loại vật tư mới
+- **Mô tả**: Tạo loại vật tư mới trong hệ thống
+- **URL**: `POST /api/v1/entity/{entity_slug}/loai-vat-tu/`
+- **Request Body**: Thông tin loại vật tư
+- **Response**: Thông tin loại vật tư đã tạo
+
+#### 4.2.4. Cập nhật loại vật tư
+- **Mô tả**: Cập nhật thông tin loại vật tư
+- **URL**: `PUT /api/v1/entity/{entity_slug}/loai-vat-tu/{uuid}/`
+- **Request Body**: Thông tin cập nhật
+- **Response**: Thông tin loại vật tư đã cập nhật
+
+#### 4.2.5. Thay đổi trạng thái loại vật tư
+- **Mô tả**: Cập nhật trạng thái của loại vật tư
+- **URL**: `PATCH /api/v1/entity/{entity_slug}/loai-vat-tu/{uuid}/status/`
+- **Request Body**: Trạng thái mới
+- **Response**: Thông tin loại vật tư đã cập nhật
+
+### 4.3. Service Logic
+
+#### 4.3.1. LoaiVatTuService
+- **Mô tả**: Xử lý logic nghiệp vụ liên quan đến quản lý loại vật tư
+- **Chức năng chính**:
+  1. Tạo và quản lý loại vật tư
+  2. Cập nhật thông tin loại vật tư
+  3. Quản lý trạng thái loại vật tư
+  4. Kiểm tra ràng buộc khi thay đổi trạng thái
+- **Các dependencies**:
+  1. LoaiVatTuRepository
+  2. AccountService
+- **Sơ đồ luồng xử lý**:
+
+```mermaid
+flowchart TD
+    A[Nhận request] --> B[Validate dữ liệu]
+    B --> C{Dữ liệu hợp lệ?}
+    C -->|Có| D[Xử lý business logic]
+    C -->|Không| E[Trả về lỗi]
+    D --> F{Loại thao tác?}
+    F -->|Tạo| G[Tạo loại vật tư mới]
+    F -->|Cập nhật| H[Cập nhật loại vật tư]
+    F -->|Thay đổi trạng thái| I[Xử lý trạng thái]
+    G --> J[Kiểm tra trùng lặp]
+    J --> K{Trùng lặp?}
+    K -->|Có| L[Thông báo lỗi]
+    K -->|Không| M[Lưu loại vật tư mới]
+    H --> N[Lưu thay đổi]
+    I --> O[Kiểm tra ràng buộc]
+    O --> P{Có ràng buộc?}
+    P -->|Có| Q[Cảnh báo/Từ chối]
+    P -->|Không| R[Cập nhật trạng thái]
+    M --> S[Ghi log]
+    N --> S
+    Q --> S
+    R --> S
+    L --> S
+    S --> T[Trả về kết quả]
+    E --> S
+```
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    EntityModel ||--o{ LoaiVatTuModel : "có"
+    LoaiVatTuModel ||--o{ VatTuModel : "phân loại"
+    AccountModel ||--o{ LoaiVatTuModel : "là tài khoản kho của"
+    AccountModel ||--o{ LoaiVatTuModel : "là tài khoản doanh thu của"
+    AccountModel ||--o{ LoaiVatTuModel : "là tài khoản giá vốn của"
+    
+    LoaiVatTuModel {
+        UUID uuid PK
+        FK EntityModel entity_model
+        String ma_loai_vat_tu
+        String ten_loai_vat_tu
+        String ten_khac
+        FK AccountModel tk_kho
+        FK AccountModel tk_doanh_thu
+        FK AccountModel tk_gia_von
+        Integer trang_thai
+        DateTime created
+        DateTime updated
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: LoaiVatTuModel
+- **Mô tả**: Lưu trữ thông tin về loại vật tư
+- **Các trường chính**:
+  - `uuid`: Khóa chính, định danh duy nhất
+  - `entity_model`: Khóa ngoại tham chiếu đến EntityModel
+  - `ma_loai_vat_tu`: Mã loại vật tư
+  - `ten_loai_vat_tu`: Tên loại vật tư
+  - `ten_khac`: Tên khác (tùy chọn)
+  - `tk_kho`: Khóa ngoại tham chiếu đến tài khoản kho (AccountModel)
+  - `tk_doanh_thu`: Khóa ngoại tham chiếu đến tài khoản doanh thu (AccountModel)
+  - `tk_gia_von`: Khóa ngoại tham chiếu đến tài khoản giá vốn (AccountModel)
+  - `trang_thai`: Trạng thái (1: active, 0: inactive)
+  - `created`: Thời gian tạo
+  - `updated`: Thời gian cập nhật
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+Kiểm thử sẽ bao gồm tất cả các chức năng liên quan đến quản lý loại vật tư, bao gồm:
+- Tạo mới loại vật tư
+- Cập nhật thông tin loại vật tư
+- Tìm kiếm và lọc loại vật tư
+- Thay đổi trạng thái loại vật tư
+- Kiểm tra tích hợp với phân hệ quản lý vật tư
+
+### 5.2. Kịch Bản Kiểm Thử
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC_CAT_C01 | Tạo loại vật tư mới thành công | Kiểm tra việc tạo loại vật tư mới | Người dùng đã đăng nhập và có quyền | 1. Truy cập form tạo loại vật tư<br>2. Nhập thông tin hợp lệ<br>3. Nhấn Lưu | Loại vật tư mới được tạo thành công |
+| 2   | TC_CAT_C02 | Tạo loại vật tư với mã trùng | Kiểm tra validate mã loại vật tư trùng | Đã có loại vật tư trong hệ thống | 1. Truy cập form tạo loại vật tư<br>2. Nhập mã loại vật tư đã tồn tại<br>3. Nhấn Lưu | Hiển thị thông báo lỗi về mã loại vật tư trùng |
+| 3   | TC_CAT_U01 | Cập nhật thông tin loại vật tư | Kiểm tra cập nhật thông tin | Loại vật tư đã tồn tại | 1. Mở form cập nhật<br>2. Thay đổi thông tin<br>3. Nhấn Lưu | Thông tin được cập nhật thành công |
+| 4   | TC_CAT_S01 | Thay đổi trạng thái loại vật tư | Kiểm tra thay đổi trạng thái | Loại vật tư đang hoạt động | 1. Chọn loại vật tư<br>2. Đổi trạng thái sang không hoạt động<br>3. Lưu | Trạng thái được cập nhật, loại vật tư không xuất hiện trong danh sách mặc định |
+| 5   | TC_CAT_I01 | Kiểm tra ràng buộc khi vô hiệu hóa | Kiểm tra ràng buộc khi đổi trạng thái | Loại vật tư đang được sử dụng | 1. Chọn loại vật tư đang có vật tư sử dụng<br>2. Đổi trạng thái sang không hoạt động<br>3. Lưu | Hiển thị cảnh báo về việc loại vật tư đang được sử dụng |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+1. Tài liệu thiết kế cơ sở dữ liệu ERP
+2. Tài liệu API đặc tả
+3. Quy định về quản lý vật tư của doanh nghiệp
+
+### 6.2. Danh Mục Thuật Ngữ
+- **LoaiVatTuModel**: Mô hình dữ liệu lưu trữ thông tin loại vật tư
+- **VatTuModel**: Mô hình dữ liệu lưu trữ thông tin vật tư, sản phẩm
+- **AccountModel**: Mô hình dữ liệu tài khoản kế toán
+- **EntityModel**: Mô hình dữ liệu đơn vị doanh nghiệp
+- **Active/Inactive**: Trạng thái hoạt động/không hoạt động của loại vật tư
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 25/07/2023 | Auto Generated | Tạo tài liệu ban đầu |

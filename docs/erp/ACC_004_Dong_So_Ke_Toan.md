@@ -1,0 +1,519 @@
+# ACC_004_Đóng Sổ Kế Toán
+
+*Phiên bản: 1.0*  
+*Người tạo: AI Assistant*  
+*Ngày tạo: 25/07/2024*  
+*Cập nhật lần cuối: 25/07/2024*  
+*Người cập nhật: AI Assistant*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Đóng sổ kế toán là quy trình nghiệp vụ quan trọng được thực hiện vào cuối một kỳ kế toán (tháng, quý, năm) để chốt sổ sách kế toán và chuẩn bị cho kỳ kế toán mới. Trong quá trình này, hệ thống sẽ tính toán và tạo các bút toán kết chuyển để chuyển số dư của các tài khoản kết quả kinh doanh (doanh thu, chi phí) vào tài khoản lợi nhuận, đồng thời khóa sổ kế toán để ngăn các thay đổi trong kỳ đã đóng.
+
+Trong Django Ledger, quy trình đóng sổ được triển khai thông qua mô hình ClosingEntryModel, cho phép tạo các bút toán đóng sổ tự động dựa trên số dư tài khoản vào ngày đóng sổ. Quá trình này đảm bảo tính toàn vẹn của dữ liệu kế toán và cung cấp một cắt mốc rõ ràng giữa các kỳ kế toán.
+
+### 1.2. Phạm Vi Áp Dụng
+Quy trình đóng sổ kế toán áp dụng cho:
+- Nhân viên kế toán có trách nhiệm đóng sổ kế toán cuối kỳ.
+- Quản lý tài chính cần xem xét và phê duyệt các bút toán đóng sổ.
+- Kiểm toán viên cần kiểm tra tính chính xác của quá trình đóng sổ.
+- Tất cả các đơn vị trong hệ thống cần thực hiện đóng sổ theo chu kỳ kế toán.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Closing Entry (Bút toán đóng sổ) | Các bút toán được tạo ra vào cuối kỳ kế toán để kết chuyển số dư các tài khoản tạm thời (doanh thu, chi phí) sang tài khoản vĩnh viễn (lợi nhuận, vốn chủ sở hữu). |
+| Closing Date (Ngày đóng sổ) | Ngày cuối cùng của kỳ kế toán, là ngày thực hiện đóng sổ. |
+| Fiscal Year (Năm tài chính) | Kỳ kế toán 12 tháng được sử dụng cho mục đích báo cáo tài chính. Có thể trùng hoặc không trùng với năm dương lịch. |
+| Temporary Accounts (Tài khoản tạm thời) | Các tài khoản doanh thu, chi phí được đưa về số dư bằng 0 sau khi đóng sổ. |
+| Permanent Accounts (Tài khoản vĩnh viễn) | Các tài khoản tài sản, nợ phải trả, vốn chủ sở hữu có số dư được chuyển sang kỳ kế toán tiếp theo. |
+| Last Closing Date (Ngày đóng sổ gần nhất) | Ngày đóng sổ gần nhất được lưu trữ trong hệ thống. |
+| Period Lock (Khóa kỳ) | Trạng thái ngăn chặn việc tạo hoặc sửa đổi các bút toán trong kỳ đã đóng. |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | ACC_001 | Sơ Đồ Tài Khoản | Quy trình thiết lập và quản lý hệ thống tài khoản kế toán |
+| 2   | ACC_002 | Sổ Cái | Quy trình quản lý sổ cái và các bút toán kế toán |
+| 3   | ACC_003 | Bút Toán Kế Toán | Quy trình tạo và quản lý các bút toán |
+| 4   | ACC_005 | Báo Cáo Tài Chính | Quy trình tạo và xuất báo cáo tài chính |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình đóng sổ kế toán bao gồm việc xác định ngày đóng sổ, tạo bút toán đóng sổ, xác minh và đăng tải bút toán đó, cập nhật ngày đóng sổ gần nhất trong hệ thống, và khóa các kỳ kế toán đã đóng để ngăn các thay đổi không được phép. Quá trình này đảm bảo tính chính xác và nhất quán của dữ liệu kế toán khi chuyển sang kỳ kế toán mới.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Bắt đầu] --> B[Xác định ngày đóng sổ]
+    B --> C[Kiểm tra điều kiện đóng sổ]
+    C --> D{Điều kiện thỏa mãn?}
+    D -->|Không| E[Hiển thị thông báo lỗi]
+    E --> B
+    D -->|Có| F[Tạo bút toán đóng sổ]
+    F --> G[Tính toán số dư cần kết chuyển]
+    G --> H[Tạo các giao dịch đóng sổ]
+    H --> I[Xác minh tính cân đối]
+    I --> J{Cân đối?}
+    J -->|Không| K[Điều chỉnh giao dịch]
+    K --> I
+    J -->|Có| L[Đăng tải bút toán đóng sổ]
+    L --> M[Cập nhật ngày đóng sổ gần nhất]
+    M --> N[Khóa kỳ kế toán đã đóng]
+    N --> O[Kết thúc]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Xác định ngày đóng sổ
+- **Mô tả**: Xác định ngày cuối cùng của kỳ kế toán cần đóng sổ.
+- **Đầu vào**: Kỳ kế toán (tháng, quý, năm) cần đóng sổ.
+- **Đầu ra**: Ngày đóng sổ (closing_date).
+- **Người thực hiện**: Kế toán trưởng hoặc người được ủy quyền.
+- **Điều kiện tiên quyết**: Đã hoàn thành tất cả các bút toán cho kỳ kế toán cần đóng sổ.
+- **Xử lý ngoại lệ**: Nếu chọn ngày trong tương lai, hiển thị thông báo lỗi và yêu cầu chọn ngày hợp lệ.
+
+#### 2.3.2. Kiểm tra điều kiện đóng sổ
+- **Mô tả**: Kiểm tra các điều kiện trước khi thực hiện đóng sổ.
+- **Đầu vào**: Ngày đóng sổ, thông tin đơn vị.
+- **Đầu ra**: Kết quả kiểm tra (đạt/không đạt).
+- **Người thực hiện**: Hệ thống.
+- **Điều kiện tiên quyết**: Đã xác định ngày đóng sổ.
+- **Xử lý ngoại lệ**: 
+  - Nếu ngày đóng sổ nằm trong tương lai, hiển thị thông báo lỗi.
+  - Nếu đã tồn tại bút toán đóng sổ cho ngày này, hệ thống sẽ xóa bút toán cũ trước khi tạo bút toán mới.
+
+#### 2.3.3. Tạo bút toán đóng sổ
+- **Mô tả**: Tạo bút toán đóng sổ mới với ngày đóng sổ đã xác định.
+- **Đầu vào**: Ngày đóng sổ, thông tin đơn vị.
+- **Đầu ra**: Bút toán đóng sổ (ClosingEntryModel).
+- **Người thực hiện**: Hệ thống.
+- **Điều kiện tiên quyết**: Kiểm tra điều kiện đóng sổ thành công.
+- **Xử lý ngoại lệ**: Nếu có lỗi khi tạo bút toán, hiển thị thông báo chi tiết về lỗi.
+
+#### 2.3.4. Tính toán số dư cần kết chuyển
+- **Mô tả**: Tính toán số dư của các tài khoản tạm thời (doanh thu, chi phí) cần kết chuyển.
+- **Đầu vào**: Bút toán đóng sổ, ngày đóng sổ, thông tin đơn vị.
+- **Đầu ra**: Danh sách số dư tài khoản cần kết chuyển.
+- **Người thực hiện**: Hệ thống.
+- **Điều kiện tiên quyết**: Bút toán đóng sổ đã được tạo.
+- **Xử lý ngoại lệ**: Nếu không thể tính toán số dư do lỗi dữ liệu, hiển thị thông báo lỗi và ghi log.
+
+#### 2.3.5. Tạo các giao dịch đóng sổ
+- **Mô tả**: Tạo các giao dịch đóng sổ dựa trên số dư tài khoản đã tính toán.
+- **Đầu vào**: Bút toán đóng sổ, danh sách số dư tài khoản.
+- **Đầu ra**: Các giao dịch đóng sổ (ClosingEntryTransactionModel).
+- **Người thực hiện**: Hệ thống.
+- **Điều kiện tiên quyết**: Số dư tài khoản đã được tính toán.
+- **Xử lý ngoại lệ**: Nếu có lỗi khi tạo giao dịch, ghi lại lỗi và dừng quá trình.
+
+#### 2.3.6. Xác minh tính cân đối
+- **Mô tả**: Kiểm tra tính cân đối của các giao dịch đóng sổ (tổng ghi nợ = tổng ghi có).
+- **Đầu vào**: Các giao dịch đóng sổ.
+- **Đầu ra**: Kết quả xác minh (cân đối/không cân đối).
+- **Người thực hiện**: Hệ thống.
+- **Điều kiện tiên quyết**: Các giao dịch đóng sổ đã được tạo.
+- **Xử lý ngoại lệ**: Nếu giao dịch không cân đối, hiển thị thông báo lỗi với chi tiết về sự chênh lệch.
+
+#### 2.3.7. Đăng tải bút toán đóng sổ
+- **Mô tả**: Đăng tải bút toán đóng sổ để nó có hiệu lực trong hệ thống.
+- **Đầu vào**: Bút toán đóng sổ đã xác minh.
+- **Đầu ra**: Bút toán đóng sổ ở trạng thái đã đăng tải.
+- **Người thực hiện**: Kế toán trưởng hoặc người được ủy quyền.
+- **Điều kiện tiên quyết**: Bút toán đóng sổ đã được xác minh là cân đối.
+- **Xử lý ngoại lệ**: Nếu bút toán không thể đăng tải, hiển thị thông báo lỗi.
+
+#### 2.3.8. Cập nhật ngày đóng sổ gần nhất
+- **Mô tả**: Cập nhật ngày đóng sổ gần nhất trong thông tin đơn vị.
+- **Đầu vào**: Bút toán đóng sổ đã đăng tải.
+- **Đầu ra**: Đơn vị với ngày đóng sổ gần nhất đã cập nhật.
+- **Người thực hiện**: Hệ thống.
+- **Điều kiện tiên quyết**: Bút toán đóng sổ đã được đăng tải thành công.
+- **Xử lý ngoại lệ**: Nếu không thể cập nhật thông tin đơn vị, ghi lại lỗi.
+
+#### 2.3.9. Khóa kỳ kế toán đã đóng
+- **Mô tả**: Khóa kỳ kế toán đã đóng để ngăn các thay đổi sau khi đóng sổ.
+- **Đầu vào**: Ngày đóng sổ, thông tin đơn vị.
+- **Đầu ra**: Kỳ kế toán đã được khóa.
+- **Người thực hiện**: Hệ thống.
+- **Điều kiện tiên quyết**: Đã cập nhật ngày đóng sổ gần nhất.
+- **Xử lý ngoại lệ**: Nếu có lỗi khi khóa kỳ kế toán, ghi lại lỗi và thông báo cho người dùng.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant System as Hệ thống
+    participant CE as Bút toán đóng sổ
+    participant CET as Giao dịch đóng sổ
+    participant Entity as Đơn vị
+    
+    User->>System: Yêu cầu đóng sổ
+    System->>User: Hiển thị form chọn ngày đóng sổ
+    User->>System: Nhập ngày đóng sổ
+    
+    System->>System: Kiểm tra điều kiện đóng sổ
+    alt Không thỏa mãn điều kiện
+        System-->>User: Hiển thị thông báo lỗi
+    else Thỏa mãn điều kiện
+        System->>CE: Tạo bút toán đóng sổ
+        CE-->>System: Xác nhận tạo thành công
+        
+        System->>System: Tính toán số dư tài khoản
+        System->>CET: Tạo giao dịch đóng sổ
+        CET-->>System: Xác nhận tạo thành công
+        
+        System->>System: Xác minh tính cân đối
+        alt Không cân đối
+            System-->>User: Hiển thị thông báo lỗi
+        else Cân đối
+            User->>System: Yêu cầu đăng tải bút toán đóng sổ
+            System->>CE: Đăng tải bút toán
+            CE-->>System: Xác nhận đăng tải thành công
+            System->>Entity: Cập nhật ngày đóng sổ gần nhất
+            Entity-->>System: Xác nhận cập nhật thành công
+            System->>Entity: Khóa kỳ kế toán đã đóng
+            Entity-->>System: Xác nhận khóa thành công
+            System-->>User: Hiển thị thông báo thành công
+        end
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+1. **Hủy đăng tải bút toán đóng sổ**:
+   - Khi phát hiện có lỗi trong bút toán đóng sổ đã đăng tải, người dùng có thể yêu cầu hủy đăng tải.
+   - Hệ thống sẽ kiểm tra xem bút toán đóng sổ có thể hủy đăng tải hay không.
+   - Nếu có thể, hệ thống sẽ hủy đăng tải bút toán và cập nhật lại ngày đóng sổ gần nhất.
+   - Sau đó, người dùng có thể tạo bút toán đóng sổ mới.
+
+2. **Cập nhật giao dịch đóng sổ**:
+   - Trường hợp cần điều chỉnh các giao dịch đóng sổ (ví dụ: khi phát hiện có sai sót sau khi tính toán).
+   - Người dùng yêu cầu cập nhật giao dịch đóng sổ.
+   - Hệ thống sẽ xóa các giao dịch đóng sổ hiện tại và tính toán lại các giao dịch mới.
+   - Sau đó, hệ thống tạo lại các giao dịch đóng sổ dựa trên dữ liệu đã cập nhật.
+
+3. **Xóa bút toán đóng sổ**:
+   - Trường hợp cần xóa hoàn toàn bút toán đóng sổ (ví dụ: khi chọn nhầm kỳ kế toán).
+   - Người dùng yêu cầu xóa bút toán đóng sổ.
+   - Hệ thống kiểm tra xem bút toán có thể xóa hay không (chưa được đăng tải).
+   - Nếu có thể, hệ thống xóa bút toán đóng sổ và tất cả giao dịch liên quan.
+   - Hệ thống cập nhật lại ngày đóng sổ gần nhất của đơn vị.
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | CLE_001 | Xem danh sách bút toán đóng sổ | Hiển thị danh sách các bút toán đóng sổ của đơn vị | Cao |
+| 2   | CLE_002 | Tạo bút toán đóng sổ | Tạo bút toán đóng sổ mới cho một ngày cụ thể | Cao |
+| 3   | CLE_003 | Xem chi tiết bút toán đóng sổ | Xem thông tin chi tiết của bút toán đóng sổ và các giao dịch liên quan | Cao |
+| 4   | CLE_004 | Đăng tải bút toán đóng sổ | Đăng tải bút toán đóng sổ để nó có hiệu lực | Cao |
+| 5   | CLE_005 | Hủy đăng tải bút toán đóng sổ | Hủy đăng tải bút toán đóng sổ để có thể chỉnh sửa | Cao |
+| 6   | CLE_006 | Cập nhật giao dịch đóng sổ | Tính toán lại và cập nhật các giao dịch đóng sổ | Trung bình |
+| 7   | CLE_007 | Xóa bút toán đóng sổ | Xóa bút toán đóng sổ khỏi hệ thống | Thấp |
+| 8   | CLE_008 | Tìm kiếm bút toán đóng sổ | Tìm kiếm bút toán đóng sổ theo nhiều tiêu chí | Trung bình |
+| 9   | CLE_009 | Thêm ghi chú cho bút toán đóng sổ | Thêm ghi chú hoặc thông tin bổ sung cho bút toán đóng sổ | Thấp |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. CLE_001: Xem danh sách bút toán đóng sổ
+- **Mô tả**: Hiển thị danh sách các bút toán đóng sổ của đơn vị theo thứ tự thời gian.
+- **Đầu vào**: Đơn vị cần xem danh sách, các tham số lọc (tùy chọn).
+- **Đầu ra**: Danh sách bút toán đóng sổ phù hợp với điều kiện lọc.
+- **Điều kiện tiên quyết**: Người dùng có quyền xem bút toán đóng sổ của đơn vị.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chức năng danh sách bút toán đóng sổ.
+  2. Hệ thống truy vấn và hiển thị danh sách bút toán đóng sổ của đơn vị.
+  3. Người dùng có thể lọc danh sách theo năm, tháng, trạng thái đăng tải, v.v.
+  4. Hệ thống cập nhật danh sách theo điều kiện lọc.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu không có bút toán đóng sổ nào, hiển thị thông báo phù hợp.
+  2. Nếu có lỗi khi truy vấn dữ liệu, hiển thị thông báo lỗi.
+- **Giao diện liên quan**: Màn hình danh sách bút toán đóng sổ.
+
+#### 3.2.2. CLE_002: Tạo bút toán đóng sổ
+- **Mô tả**: Cho phép người dùng tạo bút toán đóng sổ mới cho một ngày cụ thể.
+- **Đầu vào**: Đơn vị, ngày đóng sổ.
+- **Đầu ra**: Bút toán đóng sổ mới được tạo với các giao dịch tự động.
+- **Điều kiện tiên quyết**: Người dùng có quyền tạo bút toán đóng sổ, ngày đóng sổ không trong tương lai.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chức năng tạo bút toán đóng sổ.
+  2. Người dùng nhập ngày đóng sổ.
+  3. Hệ thống kiểm tra tính hợp lệ của ngày đóng sổ.
+  4. Hệ thống tạo bút toán đóng sổ và tính toán các giao dịch cần thiết.
+  5. Hệ thống lưu bút toán đóng sổ và các giao dịch.
+  6. Hệ thống hiển thị thông báo thành công và chuyển đến trang chi tiết bút toán.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu ngày đóng sổ không hợp lệ, hiển thị thông báo lỗi.
+  2. Nếu đã tồn tại bút toán đóng sổ cho ngày này, hệ thống sẽ xóa bút toán cũ trước khi tạo bút toán mới.
+  3. Nếu có lỗi khi tính toán hoặc tạo giao dịch, hiển thị thông báo lỗi chi tiết.
+- **Giao diện liên quan**: Form tạo bút toán đóng sổ.
+
+#### 3.2.3. CLE_003: Xem chi tiết bút toán đóng sổ
+- **Mô tả**: Hiển thị thông tin chi tiết của bút toán đóng sổ và các giao dịch liên quan.
+- **Đầu vào**: ID của bút toán đóng sổ cần xem.
+- **Đầu ra**: Thông tin chi tiết của bút toán đóng sổ và danh sách các giao dịch.
+- **Điều kiện tiên quyết**: Bút toán đóng sổ tồn tại và người dùng có quyền xem.
+- **Luồng xử lý chính**:
+  1. Người dùng chọn bút toán đóng sổ từ danh sách hoặc truy cập trực tiếp thông qua URL.
+  2. Hệ thống truy vấn thông tin chi tiết của bút toán và các giao dịch liên quan.
+  3. Hệ thống hiển thị thông tin chi tiết và danh sách giao dịch.
+  4. Người dùng có thể xem các thông tin khác nhau như ngày đóng sổ, trạng thái, ghi chú, v.v.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu bút toán không tồn tại, hiển thị thông báo lỗi.
+  2. Nếu người dùng không có quyền xem, chuyển hướng đến trang phù hợp.
+- **Giao diện liên quan**: Màn hình chi tiết bút toán đóng sổ.
+
+#### 3.2.4. CLE_004: Đăng tải bút toán đóng sổ
+- **Mô tả**: Đăng tải bút toán đóng sổ để nó có hiệu lực trong hệ thống.
+- **Đầu vào**: ID của bút toán đóng sổ cần đăng tải.
+- **Đầu ra**: Bút toán đóng sổ được cập nhật trạng thái là đã đăng tải.
+- **Điều kiện tiên quyết**: Bút toán đóng sổ tồn tại, chưa được đăng tải và người dùng có quyền đăng tải.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chi tiết bút toán đóng sổ.
+  2. Người dùng chọn hành động đăng tải.
+  3. Hệ thống kiểm tra tính hợp lệ và cân đối của bút toán.
+  4. Hệ thống tạo các bút toán kế toán thực tế từ các giao dịch đóng sổ.
+  5. Hệ thống cập nhật trạng thái bút toán đóng sổ thành đã đăng tải.
+  6. Hệ thống cập nhật ngày đóng sổ gần nhất trong thông tin đơn vị.
+  7. Hệ thống hiển thị thông báo thành công.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu bút toán không thể đăng tải (đã đăng tải, không cân đối, v.v.), hiển thị thông báo lỗi.
+  2. Nếu có lỗi khi tạo bút toán kế toán, hiển thị thông báo lỗi chi tiết.
+- **Giao diện liên quan**: Màn hình chi tiết bút toán đóng sổ, nút đăng tải.
+
+#### 3.2.5. CLE_005: Hủy đăng tải bút toán đóng sổ
+- **Mô tả**: Hủy đăng tải bút toán đóng sổ để có thể chỉnh sửa.
+- **Đầu vào**: ID của bút toán đóng sổ cần hủy đăng tải.
+- **Đầu ra**: Bút toán đóng sổ được cập nhật trạng thái là chưa đăng tải.
+- **Điều kiện tiên quyết**: Bút toán đóng sổ tồn tại, đã được đăng tải và người dùng có quyền hủy đăng tải.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chi tiết bút toán đóng sổ.
+  2. Người dùng chọn hành động hủy đăng tải.
+  3. Hệ thống kiểm tra điều kiện hủy đăng tải.
+  4. Hệ thống xóa các bút toán kế toán đã tạo từ giao dịch đóng sổ.
+  5. Hệ thống cập nhật trạng thái bút toán đóng sổ thành chưa đăng tải.
+  6. Hệ thống cập nhật ngày đóng sổ gần nhất trong thông tin đơn vị.
+  7. Hệ thống hiển thị thông báo thành công.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu bút toán không thể hủy đăng tải, hiển thị thông báo lỗi.
+  2. Nếu có lỗi khi xóa bút toán kế toán, hiển thị thông báo lỗi chi tiết.
+- **Giao diện liên quan**: Màn hình chi tiết bút toán đóng sổ, nút hủy đăng tải.
+
+#### 3.2.6. CLE_006: Cập nhật giao dịch đóng sổ
+- **Mô tả**: Tính toán lại và cập nhật các giao dịch trong bút toán đóng sổ.
+- **Đầu vào**: ID của bút toán đóng sổ cần cập nhật.
+- **Đầu ra**: Bút toán đóng sổ với các giao dịch đã được cập nhật.
+- **Điều kiện tiên quyết**: Bút toán đóng sổ tồn tại, chưa được đăng tải và người dùng có quyền cập nhật.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chi tiết bút toán đóng sổ.
+  2. Người dùng chọn hành động cập nhật giao dịch.
+  3. Hệ thống xóa các giao dịch đóng sổ hiện tại.
+  4. Hệ thống tính toán lại các giao dịch cần thiết.
+  5. Hệ thống tạo các giao dịch đóng sổ mới.
+  6. Hệ thống hiển thị thông báo thành công.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu bút toán đã được đăng tải, hiển thị thông báo lỗi.
+  2. Nếu có lỗi khi tính toán hoặc tạo giao dịch, hiển thị thông báo lỗi chi tiết.
+- **Giao diện liên quan**: Màn hình chi tiết bút toán đóng sổ, nút cập nhật giao dịch.
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+
+```mermaid
+flowchart TD
+    A[Client] --> B[API Gateway]
+    B --> C[Closing Entry Service]
+    B --> D[Entity Service]
+    B --> E[Ledger Service]
+    C --> F[(Database)]
+    D --> F
+    E --> F
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Quản lý Bút toán đóng sổ
+- **Mô tả**: API để quản lý Bút toán đóng sổ
+- **URL**: `GET /api/v1/entity/{entity_slug}/closing-entries/` - Lấy danh sách bút toán đóng sổ
+- **URL**: `POST /api/v1/entity/{entity_slug}/closing-entries/` - Tạo bút toán đóng sổ mới
+- **URL**: `GET /api/v1/entity/{entity_slug}/closing-entries/{closing_entry_pk}/` - Lấy chi tiết bút toán đóng sổ
+- **URL**: `PUT /api/v1/entity/{entity_slug}/closing-entries/{closing_entry_pk}/` - Cập nhật bút toán đóng sổ
+- **URL**: `DELETE /api/v1/entity/{entity_slug}/closing-entries/{closing_entry_pk}/` - Xóa bút toán đóng sổ
+
+#### 4.2.2. Thao tác với Bút toán đóng sổ
+- **Mô tả**: API để thực hiện các thao tác với Bút toán đóng sổ
+- **URL**: `GET /api/v1/entity/{entity_slug}/closing-entries/{closing_entry_pk}/mark-as-posted/` - Đăng tải bút toán đóng sổ
+- **URL**: `GET /api/v1/entity/{entity_slug}/closing-entries/{closing_entry_pk}/mark-as-unposted/` - Hủy đăng tải bút toán đóng sổ
+- **URL**: `GET /api/v1/entity/{entity_slug}/closing-entries/{closing_entry_pk}/update-txs/` - Cập nhật giao dịch bút toán đóng sổ
+
+### 4.3. Service Logic
+
+#### 4.3.1. Closing Entry Service
+- **Mô tả**: Service xử lý logic liên quan đến Bút toán đóng sổ
+- **Chức năng chính**:
+  1. Tạo và quản lý bút toán đóng sổ
+  2. Tính toán các giao dịch đóng sổ
+  3. Đăng tải và hủy đăng tải bút toán đóng sổ
+  4. Tạo bút toán kế toán từ giao dịch đóng sổ
+- **Các dependencies**:
+  1. Entity Service
+  2. Ledger Service
+  3. Journal Entry Service
+- **Sơ đồ luồng xử lý**:
+
+```mermaid
+flowchart TD
+    A[Nhận request] --> B[Validate dữ liệu]
+    B --> C{Dữ liệu hợp lệ?}
+    C -->|Có| D[Xử lý business logic]
+    C -->|Không| E[Trả về lỗi]
+    D --> F{Loại request?}
+    F -->|Tạo mới| G[Tạo bút toán đóng sổ]
+    F -->|Đăng tải| H[Đăng tải bút toán đóng sổ]
+    F -->|Hủy đăng tải| I[Hủy đăng tải bút toán đóng sổ]
+    F -->|Cập nhật giao dịch| J[Cập nhật giao dịch đóng sổ]
+    G --> K[Ghi log]
+    H --> K
+    I --> K
+    J --> K
+    K --> L[Trả về kết quả]
+    E --> K
+```
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    ENTITY ||--o{ CLOSING_ENTRY : contains
+    CLOSING_ENTRY ||--o{ CLOSING_ENTRY_TRANSACTION : contains
+    CLOSING_ENTRY ||--|| LEDGER : has
+    CLOSING_ENTRY_TRANSACTION }o--|| ACCOUNT : references
+    CLOSING_ENTRY_TRANSACTION }o--o| ENTITY_UNIT : references
+    
+    ENTITY {
+        uuid uuid PK
+        name string
+        slug string
+        last_closing_date date
+        meta json
+    }
+    
+    CLOSING_ENTRY {
+        uuid uuid PK
+        entity_model uuid FK
+        ledger_model uuid FK
+        closing_date date
+        posted boolean
+        markdown_notes text
+    }
+    
+    CLOSING_ENTRY_TRANSACTION {
+        uuid uuid PK
+        closing_entry_model uuid FK
+        account_model uuid FK
+        unit_model uuid FK
+        tx_type string
+        activity string
+        balance decimal
+    }
+    
+    ACCOUNT {
+        uuid uuid PK
+        code string
+        name string
+        role string
+        balance_type string
+    }
+    
+    LEDGER {
+        uuid uuid PK
+        name string
+        entity uuid FK
+        posted boolean
+        locked boolean
+    }
+    
+    ENTITY_UNIT {
+        uuid uuid PK
+        name string
+        slug string
+        entity uuid FK
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: ClosingEntryModel
+- **Mô tả**: Lưu trữ thông tin về bút toán đóng sổ
+- **Các trường chính**:
+  - `uuid`: UUID - Khóa chính
+  - `entity_model`: ForeignKey - Liên kết với Entity
+  - `ledger_model`: OneToOneField - Liên kết với Ledger
+  - `closing_date`: DateField - Ngày đóng sổ
+  - `posted`: BooleanField - Trạng thái đăng tải
+  - `markdown_notes`: TextField - Ghi chú
+
+##### Bảng: ClosingEntryTransactionModel
+- **Mô tả**: Lưu trữ thông tin về các giao dịch trong bút toán đóng sổ
+- **Các trường chính**:
+  - `uuid`: UUID - Khóa chính
+  - `closing_entry_model`: ForeignKey - Liên kết với ClosingEntry
+  - `account_model`: ForeignKey - Liên kết với Account
+  - `unit_model`: ForeignKey - Liên kết với EntityUnit
+  - `tx_type`: CharField - Loại giao dịch (ghi nợ/ghi có)
+  - `activity`: CharField - Loại hoạt động
+  - `balance`: DecimalField - Số dư
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+Kiểm thử sẽ tập trung vào các chức năng chính của quy trình đóng sổ kế toán, bao gồm:
+- Tạo bút toán đóng sổ
+- Tính toán giao dịch đóng sổ
+- Đăng tải và hủy đăng tải bút toán đóng sổ
+- Cập nhật giao dịch đóng sổ
+- Kiểm tra tính cân đối của bút toán đóng sổ
+- Cập nhật ngày đóng sổ gần nhất trong thông tin đơn vị
+
+### 5.2. Kịch Bản Kiểm Thử
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | CLE_TEST_001 | Tạo bút toán đóng sổ | Kiểm tra việc tạo bút toán đóng sổ mới | Đơn vị đã có dữ liệu kế toán | 1. Truy cập chức năng tạo bút toán đóng sổ<br>2. Nhập ngày đóng sổ<br>3. Gửi yêu cầu tạo | Bút toán đóng sổ mới được tạo thành công với các giao dịch đã được tính toán |
+| 2   | CLE_TEST_002 | Tạo bút toán đóng sổ với ngày trong tương lai | Kiểm tra xử lý lỗi khi tạo bút toán đóng sổ với ngày trong tương lai | Đơn vị đã có dữ liệu kế toán | 1. Truy cập chức năng tạo bút toán đóng sổ<br>2. Nhập ngày đóng sổ trong tương lai<br>3. Gửi yêu cầu tạo | Hệ thống hiển thị thông báo lỗi và không tạo bút toán đóng sổ |
+| 3   | CLE_TEST_003 | Đăng tải bút toán đóng sổ | Kiểm tra việc đăng tải bút toán đóng sổ | Bút toán đóng sổ đã được tạo và chưa đăng tải | 1. Truy cập chi tiết bút toán đóng sổ<br>2. Chọn hành động đăng tải<br>3. Xác nhận đăng tải | Bút toán đóng sổ được đăng tải thành công, ngày đóng sổ gần nhất của đơn vị được cập nhật |
+| 4   | CLE_TEST_004 | Hủy đăng tải bút toán đóng sổ | Kiểm tra việc hủy đăng tải bút toán đóng sổ | Bút toán đóng sổ đã được đăng tải | 1. Truy cập chi tiết bút toán đóng sổ<br>2. Chọn hành động hủy đăng tải<br>3. Xác nhận hủy đăng tải | Bút toán đóng sổ được hủy đăng tải thành công, ngày đóng sổ gần nhất của đơn vị được cập nhật |
+| 5   | CLE_TEST_005 | Cập nhật giao dịch đóng sổ | Kiểm tra việc cập nhật giao dịch trong bút toán đóng sổ | Bút toán đóng sổ đã được tạo và chưa đăng tải | 1. Truy cập chi tiết bút toán đóng sổ<br>2. Chọn hành động cập nhật giao dịch<br>3. Xác nhận cập nhật | Các giao dịch đóng sổ được tính toán lại và cập nhật thành công |
+| 6   | CLE_TEST_006 | Xóa bút toán đóng sổ | Kiểm tra việc xóa bút toán đóng sổ | Bút toán đóng sổ đã được tạo và chưa đăng tải | 1. Truy cập chi tiết bút toán đóng sổ<br>2. Chọn hành động xóa<br>3. Xác nhận xóa | Bút toán đóng sổ và các giao dịch liên quan được xóa thành công |
+| 7   | CLE_TEST_007 | Tìm kiếm bút toán đóng sổ | Kiểm tra việc tìm kiếm bút toán đóng sổ | Có nhiều bút toán đóng sổ trong hệ thống | 1. Truy cập danh sách bút toán đóng sổ<br>2. Nhập tiêu chí tìm kiếm<br>3. Thực hiện tìm kiếm | Kết quả tìm kiếm chính xác theo tiêu chí |
+| 8   | CLE_TEST_008 | Thêm ghi chú cho bút toán đóng sổ | Kiểm tra việc thêm ghi chú cho bút toán đóng sổ | Bút toán đóng sổ đã được tạo | 1. Truy cập form cập nhật bút toán đóng sổ<br>2. Nhập ghi chú<br>3. Lưu thay đổi | Ghi chú được lưu thành công |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Django Ledger Documentation
+- Accounting Principles - Weygandt, Kieso, Kimmel
+- Django Framework Documentation
+- Python Documentation
+
+### 6.2. Danh Mục Thuật Ngữ
+- **Closing Entry (Bút toán đóng sổ)**: Các bút toán được tạo ra vào cuối kỳ kế toán để kết chuyển số dư các tài khoản tạm thời sang tài khoản vĩnh viễn.
+- **Closing Date (Ngày đóng sổ)**: Ngày cuối cùng của kỳ kế toán, là ngày thực hiện đóng sổ.
+- **Temporary Accounts (Tài khoản tạm thời)**: Các tài khoản doanh thu, chi phí được đưa về số dư bằng 0 sau khi đóng sổ.
+- **Permanent Accounts (Tài khoản vĩnh viễn)**: Các tài khoản tài sản, nợ phải trả, vốn chủ sở hữu có số dư được chuyển sang kỳ kế toán tiếp theo.
+- **Period Lock (Khóa kỳ)**: Trạng thái ngăn chặn việc tạo hoặc sửa đổi các bút toán trong kỳ đã đóng.
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 25/07/2024 | AI Assistant | Tạo tài liệu ban đầu |

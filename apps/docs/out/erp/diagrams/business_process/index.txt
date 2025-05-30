@@ -1,0 +1,144 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:Tae6,# Sơ Đồ Quy Trình Nghiệp Vụ
+
+## 1. Quy Trình Mua Hàng
+
+```mermaid
+graph TD
+    A[Yêu Cầu Mua Hàng] --> B[Phê Duyệt YC]
+    B --> C[Đặt Hàng]
+    C --> D[Nhận Hàng]
+    D --> E[Kiểm Tra]
+    
+    E -->|Đạt| F[Nhập Kho]
+    E -->|Không Đạt| G[Trả Hàng]
+    
+    F --> H[Nhận Hóa Đơn]
+    H --> I[Hạch Toán]
+    I --> J[Thanh Toán]
+```
+
+## 2. Quy Trình Bán Hàng
+
+```mermaid
+graph TD
+    A[Đơn Đặt Hàng] --> B[Kiểm Tra Tồn Kho]
+    B -->|Đủ hàng| C[Xác Nhận Đơn]
+    B -->|Thiếu hàng| D[Thông Báo KH]
+    
+    C --> E[Xuất Kho]
+    E --> F[Giao Hàng]
+    F --> G[Xuất Hóa Đơn]
+    G --> H[Hạch Toán]
+    H --> I[Thu Tiền]
+```
+
+## 3. Quy Trình Sản Xuất
+
+```mermaid
+graph TD
+    A[Kế Hoạch SX] --> B[Dự Trù NVL]
+    B --> C[Mua NVL]
+    C --> D[Nhập Kho NVL]
+    
+    D --> E[Sản Xuất]
+    E --> F[QC Sản Phẩm]
+    F -->|Đạt| G[Nhập Kho TP]
+    F -->|Không Đạt| H[Phế Phẩm]
+    
+    G --> I[Tính Giá Thành]
+```
+
+## 4. Quy Trình Quản Lý Tiền
+
+```mermaid
+graph TD
+    A[Thu Tiền] --> B[Ghi Nhận Thu]
+    B --> C[Gửi Ngân Hàng]
+    
+    D[Chi Tiền] --> E[Duyệt Chi]
+    E --> F[Ghi Nhận Chi]
+    
+    G[Đối Chiếu NH] --> H[Xử Lý Chênh Lệch]
+    H --> I[Điều Chỉnh Sổ Sách]
+```
+
+## 5. Quy Trình Khấu Hao
+
+```mermaid
+graph TD
+    A[Ghi Nhận TSCĐ] --> B[Thiết Lập KH]
+    B --> C[Tính KH Hàng Tháng]
+    C --> D[Hạch Toán KH]
+    D --> E[Điều Chỉnh Nếu Cần]
+```
+
+## 6. Quy Trình Tính Lương
+
+```mermaid
+graph TD
+    A[Chấm Công] --> B[Tổng Hợp Công]
+    B --> C[Tính Lương]
+    C --> D[Tính BHXH]
+    D --> E[Tính Thuế TNCN]
+    E --> F[Lập Bảng Lương]
+    F --> G[Duyệt Lương]
+    G --> H[Chi Lương]
+```
+
+## 7. Quy Trình Kế Toán Thuế
+
+```mermaid
+graph TD
+    A[Ghi Nhận Phát Sinh] --> B[Tính Thuế GTGT]
+    A --> C[Tính Thuế TNDN]
+    
+    B --> D[Kê Khai GTGT]
+    C --> E[Kê Khai TNDN]
+    
+    D --> F[Nộp Thuế]
+    E --> F
+```
+
+## 8. Quy Trình Đóng Sổ
+
+```mermaid
+graph TD
+    A[Kiểm Tra Số Liệu] --> B[Bút Toán Điều Chỉnh]
+    B --> C[Khóa Sổ Phụ]
+    C --> D[Kết Chuyển Số Dư]
+    D --> E[Lập BCTC]
+    E --> F[Phê Duyệt]
+    F --> G[Mở Sổ Kỳ Mới]
+```
+
+## 9. Quy Trình Báo Cáo
+
+```mermaid
+graph TD
+    A[Thu Thập Số Liệu] --> B[Kiểm Tra ĐC]
+    B --> C[Lập Báo Cáo]
+    C --> D[Soát Xét]
+    D -->|OK| E[Trình Duyệt]
+    D -->|Cần sửa| B
+    E --> F[Phát Hành]
+```
+
+## 10. Quy Trình Kiểm Soát
+
+```mermaid
+graph TD
+    A[Thiết Lập KSN] --> B[Thực Hiện KSN]
+    B --> C[Phát Hiện Sai Sót]
+    C --> D[Điều Chỉnh]
+    D --> E[Báo Cáo]
+    E --> F[Cập Nhật QT]
+6:["slug","erp/diagrams/business_process","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/diagrams/business_process","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"diagrams\",\"business_process\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/diagrams/business_process","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

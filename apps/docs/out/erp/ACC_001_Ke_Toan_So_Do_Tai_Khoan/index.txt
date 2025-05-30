@@ -1,0 +1,236 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T3a35,# ACC_001_Kế Toán_Sơ Đồ Tài Khoản
+
+*Phiên bản: 1.0*  
+*Người tạo: [Tên Tác Giả]*  
+*Ngày tạo: [DD/MM/YYYY]*  
+*Cập nhật lần cuối: [DD/MM/YYYY]*  
+*Người cập nhật: [Tên Người Cập Nhật]*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Sơ đồ tài khoản (Chart of Accounts) là cấu trúc nền tảng của hệ thống kế toán, định nghĩa tất cả các tài khoản được sử dụng để ghi nhận và phân loại các giao dịch tài chính của doanh nghiệp. Nghiệp vụ này cho phép người dùng tạo, quản lý và tùy chỉnh sơ đồ tài khoản theo chuẩn kế toán Việt Nam (TT200) hoặc các chuẩn kế toán khác, đảm bảo tính nhất quán và chính xác trong việc ghi nhận các giao dịch tài chính.
+
+### 1.2. Phạm Vi Áp Dụng
+Nghiệp vụ này áp dụng cho tất cả các đơn vị (Entity) trong hệ thống ERP. Mỗi đơn vị phải có ít nhất một sơ đồ tài khoản mặc định để có thể thực hiện các giao dịch tài chính. Người dùng có quyền quản trị (Admin) hoặc quản lý (Manager) của đơn vị mới có thể tạo và quản lý sơ đồ tài khoản.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Sơ đồ tài khoản (Chart of Accounts) | Cấu trúc phân cấp các tài khoản kế toán được sử dụng để ghi nhận và phân loại các giao dịch tài chính |
+| Tài khoản (Account) | Đơn vị cơ bản trong sơ đồ tài khoản, được sử dụng để ghi nhận các giao dịch tài chính |
+| Mã tài khoản (Account Code) | Mã số định danh duy nhất cho mỗi tài khoản, thường tuân theo chuẩn kế toán cụ thể (VD: 111 - Tiền mặt) |
+| Vai trò tài khoản (Account Role) | Phân loại chức năng của tài khoản (VD: ASSET_CA_CASH - Tài sản tiền mặt) |
+| Loại số dư (Balance Type) | Xác định tài khoản có số dư bên Nợ (Debit) hay bên Có (Credit) |
+| Node gốc (Root Node) | Tài khoản cấp cao nhất trong cấu trúc phân cấp của sơ đồ tài khoản |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | ACC_002 | Sổ Cái | Tài liệu mô tả quy trình quản lý sổ cái và các bút toán kế toán |
+| 2   | ACC_003 | Bút Toán Kế Toán | Tài liệu mô tả quy trình tạo và quản lý các bút toán |
+| 3   | TT200 | Thông tư 200/2014/TT-BTC | Thông tư hướng dẫn chế độ kế toán doanh nghiệp |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình quản lý sơ đồ tài khoản bao gồm việc tạo mới, cấu hình, quản lý và sử dụng sơ đồ tài khoản trong hệ thống ERP. Khi một đơn vị mới được tạo, hệ thống sẽ tự động tạo một sơ đồ tài khoản mặc định dựa trên cấu hình hệ thống. Người dùng có thể tùy chỉnh sơ đồ tài khoản này hoặc tạo mới sơ đồ tài khoản khác phù hợp với nhu cầu của doanh nghiệp.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Khởi tạo Entity] --> B[Tạo mới Chart of Accounts]
+    B --> C{Sử dụng CoA mặc định?}
+    C -->|Có| D[Sử dụng DEFAULT_CHART_OF_ACCOUNTS]
+    C -->|Không| E[Tạo CoA tùy chỉnh]
+    D --> F[Khởi tạo cấu trúc cây tài khoản]
+    E --> F
+    F --> G[Tạo các node gốc]
+    G --> H[Thêm các tài khoản con]
+    H --> I[Thiết lập tài khoản mặc định]
+    I --> J[Sử dụng CoA trong giao dịch]
+    J --> K{Cần cập nhật CoA?}
+    K -->|Có| L[Thêm/Sửa/Xóa tài khoản]
+    K -->|Không| M[Kết thúc]
+    L --> J
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Khởi tạo Entity và Tạo mới Chart of Accounts
+- **Mô tả**: Khi một đơn vị (Entity) mới được tạo trong hệ thống, một sơ đồ tài khoản (Chart of Accounts) mặc định sẽ được tạo tự động
+- **Đầu vào**: Thông tin đơn vị (tên, mã, người quản trị)
+- **Đầu ra**: Đơn vị mới với sơ đồ tài khoản mặc định
+- **Người thực hiện**: Người quản trị hệ thống hoặc người có quyền tạo đơn vị
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập và có quyền tạo đơn vị
+- **Xử lý ngoại lệ**: Nếu có lỗi trong quá trình tạo sơ đồ tài khoản, hệ thống sẽ hiển thị thông báo lỗi và yêu cầu người dùng thử lại
+
+#### 2.3.2. Cấu hình Sơ đồ tài khoản
+- **Mô tả**: Người dùng có thể chọn sử dụng sơ đồ tài khoản mặc định hoặc tạo sơ đồ tài khoản tùy chỉnh
+- **Đầu vào**: Lựa chọn của người dùng (mặc định/tùy chỉnh)
+- **Đầu ra**: Sơ đồ tài khoản được cấu hình
+- **Người thực hiện**: Người quản trị đơn vị hoặc kế toán trưởng
+- **Điều kiện tiên quyết**: Đơn vị đã được tạo
+- **Xử lý ngoại lệ**: Nếu người dùng không có quyền cấu hình, hệ thống sẽ hiển thị thông báo lỗi
+
+#### 2.3.3. Khởi tạo cấu trúc cây tài khoản
+- **Mô tả**: Hệ thống tạo cấu trúc cây tài khoản với các node gốc (ROOT_COA, ROOT_ASSETS, ROOT_LIABILITIES, ROOT_CAPITAL, ROOT_INCOME, ROOT_EXPENSES)
+- **Đầu vào**: Sơ đồ tài khoản đã được tạo
+- **Đầu ra**: Cấu trúc cây tài khoản với các node gốc
+- **Người thực hiện**: Hệ thống tự động
+- **Điều kiện tiên quyết**: Sơ đồ tài khoản đã được tạo
+- **Xử lý ngoại lệ**: Nếu các node gốc đã tồn tại, hệ thống sẽ bỏ qua bước này
+
+#### 2.3.4. Thêm các tài khoản con
+- **Mô tả**: Người dùng thêm các tài khoản con vào cấu trúc cây tài khoản
+- **Đầu vào**: Thông tin tài khoản (mã, tên, vai trò, loại số dư, tài khoản cha)
+- **Đầu ra**: Tài khoản mới được thêm vào cấu trúc cây
+- **Người thực hiện**: Người quản trị đơn vị hoặc kế toán trưởng
+- **Điều kiện tiên quyết**: Cấu trúc cây tài khoản đã được khởi tạo
+- **Xử lý ngoại lệ**: Nếu mã tài khoản đã tồn tại, hệ thống sẽ hiển thị thông báo lỗi
+
+#### 2.3.5. Thiết lập tài khoản mặc định
+- **Mô tả**: Người dùng thiết lập một sơ đồ tài khoản làm mặc định cho đơn vị
+- **Đầu vào**: Sơ đồ tài khoản cần thiết lập làm mặc định
+- **Đầu ra**: Sơ đồ tài khoản được đánh dấu là mặc định
+- **Người thực hiện**: Người quản trị đơn vị hoặc kế toán trưởng
+- **Điều kiện tiên quyết**: Sơ đồ tài khoản đã được cấu hình đầy đủ
+- **Xử lý ngoại lệ**: Nếu đơn vị đã có sơ đồ tài khoản mặc định, hệ thống sẽ cập nhật sơ đồ tài khoản mặc định mới
+
+#### 2.3.6. Sử dụng CoA trong giao dịch
+- **Mô tả**: Sơ đồ tài khoản được sử dụng trong các giao dịch tài chính của đơn vị
+- **Đầu vào**: Giao dịch tài chính cần ghi nhận
+- **Đầu ra**: Giao dịch được ghi nhận vào các tài khoản phù hợp
+- **Người thực hiện**: Người dùng có quyền tạo giao dịch
+- **Điều kiện tiên quyết**: Sơ đồ tài khoản đã được thiết lập làm mặc định
+- **Xử lý ngoại lệ**: Nếu tài khoản cần sử dụng không tồn tại, hệ thống sẽ hiển thị thông báo lỗi
+
+#### 2.3.7. Cập nhật Sơ đồ tài khoản
+- **Mô tả**: Người dùng cập nhật sơ đồ tài khoản khi có thay đổi về cấu trúc tài khoản
+- **Đầu vào**: Thông tin cập nhật (thêm/sửa/xóa tài khoản)
+- **Đầu ra**: Sơ đồ tài khoản được cập nhật
+- **Người thực hiện**: Người quản trị đơn vị hoặc kế toán trưởng
+- **Điều kiện tiên quyết**: Người dùng có quyền cập nhật sơ đồ tài khoản
+- **Xử lý ngoại lệ**: Nếu tài khoản đã được sử dụng trong giao dịch, không thể xóa tài khoản đó
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant A as Người dùng
+    participant B as Hệ thống
+    participant C as Cơ sở dữ liệu
+    
+    A->>B: Tạo đơn vị mới
+    B->>C: Lưu thông tin đơn vị
+    B->>C: Tạo sơ đồ tài khoản mặc định
+    C-->>B: Xác nhận tạo thành công
+    B-->>A: Hiển thị thông tin đơn vị và CoA
+    
+    A->>B: Yêu cầu cấu hình CoA
+    B->>C: Truy vấn thông tin CoA
+    C-->>B: Trả về thông tin CoA
+    B-->>A: Hiển thị form cấu hình
+    
+    A->>B: Gửi thông tin cấu hình
+    B->>C: Cập nhật CoA
+    C-->>B: Xác nhận cập nhật thành công
+    B-->>A: Hiển thị CoA đã cập nhật
+    
+    A->>B: Thêm tài khoản mới
+    B->>C: Kiểm tra tài khoản tồn tại
+    C-->>B: Kết quả kiểm tra
+    B->>C: Lưu tài khoản mới
+    C-->>B: Xác nhận lưu thành công
+    B-->>A: Hiển thị tài khoản mới
+    
+    A->>B: Thiết lập CoA mặc định
+    B->>C: Cập nhật trạng thái mặc định
+    C-->>B: Xác nhận cập nhật thành công
+    B-->>A: Hiển thị thông báo thành công
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+1. **Nhập khẩu sơ đồ tài khoản từ file**:
+   - Người dùng có thể nhập khẩu sơ đồ tài khoản từ file CSV hoặc Excel
+   - Hệ thống sẽ kiểm tra tính hợp lệ của dữ liệu trước khi nhập khẩu
+   - Nếu có lỗi, hệ thống sẽ hiển thị danh sách lỗi và yêu cầu người dùng sửa lỗi
+
+2. **Sao chép sơ đồ tài khoản từ đơn vị khác**:
+   - Người dùng có thể sao chép sơ đồ tài khoản từ một đơn vị khác
+   - Hệ thống sẽ tạo bản sao của sơ đồ tài khoản và gán cho đơn vị hiện tại
+   - Người dùng có thể tùy chỉnh sơ đồ tài khoản sau khi sao chép
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | COA_CREATE | Tạo mới sơ đồ tài khoản | Cho phép người dùng tạo mới sơ đồ tài khoản | Cao |
+| 2   | COA_CONFIG | Cấu hình sơ đồ tài khoản | Cho phép người dùng cấu hình sơ đồ tài khoản | Cao |
+| 3   | COA_LIST | Xem danh sách sơ đồ tài khoản | Hiển thị danh sách sơ đồ tài khoản của đơn vị | Cao |
+| 4   | COA_DETAIL | Xem chi tiết sơ đồ tài khoản | Hiển thị chi tiết sơ đồ tài khoản và cấu trúc cây tài khoản | Cao |
+| 5   | COA_UPDATE | Cập nhật sơ đồ tài khoản | Cho phép người dùng cập nhật thông tin sơ đồ tài khoản | Cao |
+| 6   | COA_DELETE | Xóa sơ đồ tài khoản | Cho phép người dùng xóa sơ đồ tài khoản | Trung bình |
+| 7   | COA_DEFAULT | Thiết lập sơ đồ tài khoản mặc định | Cho phép người dùng thiết lập sơ đồ tài khoản mặc định cho đơn vị | Cao |
+| 8   | ACC_CREATE | Tạo mới tài khoản | Cho phép người dùng tạo mới tài khoản trong sơ đồ tài khoản | Cao |
+| 9   | ACC_UPDATE | Cập nhật tài khoản | Cho phép người dùng cập nhật thông tin tài khoản | Cao |
+| 10  | ACC_DELETE | Xóa tài khoản | Cho phép người dùng xóa tài khoản | Trung bình |
+| 11  | ACC_LOCK | Khóa/Mở khóa tài khoản | Cho phép người dùng khóa hoặc mở khóa tài khoản | Trung bình |
+| 12  | COA_IMPORT | Nhập khẩu sơ đồ tài khoản | Cho phép người dùng nhập khẩu sơ đồ tài khoản từ file | Thấp |
+| 13  | COA_EXPORT | Xuất sơ đồ tài khoản | Cho phép người dùng xuất sơ đồ tài khoản ra file | Thấp |
+| 14  | COA_COPY | Sao chép sơ đồ tài khoản | Cho phép người dùng sao chép sơ đồ tài khoản từ đơn vị khác | Thấp |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. COA_CREATE: Tạo mới sơ đồ tài khoản
+- **Mô tả**: Cho phép người dùng tạo mới sơ đồ tài khoản cho đơn vị
+- **Đầu vào**: 
+  - Tên sơ đồ tài khoản
+  - Mô tả (tùy chọn)
+  - Lựa chọn sử dụng sơ đồ tài khoản mặc định hoặc tùy chỉnh
+- **Đầu ra**: Sơ đồ tài khoản mới được tạo
+- **Điều kiện tiên quyết**: Người dùng có quyền quản trị đơn vị
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập trang tạo mới sơ đồ tài khoản
+  2. Người dùng nhập thông tin sơ đồ tài khoản
+  3. Người dùng chọn sử dụng sơ đồ tài khoản mặc định hoặc tùy chỉnh
+  4. Hệ thống kiểm tra tính hợp lệ của thông tin
+  5. Hệ thống tạo sơ đồ tài khoản mới
+  6. Hệ thống khởi tạo cấu trúc cây tài khoản
+  7. Hệ thống hiển thị thông báo thành công
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu thông tin không hợp lệ, hệ thống hiển thị thông báo lỗi
+  2. Nếu người dùng không có quyền, hệ thống hiển thị thông báo lỗi
+- **Giao diện liên quan**: Trang tạo mới sơ đồ tài khoản
+
+#### 3.2.2. COA_CONFIG: Cấu hình sơ đồ tài khoản
+- **Mô tả**: Cho phép người dùng cấu hình sơ đồ tài khoản
+- **Đầu vào**: 
+  - Sơ đồ tài khoản cần cấu hình
+  - Danh sách tài khoản cần thêm/sửa/xóa
+- **Đầu ra**: Sơ đồ tài khoản được cấu hình
+- **Điều kiện tiên quyết**: Sơ đồ tài khoản đã được tạo
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập trang cấu hình sơ đồ tài khoản
+  2. Hệ thống hiển thị cấu trúc cây tài khoản hiện tại
+  3. Người dùng thêm/sửa/xóa tài khoản
+  4. Hệ thống kiểm tra tính hợp lệ của thông tin
+  5. Hệ thống cập nhật cấu trúc cây tài khoản
+  6. Hệ thống hiển thị thông báo thành công
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu thông tin không hợp lệ, hệ thống hiển thị thông báo lỗi
+  2. Nếu tài khoản đã được sử dụng trong giao dịch, không thể xóa
+- **Giao diện liên quan**: Trang cấu hình sơ đồ tài khoản
+6:["slug","erp/ACC_001_Ke_Toan_So_Do_Tai_Khoan","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/ACC_001_Ke_Toan_So_Do_Tai_Khoan","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"ACC_001_Ke_Toan_So_Do_Tai_Khoan\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/ACC_001_Ke_Toan_So_Do_Tai_Khoan","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

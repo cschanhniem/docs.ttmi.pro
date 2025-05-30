@@ -1,0 +1,83 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:Tdf0,# Hệ Thống Tài Khoản (Chart of Accounts)
+
+Hệ thống tài khoản là cấu trúc tổ chức cơ bản trong kế toán, cung cấp danh sách đầy đủ của mọi tài khoản trong hệ thống kế toán. 
+
+## 1. Cấu Trúc Tổ Chức
+- Hoạt động như một hệ thống phân loại để tổ chức tất cả các tài khoản tài chính
+- Nhóm các tài khoản vào một hệ thống phân cấp logic (Tài sản, Nợ phải trả, Vốn chủ sở hữu, Doanh thu, Chi phí)
+- Trong hệ thống của chúng ta, điều này được quản lý thông qua trường `role` và mối quan hệ cha-con
+
+## 2. Phân Loại Tài Khoản
+- Xác định loại và mục đích của từng tài khoản (ví dụ: tài khoản tài sản, tài khoản nợ phải trả)
+- Giúp duy trì tính nhất quán trong ghi chép tài chính
+- Hệ thống của chúng ta sử dụng các trường `role`, `balance_type`, và `account_type_code` để phân loại
+
+## 3. Mối Quan Hệ Giữa Các Tài Khoản
+- Thể hiện mối quan hệ giữa các tài khoản thông qua hệ thống phân cấp cha-con
+- Trong hệ thống của chúng ta, điều này được theo dõi thông qua `parent_account_code` và `is_parent_account`
+
+## 4. Báo Cáo Tài Chính
+- Cho phép tổ chức hợp lý các báo cáo tài chính
+- Hỗ trợ trong việc tạo bảng cân đối kế toán, báo cáo kết quả kinh doanh, v.v.
+- Hệ thống của chúng ta sử dụng `role` và `balance_type` để xác định vị trí của tài khoản trong báo cáo
+
+## 5. Tiêu Chuẩn Hóa
+- Cung cấp cấu trúc nhất quán cho việc ghi chép giao dịch
+- Đảm bảo tất cả các đơn vị trong tổ chức tuân theo cùng một nguyên tắc kế toán
+- Chúng ta thực hiện điều này thông qua các mã và vai trò được tiêu chuẩn hóa
+
+## Cấu Trúc Điển Hình
+```mermaid
+graph TD
+    A[Hệ Thống Tài Khoản] --> B[Tài Sản]
+    A --> C[Nợ Phải Trả]
+    A --> D[Vốn Chủ Sở Hữu]
+    A --> E[Doanh Thu]
+    A --> F[Chi Phí]
+    
+    B --> B1[Tài Sản Ngắn Hạn]
+    B --> B2[Tài Sản Cố Định]
+    B1 --> B1a[Tiền Mặt]
+    B1 --> B1b[Phải Thu]
+    
+    C --> C1[Nợ Ngắn Hạn]
+    C --> C2[Nợ Dài Hạn]
+    C1 --> C1a[Phải Trả]
+    C1 --> C1b[Vay Ngắn Hạn]
+```
+
+## Vai Trò Của ChartOfAccountModel Trong Hệ Thống
+ChartOfAccountModel trong hệ thống của chúng ta đóng vai trò là container để tổ chức các tài khoản và thực thi các mối quan hệ này. Nó đảm bảo:
+
+1. Mỗi đơn vị có ít nhất một hệ thống tài khoản
+2. Các tài khoản trong hệ thống tuân theo quy tắc đánh số nhất quán (thông qua tiền tố mã)
+3. Duy trì đúng các mối quan hệ phân cấp
+4. Vai trò và loại tài khoản được thực thi đúng quy định
+
+## Các Trường Quan Trọng
+- `code`: Mã tài khoản
+- `name`: Tên tài khoản
+- `role`: Vai trò của tài khoản
+- `balance_type`: Loại số dư (Nợ/Có)
+- `parent_account_code`: Mã tài khoản cha
+- `is_parent_account`: Là tài khoản tổng hợp?
+- `account_type_code`: Mã loại tài khoản
+- `currency_code`: Mã tiền tệ
+- `ar_ap_tracking_type`: Loại theo dõi công nợ
+
+## Ràng Buộc Tài Khoản
+Mỗi tài khoản có thể có các ràng buộc khác nhau:
+- Mã ràng buộc (VD: BP - Bộ phận, VV - Vụ việc)
+- Thứ tự ràng buộc
+- Tên ràng buộc
+- Bắt buộc nhập hay không
+6:["slug","erp/he_thong_tai_khoan","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/he_thong_tai_khoan","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"he_thong_tai_khoan\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/he_thong_tai_khoan","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

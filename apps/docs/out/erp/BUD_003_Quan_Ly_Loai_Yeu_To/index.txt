@@ -1,0 +1,259 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T3734,# BUD_003_Budget_Quản Lý Loại Yếu Tố
+
+*Phiên bản: 1.0*
+*Người tạo: Gemini AI Assistant*
+*Ngày tạo: 2024-07-30*
+*Cập nhật lần cuối: 2024-07-30*
+*Người cập nhật: Gemini AI Assistant*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Nghiệp vụ Quản Lý Loại Yếu Tố (trong mã nguồn là `LoaiYeuToModel`, còn được gọi là Factor Type) cho phép người dùng định nghĩa và quản lý các loại yếu tố (ví dụ: yếu tố chi phí, yếu tố sản xuất,...) trong một đơn vị (entity). Mỗi loại yếu tố được xác định bởi một mã loại, tên loại, và trạng thái. Nghiệp vụ này cung cấp một danh mục các loại yếu tố có thể được sử dụng và tham chiếu trong các module khác của hệ thống ERP, giúp chuẩn hóa và phân loại dữ liệu.
+
+### 1.2. Phạm Vi Áp Dụng
+- Áp dụng cho từng Đơn vị (Entity) trong hệ thống.
+- Quản trị viên hệ thống, kế toán trưởng, hoặc người dùng được phân quyền cấu hình danh mục.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Loại Yếu Tố | Một danh mục hoặc phân loại cho các yếu tố khác nhau trong hệ thống. Trong mã nguồn là `LoaiYeuToModel`. |
+| Đơn vị (Entity) | Tổ chức hoặc công ty mà Loại Yếu Tố được định nghĩa và áp dụng. |
+| `ma_loai` | Mã định danh duy nhất cho một Loại Yếu Tố trong một đơn vị. |
+| `ten_loai` | Tên mô tả của Loại Yếu Tố. |
+| `ten_loai2` | Tên thay thế hoặc tên tiếng Anh của Loại Yếu Tố. |
+| `status` | Trạng thái của Loại Yếu Tố (ví dụ: '1' = hoạt động, '0' = không hoạt động). |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | `django_ledger/models/loai_yeu_to.py` | Model Định Nghĩa Loại Yếu Tố | Định nghĩa cấu trúc dữ liệu cho `LoaiYeuToModel`. |
+| 2   | `django_ledger/api/views/loai_yeu_to.py` | API Endpoints Loại Yếu Tố | Các điểm cuối API để tương tác với nghiệp vụ Quản Lý Loại Yếu Tố. |
+| 3   | `django_ledger/api/serializers/loai_yeu_to.py` | Serializers Loại Yếu Tố | Định dạng dữ liệu JSON cho API và thực hiện validation. |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Người dùng có thẩm quyền sẽ tương tác với hệ thống (qua UI hoặc API) để thực hiện các thao tác CRUD (Create, Read, Update, Delete) trên các Loại Yếu Tố. Hệ thống, thông qua `LoaiYeuToViewSet` và `LoaiYeuToModelSerializer`, sẽ validate dữ liệu, xử lý logic và tương tác với `LoaiYeuToModel` để cập nhật cơ sở dữ liệu.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Người dùng yêu cầu thao tác Loại Yếu Tố] --> B{API Gateway nhận yêu cầu};
+    B --> C[Xác thực & Ủy quyền];
+    C --> D[LoaiYeuToViewSet];
+    D --> E[LoaiYeuToModelSerializer (Validate)];
+    E -- Dữ liệu hợp lệ --> F[LoaiYeuToModel (ORM)];
+    F --> G[(Cơ sở dữ liệu)];
+    G --> F;
+    F --> D;
+    E -- Dữ liệu không hợp lệ --> D[Báo lỗi cho ViewSet];
+    D --> B;
+    B --> A[Trả kết quả cho người dùng];
+
+    subgraph \"Thao tác Loại Yếu Tố\"
+        direction LR
+        AA[Tạo mới Loại Yếu Tố] --> AB{Validate dữ liệu (Serializer)};
+        AB -- hợp lệ --> AC[Lưu Loại Yếu Tố (Model)];
+        AB -- không hợp lệ --> AD[Báo lỗi];
+        AE[Xem DS/chi tiết Loại Yếu Tố] --> AF[Truy vấn Loại Yếu Tố (Model QuerySet)];
+        AG[Cập nhật Loại Yếu Tố] --> AH{Validate dữ liệu (Serializer)};
+        AH -- hợp lệ --> AI[Cập nhật Loại Yếu Tố (Model)];
+        AH -- không hợp lệ --> AD;
+        AJ[Xóa Loại Yếu Tố] --> AK[Xóa Loại Yếu Tố (Model)];
+    end
+    D --> AA & AE & AG & AJ
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Tạo Mới Loại Yếu Tố
+- **Mô tả**: Người dùng nhập thông tin để tạo một Loại Yếu Tố mới.
+- **Đầu vào**: Dữ liệu Loại Yếu Tố (`ma_loai`, `ten_loai`, `ten_loai2` (optional), `status` (optional, default '1')). `entity_model` được xác định từ URL và gán trong `perform_create` của ViewSet.
+- **Đầu ra**: Loại Yếu Tố mới được tạo hoặc thông báo lỗi.
+- **Người thực hiện**: Quản trị viên, người có quyền cấu hình danh mục.
+- **Điều kiện tiên quyết**: Đăng nhập, có quyền tạo Loại Yếu Tố cho đơn vị. `ma_loai` phải là duy nhất trong đơn vị. `ma_loai` và `ten_loai` không được để trống.
+- **Xử lý ngoại lệ**: Dữ liệu không hợp lệ (thiếu trường, sai định dạng), `ma_loai` đã tồn tại, đơn vị không tồn tại.
+
+#### 2.3.2. Xem/Tìm Kiếm Loại Yếu Tố
+- **Mô tả**: Người dùng xem danh sách hoặc chi tiết một Loại Yếu Tố. `LoaiYeuToViewSet` hỗ trợ phân trang.
+- **Đầu vào**: UUID của Loại Yếu Tố (để xem chi tiết), hoặc các tham số query để lọc (nếu ViewSet hỗ trợ filter fields), thông tin phân trang (`page`, `page_size`).
+- **Đầu ra**: Danh sách hoặc chi tiết Loại Yếu Tố.
+- **Người thực hiện**: Người dùng có quyền xem.
+- **Điều kiện tiên quyết**: Đăng nhập vào hệ thống.
+- **Xử lý ngoại lệ**: Loại Yếu Tố không tồn tại.
+
+#### 2.3.3. Cập Nhật Loại Yếu Tố
+- **Mô tả**: Người dùng thay đổi thông tin của một Loại Yếu Tố đã có.
+- **Đầu vào**: UUID của Loại Yếu Tố và dữ liệu cần cập nhật.
+- **Đầu ra**: Loại Yếu Tố được cập nhật hoặc thông báo lỗi.
+- **Người thực hiện**: Quản trị viên, người có quyền cấu hình danh mục.
+- **Điều kiện tiên quyết**: Đăng nhập, có quyền sửa. Loại Yếu Tố phải tồn tại. Nếu `ma_loai` thay đổi, mã mới không được trùng.
+- **Xử lý ngoại lệ**: Dữ liệu không hợp lệ, Loại Yếu Tố không tồn tại, `ma_loai` mới bị trùng.
+
+#### 2.3.4. Xóa Loại Yếu Tố
+- **Mô tả**: Người dùng xóa một Loại Yếu Tố.
+- **Đầu vào**: UUID của Loại Yếu Tố.
+- **Đầu ra**: Thông báo xóa thành công (HTTP 204) hoặc lỗi.
+- **Người thực hiện**: Quản trị viên, người có quyền cấu hình danh mục.
+- **Điều kiện tiên quyết**: Đăng nhập, có quyền xóa. Loại Yếu Tố phải tồn tại. Cần cân nhắc các ràng buộc nếu Loại Yếu Tố này đang được sử dụng ở nơi khác.
+- **Xử lý ngoại lệ**: Loại Yếu Tố không tồn tại, hoặc không thể xóa do ràng buộc dữ liệu.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram) - Tạo mới Loại Yếu Tố
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant APIView as LoaiYeuToViewSet
+    participant Serializer as LoaiYeuToModelSerializer
+    participant Model as LoaiYeuToModel
+    participant DB as Database
+
+    User->>APIView: POST /api/{entity_slug}/factor-types/ (data)
+    APIView->>Serializer: serializer_class(data=request.data)
+    Serializer->>Serializer: is_valid(raise_exception=True) # Includes validate_ma_loai, validate_ten_loai
+    alt Dữ liệu không hợp lệ
+        Serializer-->>APIView: Raise ValidationError
+        APIView-->>User: HTTP 400 (Error details)
+    else Dữ liệu hợp lệ
+        APIView->>APIView: perform_create(serializer)
+        APIView->>Model: EntityModel.objects.for_user().get(slug=entity_slug) # Fetch entity
+        Model-->>APIView: entity_model
+        APIView->>Serializer: save(entity_model=entity_model) # Serializer.create() is called
+        Serializer->>Model: LoaiYeuToModel.objects.create(**validated_data_with_entity)
+        Model->>DB: INSERT INTO loai_yeu_to
+        DB-->>Model: created_instance
+        Model-->>Serializer: created_instance
+        Serializer-->>APIView: created_instance
+        APIView-->>User: HTTP 201 (serialized_instance_data)
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Cập nhật `ma_loai`**: Tính duy nhất của `(entity_model, ma_loai)` được đảm bảo bởi `unique_together` trong model.
+- **Phân trang danh sách**: `LoaiYeuToViewSet` có logic phân trang tùy chỉnh trong method `list`.
+
+## 3. Yêu Cầu Chức Năng
+(Dựa trên các actions của `LoaiYeuToViewSet`)
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | BUD003-LYT-LIST | Xem danh sách Loại Yếu Tố | Lấy danh sách các Loại Yếu Tố cho một đơn vị, hỗ trợ phân trang. | Cao |
+| 2   | BUD003-LYT-CREATE | Tạo mới Loại Yếu Tố | Tạo một Loại Yếu Tố mới. | Cao |
+| 3   | BUD003-LYT-RETRIEVE | Xem chi tiết Loại Yếu Tố | Lấy thông tin chi tiết của một Loại Yếu Tố bằng UUID. | Cao |
+| 4   | BUD003-LYT-UPDATE | Cập nhật Loại Yếu Tố | Cập nhật toàn bộ thông tin của một Loại Yếu Tố đã có. | Cao |
+| 5   | BUD003-LYT-PARTIAL-UPDATE | Cập nhật một phần Loại Yếu Tố | Cập nhật một phần thông tin của một Loại Yếu Tố đã có. | Cao |
+| 6   | BUD003-LYT-DELETE | Xóa Loại Yếu Tố | Xóa một Loại Yếu Tố. | Cao |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. BUD003-LYT-CREATE: Tạo mới Loại Yếu Tố
+- **Mô tả**: Cho phép tạo một Loại Yếu Tố mới.
+- **Đầu vào**: Dữ liệu JSON: `ma_loai`, `ten_loai`, `ten_loai2` (optional), `status` (optional).
+- **Đầu ra**: Dữ liệu JSON của Loại Yếu Tố vừa tạo.
+- **Điều kiện tiên quyết**: `ma_loai` và `ten_loai` không trống. `ma_loai` duy nhất trong `entity_model`.
+- **Luồng xử lý chính**:
+  1. `LoaiYeuToViewSet` nhận POST request.
+  2. `LoaiYeuToModelSerializer` được khởi tạo, `is_valid()` được gọi (bao gồm `validate_ma_loai`, `validate_ten_loai`).
+  3. `viewset.perform_create(serializer)` được gọi:
+     a. Lấy `entity_model` từ `entity_slug`.
+     b. Gọi `serializer.save(entity_model=entity_model)`. Bên trong `serializer.create()` sẽ gọi `LoaiYeuToModel.objects.create()`.
+  4. Trả về HTTP 201 với dữ liệu đã serialize.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  - Dữ liệu không hợp lệ: HTTP 400.
+  - `entity_slug` không hợp lệ: HTTP 404 (xử lý bởi `EntityRelatedViewSet`).
+- **Giao diện liên quan**: Form tạo mới Loại Yếu Tố.
+
+*(Các chức năng LIST, RETRIEVE, UPDATE, DELETE được cung cấp bởi `LoaiYeuToViewSet` và sử dụng `LoaiYeuToModelSerializer` tương tự.)*
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+Kiến trúc tương tự như Quản Lý Chi Phí, dựa trên các thành phần Django và DRF:
+- **View Layer**: `LoaiYeuToViewSet`.
+- **Serializer Layer**: `LoaiYeuToModelSerializer`.
+- **Model Layer**: `LoaiYeuToModel`, `LoaiYeuToModelManager`.
+- **Database Layer**: Django ORM.
+
+```mermaid
+graph TD
+    Client --> Nginx --> Gunicorn
+    Gunicorn --> DjangoApp[Django Application]
+
+    subgraph DjangoApp
+        APILayer[API Layer: LoaiYeuToViewSet]
+        SerializerLayer[Serializer Layer: LoaiYeuToModelSerializer]
+        ModelLayer[Model Layer: LoaiYeuToModel, Manager]
+        Database[(PostgreSQL Database)]
+
+        APILayer -->|uses| SerializerLayer
+        SerializerLayer -->|interacts with| ModelLayer
+        APILayer -->|queries via ORM| ModelLayer
+        ModelLayer -->|maps to| Database
+    end
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Quản Lý Loại Yếu Tố (`LoaiYeuToModel`)
+- **Mô tả**: CRUD các Loại Yếu Tố.
+- **Base URL**: `/api/{entity_slug}/factor-types/` (Giả định `factor-types` là slug đã đăng ký trong `urls.py` cho `LoaiYeuToViewSet`)
+- **Endpoints** (cung cấp bởi `LoaiYeuToViewSet`):
+  - `GET /`: Lấy danh sách Loại Yếu Tố (hỗ trợ phân trang `ERPPagination`, với logic tùy chỉnh trong method `list` của ViewSet).
+    - Query params: `page`, `page_size`.
+  - `POST /`: Tạo Loại Yếu Tố mới.
+  - `GET /{uuid}/`: Lấy chi tiết Loại Yếu Tố.
+  - `PUT /{uuid}/`: Cập nhật toàn bộ Loại Yếu Tố.
+  - `PATCH /{uuid}/`: Cập nhật một phần Loại Yếu Tố.
+  - `DELETE /{uuid}/`: Xóa Loại Yếu Tố.
+
+### 4.3. Service Logic
+Không có lớp Service riêng biệt. Logic được xử lý trong:
+- `LoaiYeuToViewSet`: Xử lý request, gọi serializer, lọc queryset theo `entity_slug`, tùy chỉnh `list` và `perform_create`.
+- `LoaiYeuToModelSerializer`: Validate dữ liệu (`ma_loai`, `ten_loai`), tùy chỉnh `create`.
+- `LoaiYeuToModel` và `LoaiYeuToModelManager`: Các phương thức truy vấn (`for_entity`, `active`), ràng buộc (`unique_together`), method `clean()`.
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    EntityModel ||--o{ LoaiYeuToModel : \"defines_factor_types\"
+
+    EntityModel {
+        UUID uuid PK
+        string slug
+        # ... other fields
+    }
+
+    LoaiYeuToModel {
+        UUID uuid PK
+        UUID entity_model_id FK
+        string ma_loai \"Mã loại yếu tố (unique per entity)\"
+        string ten_loai \"Tên loại yếu tố\"
+        string ten_loai2 \"Tên loại 2 (alt)\"
+        string status \"Trạng thái (0/1)\"
+        datetime created
+        datetime updated
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: `loai_yeu_to` (mapped from `LoaiYeuToModel`)
+- **Mô tả**: Lưu trữ thông tin các Loại Yếu Tố.
+- **Các cột chính**:
+  - `uuid` (PK, UUID): Định danh duy nhất.
+ 6:["slug","erp/BUD_003_Quan_Ly_Loai_Yeu_To","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/BUD_003_Quan_Ly_Loai_Yeu_To","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"BUD_003_Quan_Ly_Loai_Yeu_To\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/BUD_003_Quan_Ly_Loai_Yeu_To","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

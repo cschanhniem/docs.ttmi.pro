@@ -1,0 +1,361 @@
+# AST_004_Quản Lý Loại Tài Sản Công Cụ
+
+*Phiên bản: 1.0*
+*Người tạo: Claude AI Assistant*
+*Ngày tạo: 2024-08-01*
+*Cập nhật lần cuối: 2024-08-01*
+*Người cập nhật: Claude AI Assistant*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Nghiệp vụ Quản Lý Loại Tài Sản Công Cụ cho phép doanh nghiệp phân loại, định nghĩa và quản lý các loại tài sản và công cụ dụng cụ trong hệ thống. Việc phân loại này giúp doanh nghiệp tổ chức tài sản một cách có hệ thống, áp dụng chính sách quản lý và kế toán phù hợp cho từng loại, và thống kê báo cáo theo các nhóm loại phục vụ cho việc ra quyết định. Loại tài sản công cụ còn giúp xác định các tài khoản kế toán mặc định và phương pháp tính khấu hao/phân bổ cho tài sản.
+
+### 1.2. Phạm Vi Áp Dụng
+- Áp dụng cho mọi loại tài sản và công cụ dụng cụ trong doanh nghiệp.
+- Phạm vi bao gồm các bộ phận: Kế toán, Tài chính, Quản lý tài sản, và các bộ phận liên quan đến quản lý tài sản.
+- Mỗi đơn vị (Entity) trong hệ thống có thể có danh mục loại tài sản công cụ riêng phù hợp với đặc thù hoạt động.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Loại tài sản công cụ | Phân loại tài sản và công cụ dụng cụ theo tính chất, mục đích sử dụng. Trong mã nguồn là `LoaiTaiSanCongCuModel`. |
+| Tài sản cố định | Tài sản có giá trị lớn, thời gian sử dụng dài (thường trên 1 năm). |
+| Công cụ dụng cụ | Vật dụng có giá trị nhỏ, thời gian sử dụng ngắn hơn, dùng trong hoạt động sản xuất kinh doanh. |
+| `loai_tscc` | Mã phân loại tài sản công cụ (ví dụ: máy móc, thiết bị văn phòng). |
+| `ma_lts` | Mã loại tài sản, dùng để định danh loại tài sản trong hệ thống. |
+| `ten_lts` | Tên loại tài sản. |
+| `tk_ts` | Tài khoản kế toán dùng cho tài sản. |
+| `tk_kh` | Tài khoản kế toán dùng cho khấu hao. |
+| `tk_cp` | Tài khoản kế toán dùng cho chi phí. |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | AST_001 | Quản Lý Tài Sản Cố Định | Quy trình quản lý tài sản cố định |
+| 2   | AST_002 | Quản Lý Công Cụ Dụng Cụ | Quy trình quản lý công cụ dụng cụ |
+| 3   | ACC_001 | Sơ Đồ Tài Khoản | Tài liệu về cấu trúc tài khoản kế toán |
+| 4   | FIN_004 | Quản Lý Phí | Quy trình quản lý các loại phí liên quan đến tài sản |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình quản lý loại tài sản công cụ bao gồm việc thiết lập, cập nhật danh mục loại tài sản, và áp dụng các loại này khi tạo mới hay phân loại tài sản. Hệ thống cho phép định nghĩa các loại tài sản cùng với các thuộc tính đặc thù như tài khoản kế toán, mã phí liên quan, giúp tự động hóa việc hạch toán và theo dõi tài sản.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Định nghĩa loại tài sản công cụ] --> B[Thiết lập thông tin liên quan]
+    B --> C{Loại tài sản hợp lệ?}
+    C -->|Có| D[Kích hoạt loại tài sản]
+    C -->|Không| E[Chỉnh sửa thông tin]
+    E --> B
+    D --> F[Áp dụng loại tài sản khi tạo tài sản mới]
+    F --> G[Tự động áp dụng tài khoản kế toán]
+    G --> H[Thống kê, báo cáo theo loại tài sản]
+    D --> I[Cập nhật thông tin loại tài sản khi cần]
+    I --> J{Còn sử dụng?}
+    J -->|Có| I
+    J -->|Không| K[Vô hiệu hóa loại tài sản]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Định Nghĩa Loại Tài Sản Công Cụ
+- **Mô tả**: Người dùng định nghĩa và thiết lập các loại tài sản công cụ trong hệ thống.
+- **Đầu vào**: Thông tin loại tài sản (mã, tên, phân loại).
+- **Đầu ra**: Bản ghi loại tài sản mới trong hệ thống.
+- **Người thực hiện**: Quản trị viên hoặc nhân viên kế toán có quyền thiết lập.
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập và có quyền quản lý danh mục.
+- **Xử lý ngoại lệ**: Thông tin không hợp lệ, mã loại tài sản bị trùng.
+
+#### 2.3.2. Thiết Lập Thông Tin Liên Quan
+- **Mô tả**: Thiết lập các thông tin bổ sung cho loại tài sản như tài khoản kế toán, mã phí.
+- **Đầu vào**: ID loại tài sản, thông tin tài khoản kế toán, mã phí liên quan.
+- **Đầu ra**: Thông tin loại tài sản được cập nhật đầy đủ.
+- **Người thực hiện**: Quản trị viên hoặc nhân viên kế toán có quyền thiết lập.
+- **Điều kiện tiên quyết**: Loại tài sản đã được tạo trong hệ thống, tài khoản kế toán hợp lệ.
+- **Xử lý ngoại lệ**: Tài khoản kế toán không tồn tại, thông tin không đồng nhất.
+
+#### 2.3.3. Áp Dụng Loại Tài Sản Khi Tạo Tài Sản Mới
+- **Mô tả**: Khi tạo mới tài sản, người dùng chọn loại tài sản phù hợp.
+- **Đầu vào**: ID loại tài sản, thông tin tài sản mới.
+- **Đầu ra**: Tài sản mới được tạo với loại tài sản được chỉ định.
+- **Người thực hiện**: Nhân viên kế toán tài sản.
+- **Điều kiện tiên quyết**: Loại tài sản đã tồn tại và đang hoạt động.
+- **Xử lý ngoại lệ**: Loại tài sản không phù hợp, loại tài sản đã bị vô hiệu hóa.
+
+#### 2.3.4. Tự Động Áp Dụng Tài Khoản Kế Toán
+- **Mô tả**: Hệ thống tự động áp dụng tài khoản kế toán dựa trên loại tài sản.
+- **Đầu vào**: ID tài sản, ID loại tài sản.
+- **Đầu ra**: Tài sản được gán các tài khoản kế toán mặc định.
+- **Người thực hiện**: Hệ thống (tự động).
+- **Điều kiện tiên quyết**: Loại tài sản đã được thiết lập đầy đủ thông tin tài khoản.
+- **Xử lý ngoại lệ**: Thông tin tài khoản không đầy đủ, xung đột tài khoản.
+
+#### 2.3.5. Vô Hiệu Hóa Loại Tài Sản
+- **Mô tả**: Đánh dấu loại tài sản không còn được sử dụng.
+- **Đầu vào**: ID loại tài sản, lý do vô hiệu hóa.
+- **Đầu ra**: Loại tài sản được đánh dấu không hoạt động.
+- **Người thực hiện**: Quản trị viên hoặc nhân viên kế toán có quyền.
+- **Điều kiện tiên quyết**: Loại tài sản đã tồn tại trong hệ thống.
+- **Xử lý ngoại lệ**: Có tài sản đang sử dụng loại tài sản này.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant U as Người dùng
+    participant API as API Layer
+    participant S as Service Layer
+    participant R as Repository Layer
+    participant DB as Database
+    
+    U->>API: Yêu cầu tạo loại tài sản
+    API->>S: Gọi service tạo loại tài sản
+    S->>S: Validate dữ liệu
+    S->>R: Kiểm tra mã loại tài sản đã tồn tại
+    R->>DB: SELECT từ cơ sở dữ liệu
+    DB-->>R: Trả về kết quả kiểm tra
+    R-->>S: Thông báo kết quả kiểm tra
+    alt Mã loại tài sản chưa tồn tại
+        S->>R: Lưu thông tin loại tài sản
+        R->>DB: INSERT vào cơ sở dữ liệu
+        DB-->>R: Xác nhận thành công
+        R-->>S: Trả về dữ liệu loại tài sản
+        S-->>API: Trả về kết quả
+        API-->>U: Hiển thị thông tin loại tài sản đã tạo
+    else Mã loại tài sản đã tồn tại
+        S-->>API: Trả về thông báo lỗi
+        API-->>U: Hiển thị thông báo lỗi
+    end
+    
+    U->>API: Yêu cầu tạo tài sản mới với loại tài sản
+    API->>S: Gọi service tạo tài sản
+    S->>R: Lấy thông tin loại tài sản
+    R->>DB: SELECT từ cơ sở dữ liệu
+    DB-->>R: Trả về thông tin loại tài sản
+    R-->>S: Trả về dữ liệu loại tài sản
+    S->>S: Áp dụng thông tin mặc định từ loại tài sản
+    S->>R: Lưu thông tin tài sản
+    R->>DB: INSERT tài sản vào cơ sở dữ liệu
+    DB-->>R: Xác nhận thành công
+    R-->>S: Trả về dữ liệu tài sản
+    S-->>API: Trả về kết quả
+    API-->>U: Hiển thị thông tin tài sản đã tạo
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Nhập danh mục loại tài sản từ nguồn khác**: Nhập danh mục loại tài sản từ file Excel/CSV hoặc từ hệ thống khác.
+- **Sao chép loại tài sản**: Tạo một loại tài sản mới dựa trên một loại tài sản đã có (nhưng với mã khác).
+- **Đồng bộ tài khoản kế toán**: Cập nhật tài khoản kế toán cho tất cả các tài sản thuộc một loại khi thay đổi tài khoản mặc định.
+- **Phân nhóm loại tài sản**: Nhóm các loại tài sản thành các nhóm lớn hơn để phục vụ báo cáo và quản lý.
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | AST004-LIST | Danh sách loại tài sản | Xem danh sách loại tài sản công cụ | Cao |
+| 2   | AST004-CREATE | Tạo mới loại tài sản | Thêm loại tài sản mới vào hệ thống | Cao |
+| 3   | AST004-DETAIL | Chi tiết loại tài sản | Xem thông tin chi tiết của một loại tài sản | Cao |
+| 4   | AST004-UPDATE | Cập nhật loại tài sản | Sửa đổi thông tin loại tài sản | Cao |
+| 5   | AST004-DELETE | Xóa loại tài sản | Xóa loại tài sản khỏi hệ thống | Cao |
+| 6   | AST004-APPLY | Áp dụng loại tài sản | Áp dụng loại tài sản cho tài sản mới | Cao |
+| 7   | AST004-REPORT | Báo cáo theo loại | Xuất báo cáo tài sản theo loại | Trung bình |
+| 8   | AST004-IMPORT | Nhập danh mục | Nhập danh mục loại tài sản từ file | Thấp |
+| 9   | AST004-EXPORT | Xuất danh mục | Xuất danh mục loại tài sản ra file | Thấp |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. AST004-CREATE: Tạo mới loại tài sản
+- **Mô tả**: Cho phép người dùng tạo mới loại tài sản công cụ trong hệ thống
+- **Đầu vào**: 
+  * Thông tin cơ bản: loại tài sản công cụ (`loai_tscc`), mã loại tài sản (`ma_lts`), tên loại tài sản (`ten_lts`), tên thay thế (`ten_lts2`)
+  * Thông tin tài khoản: tài khoản tài sản (`tk_ts`), tài khoản khấu hao (`tk_kh`), tài khoản chi phí (`tk_cp`)
+  * Thông tin khác: mã phí (`ma_phi`), trạng thái (`status`)
+  * Entity_model (từ URL)
+- **Đầu ra**: Bản ghi loại tài sản mới được tạo trong hệ thống
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập và có quyền tạo loại tài sản
+- **Luồng xử lý chính**:
+  1. Người dùng nhập thông tin loại tài sản
+  2. Hệ thống kiểm tra tính hợp lệ của dữ liệu
+  3. Hệ thống kiểm tra mã loại tài sản có bị trùng không
+  4. Hệ thống tạo bản ghi loại tài sản mới
+  5. Hệ thống thông báo tạo loại tài sản thành công
+- **Luồng xử lý thay thế/ngoại lệ**:
+  * Dữ liệu không hợp lệ: Hệ thống hiển thị thông báo lỗi
+  * Mã loại tài sản bị trùng: Hệ thống yêu cầu nhập mã khác
+- **Giao diện liên quan**: Màn hình tạo mới loại tài sản
+
+#### 3.2.2. AST004-APPLY: Áp dụng loại tài sản
+- **Mô tả**: Áp dụng loại tài sản cho tài sản mới hoặc cập nhật loại tài sản cho tài sản hiện có
+- **Đầu vào**: 
+  * ID tài sản (trong trường hợp cập nhật)
+  * ID loại tài sản
+  * Entity_model (từ URL)
+- **Đầu ra**: Tài sản được gán loại tài sản và các thông tin mặc định từ loại
+- **Điều kiện tiên quyết**: Loại tài sản đã tồn tại và đang hoạt động
+- **Luồng xử lý chính**:
+  1. Người dùng chọn loại tài sản khi tạo/cập nhật tài sản
+  2. Hệ thống tự động áp dụng các giá trị mặc định từ loại tài sản
+  3. Người dùng có thể điều chỉnh các giá trị nếu cần
+  4. Hệ thống lưu thông tin tài sản với loại đã chọn
+- **Luồng xử lý thay thế/ngoại lệ**:
+  * Loại tài sản không hoạt động: Hệ thống hiển thị cảnh báo
+  * Tài khoản không hợp lệ: Người dùng phải nhập tài khoản thay thế
+- **Giao diện liên quan**: Màn hình tạo/cập nhật tài sản
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+Quản lý loại tài sản công cụ được xây dựng theo kiến trúc 3 lớp:
+- **API Layer**: Xử lý request/response, kiểm tra quyền truy cập, định dạng dữ liệu
+- **Service Layer**: Xử lý logic nghiệp vụ, kiểm tra hợp lệ dữ liệu
+- **Repository Layer**: Tương tác với cơ sở dữ liệu, thực hiện các thao tác CRUD
+
+```mermaid
+graph TD
+    Client --> API[API Layer]
+    API --> Service[Service Layer]
+    Service --> Repository[Repository Layer]
+    Repository --> Database[(Database)]
+    
+    subgraph API Layer
+        LoaiTaiSanCongCuViewSet
+    end
+    
+    subgraph Service Layer
+        LoaiTaiSanCongCuService
+    end
+    
+    subgraph Repository Layer
+        LoaiTaiSanCongCuRepository
+    end
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Quản Lý Loại Tài Sản Công Cụ
+- **GET /api/{entity_slug}/asset-types/**: Lấy danh sách loại tài sản công cụ
+- **POST /api/{entity_slug}/asset-types/**: Tạo mới loại tài sản công cụ
+- **GET /api/{entity_slug}/asset-types/{uuid}/**: Xem chi tiết loại tài sản công cụ
+- **PUT /api/{entity_slug}/asset-types/{uuid}/**: Cập nhật toàn bộ thông tin loại tài sản
+- **PATCH /api/{entity_slug}/asset-types/{uuid}/**: Cập nhật một phần thông tin loại tài sản
+- **DELETE /api/{entity_slug}/asset-types/{uuid}/**: Xóa loại tài sản công cụ
+
+#### 4.2.2. Báo Cáo Theo Loại Tài Sản
+- **GET /api/{entity_slug}/assets/by-type/{type_uuid}/**: Lấy danh sách tài sản theo loại
+- **GET /api/{entity_slug}/assets/reports/by-type/**: Thống kê tài sản theo loại
+
+### 4.3. Service Logic
+
+#### 4.3.1. LoaiTaiSanCongCuService
+- **Mô tả**: Xử lý logic nghiệp vụ liên quan đến loại tài sản công cụ
+- **Chức năng chính**:
+  1. Tạo mới loại tài sản công cụ
+  2. Cập nhật thông tin loại tài sản
+  3. Kiểm tra tính hợp lệ của loại tài sản
+  4. Lấy danh sách tài sản theo loại
+  5. Thống kê tài sản theo loại
+- **Các dependencies**:
+  1. LoaiTaiSanCongCuRepository
+  2. TaiSanCoDinhRepository
+  3. CongCuDungCuRepository
+
+#### 4.3.2. Các đoạn code quan trọng (từ source code thực tế)
+
+```python
+def validate_loai_tai_san_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validate loại tài sản data before creating/updating
+    """
+    # Validate required fields
+    required_fields = ['ma_lts', 'ten_lts']
+    for field in required_fields:
+        if not data.get(field):
+            raise ValueError(f'{field} is required')
+
+    # Set default status if not provided
+    if 'status' not in data:
+        data['status'] = 1
+
+    return data
+```
+
+```python
+def create_loai_tai_san(self, entity_slug: str, data: Dict[str, Any]) -> LoaiTaiSanCongCuModel:
+    """
+    Create a new asset type for a specific entity
+    """
+    entity_model = get_object_or_404(EntityModel, slug=entity_slug)
+    validated_data = self.validate_loai_tai_san_data(data)
+    validated_data['entity_model'] = entity_model
+    return self.repository.create_loai_tai_san(validated_data)
+```
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    Entity ||--o{ LoaiTaiSanCongCu : "có"
+    LoaiTaiSanCongCu ||--o{ TaiSanCoDinh : "áp dụng cho"
+    LoaiTaiSanCongCu ||--o{ CongCuDungCu : "áp dụng cho"
+    Entity ||--o{ TaiSanCoDinh : "có"
+    Entity ||--o{ CongCuDungCu : "có"
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: loai_tai_san_cong_cu
+- **Mô tả**: Lưu trữ thông tin về loại tài sản công cụ
+- **Các cột chính**:
+  * uuid: UUID (khóa chính)
+  * entity_model_id: UUID (khóa ngoại đến entity)
+  * loai_tscc: VARCHAR (loại tài sản công cụ)
+  * ma_lts: VARCHAR (mã loại tài sản)
+  * ten_lts: VARCHAR (tên loại tài sản)
+  * ten_lts2: VARCHAR (tên loại tài sản thay thế)
+  * tk_ts: VARCHAR (tài khoản tài sản)
+  * tk_kh: VARCHAR (tài khoản khấu hao)
+  * tk_cp: VARCHAR (tài khoản chi phí)
+  * ma_phi: VARCHAR (mã phí)
+  * status: VARCHAR (trạng thái: 1=active, 0=inactive)
+  * created: DATETIME (ngày tạo)
+  * updated: DATETIME (ngày cập nhật)
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- Kiểm thử chức năng tạo mới, cập nhật, xóa loại tài sản công cụ
+- Kiểm thử chức năng áp dụng loại tài sản cho tài sản mới
+- Kiểm thử chức năng báo cáo thống kê theo loại tài sản
+- Kiểm thử trường hợp các ràng buộc dữ liệu
+- Kiểm thử quyền truy cập và phân quyền
+
+### 5.2. Kịch Bản Kiểm Thử
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC_AST004_001 | Tạo mới loại tài sản | Kiểm tra việc tạo mới loại tài sản | User đã đăng nhập, có quyền tạo loại tài sản | 1. Truy cập màn hình tạo loại tài sản<br>2. Nhập thông tin hợp lệ<br>3. Nhấn nút Lưu | 1. Loại tài sản được tạo thành công<br>2. Hệ thống hiển thị thông báo thành công |
+| 2   | TC_AST004_002 | Cập nhật loại tài sản | Kiểm tra việc cập nhật thông tin loại tài sản | User đã đăng nhập, có loại tài sản tồn tại | 1. Chọn loại tài sản cần cập nhật<br>2. Sửa thông tin<br>3. Nhấn nút Lưu | 1. Loại tài sản được cập nhật thành công<br>2. Hệ thống hiển thị thông báo thành công |
+| 3   | TC_AST004_003 | Áp dụng loại tài sản | Kiểm tra việc áp dụng loại tài sản khi tạo tài sản mới | User đã đăng nhập, có loại tài sản hoạt động | 1. Truy cập màn hình tạo tài sản mới<br>2. Chọn loại tài sản<br>3. Kiểm tra các giá trị mặc định được áp dụng<br>4. Hoàn tất tạo tài sản | 1. Các giá trị mặc định từ loại tài sản được áp dụng<br>2. Tài sản được tạo với loại tài sản đã chọn |
+| 4   | TC_AST004_004 | Báo cáo theo loại tài sản | Kiểm tra báo cáo thống kê tài sản theo loại | User đã đăng nhập, có dữ liệu tài sản và loại tài sản | 1. Truy cập màn hình báo cáo<br>2. Chọn loại báo cáo theo loại tài sản<br>3. Thiết lập các tham số lọc<br>4. Xem báo cáo | 1. Báo cáo hiển thị chính xác<br>2. Dữ liệu được phân nhóm theo loại tài sản |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Chuẩn mực kế toán Việt Nam (VAS) về tài sản cố định
+- Thông tư 45/2013/TT-BTC về quản lý, sử dụng và trích khấu hao tài sản
+- Tài liệu mã nguồn hệ thống ERP-BE (`django_ledger/models/loai_tai_san_cong_cu.py`, `django_ledger/repositories/loai_tai_san_cong_cu/repository.py`, `django_ledger/services/loai_tai_san_cong_cu/service.py`)
+
+### 6.2. Danh Mục Thuật Ngữ
+(Xem mục 1.3)
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+| Phiên bản | Ngày       | Người thực hiện | Mô tả thay đổi |
+|-----------|------------|-----------------|----------------|
+| 1.0       | 2024-08-01 | Claude AI       | Tạo tài liệu   | 

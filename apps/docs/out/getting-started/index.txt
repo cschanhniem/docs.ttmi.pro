@@ -1,0 +1,133 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:Tc23,
+# Getting Started
+
+Welcome to the ERP Documentation! This is a modern, GitBook-style documentation system built with Next.js, featuring Mermaid diagrams, full-text search, and password authentication.
+
+## Features
+
+- 📝 **Markdown Support**: Write documentation in Markdown with MDX extensions
+- 🎨 **Mermaid Diagrams**: Create beautiful diagrams with Mermaid syntax
+- 🔍 **Full-Text Search**: Quickly find what you're looking for with built-in search
+- 🔐 **Password Protection**: Secure your documentation with simple authentication
+- 🌙 **Dark Mode**: Toggle between light and dark themes
+- 📱 **Responsive Design**: Works perfectly on desktop and mobile devices
+- ⚡ **GitHub Pages**: Automatically deployed to GitHub Pages
+
+## Quick Start
+
+### 1. Authentication
+
+The documentation is protected by a password. The default password is `admin123`. You can change this by setting the `NEXT_PUBLIC_DOCS_PASSWORD` environment variable.
+
+### 2. Navigation
+
+Use the sidebar to navigate through different sections of the documentation. The navigation is automatically generated from your markdown files.
+
+### 3. Search
+
+Press `Cmd+K` (or `Ctrl+K` on Windows/Linux) to open the search dialog, or click the search button in the header.
+
+## Writing Documentation
+
+### Basic Markdown
+
+You can use all standard Markdown features:
+
+- **Bold text**
+- *Italic text*
+- `Inline code`
+- [Links](https://example.com)
+
+### Code Blocks
+
+```javascript
+// JavaScript example
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet('World'));
+```
+
+```python
+# Python example
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("World"))
+```
+
+### Mermaid Diagrams
+
+Create beautiful diagrams using Mermaid syntax:
+
+```mermaid
+graph TD
+    A[Start] --> B{Is it working?}
+    B -->|Yes| C[Great!]
+    B -->|No| D[Debug]
+    D --> B
+    C --> E[End]
+```
+
+### Tables
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Markdown | ✅ | Full support |
+| Mermaid | ✅ | Auto-rendering |
+| Search | ✅ | Real-time |
+| Auth | ✅ | Password-based |
+
+### Frontmatter
+
+Each markdown file should include frontmatter with metadata:
+
+```yaml
+---
+title: Page Title
+description: Brief description of the page
+order: 1
+date: 2024-05-30
+author: Your Name
+tags: [tag1, tag2]
+---
+```
+
+## File Organization
+
+Organize your documentation files in the `docs/` directory:
+
+```
+docs/
+├── getting-started.md
+├── user-guide/
+│   ├── installation.md
+│   └── configuration.md
+├── api/
+│   ├── overview.md
+│   └── endpoints.md
+└── troubleshooting.md
+```
+
+The navigation will be automatically generated based on your file structure.
+
+## Deployment
+
+This documentation system is designed to work with GitHub Pages. Simply push your changes to the repository, and GitHub Actions will automatically build and deploy your documentation.
+
+## Next Steps
+
+- Explore the [User Guide](/user-guide/installation) to learn more
+- Check out the [API Documentation](/api/overview) for technical details
+- Visit [Troubleshooting](/troubleshooting) if you encounter issues
+6:["slug","getting-started","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","getting-started","c"],{"children":["__PAGE__?{\"slug\":[\"getting-started\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","getting-started","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"Getting Started"}],["$","p",null,{"className":"text-xl text-muted-foreground","children":"Welcome to the ERP Documentation. Learn how to navigate and use this documentation system."}],["$","p",null,{"className":"text-sm text-muted-foreground","children":["Last updated: ","5/30/2024"]}]]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"Getting Started | ERP Documentation"}],["$","meta","3",{"name":"description","content":"Welcome to the ERP Documentation. Learn how to navigate and use this documentation system."}],["$","meta","4",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","5",{"name":"next-size-adjust"}]]
+1:null

@@ -1,0 +1,339 @@
+# GEO_007_Geography_Quản Lý Thông Tin Địa Chỉ Nhận Hàng
+
+*Phiên bản: 1.0*
+*Người tạo: Cline*
+*Ngày tạo: 13/05/2025*
+*Cập nhật lần cuối: 13/05/2025*
+*Người cập nhật: Cline*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Nghiệp vụ này cho phép quản lý các thông tin bổ sung cụ thể cho mục đích nhận hàng hoặc giao hàng, liên kết với một địa chỉ cơ sở đã được định nghĩa trong hệ thống (`GEO_006_Quan_Ly_Dia_Chi`). Các thông tin này bao gồm tên người nhận, số điện thoại người nhận, email, tên gợi nhớ cho địa chỉ (ví dụ: "Nhà riêng", "Văn phòng"), và các hướng dẫn giao hàng đặc biệt. Một bản ghi "Thông Tin Địa Chỉ Nhận Hàng" giúp chuẩn hóa và tái sử dụng thông tin giao nhận cho các đối tượng khác nhau như Khách hàng, Đơn hàng Bán, Đơn hàng Mua.
+
+### 1.2. Phạm Vi Áp Dụng
+Áp dụng cho các bộ phận liên quan đến giao nhận hàng hóa, quản lý khách hàng, quản lý đơn hàng. Người dùng có thể tạo, cập nhật, xem và xóa các bản ghi thông tin địa chỉ nhận hàng này. Các bản ghi này sau đó có thể được chọn và liên kết khi tạo đơn hàng hoặc thiết lập thông tin giao hàng cho khách hàng/nhà cung cấp.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Thông Tin Địa Chỉ Nhận Hàng | Một bản ghi chứa các thông tin cụ thể cho việc giao/nhận hàng tại một địa chỉ. |
+| Địa Chỉ Cơ Sở (dia_chi_uuid) | UUID của một bản ghi `DiaChiModel` (từ GEO_006) mà thông tin nhận hàng này áp dụng. |
+| Tên Người Nhận (ten_nguoi_nhan) | Tên của người hoặc bộ phận sẽ nhận hàng. |
+| Số Điện Thoại Người Nhận (so_dien_thoai_nguoi_nhan) | Số điện thoại liên lạc của người nhận. |
+| Email Người Nhận (email_nguoi_nhan) | Địa chỉ email của người nhận (tùy chọn). |
+| Tên Gợi Nhớ Địa Chỉ (ten_goi_nho_dia_chi) | Tên ngắn gọn, dễ nhớ để phân biệt các địa chỉ nhận hàng khác nhau (ví dụ: "Kho chính", "VP Hà Nội"). |
+| Hướng Dẫn Giao Hàng (huong_dan_giao_hang) | Các chỉ dẫn đặc biệt cho người giao hàng (ví dụ: "Giao hàng trong giờ hành chính", "Gọi trước khi đến"). |
+| Trạng Thái (status) | Trạng thái của thông tin địa chỉ nhận hàng (ví dụ: 1 - Hoạt động, 0 - Không hoạt động). |
+| Entity (Đơn vị) | Đơn vị/Công ty sử dụng hệ thống ERP. Mỗi bản ghi được quản lý trong phạm vi một Entity cụ thể. |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | GEO_006 | Quản Lý Địa Chỉ | Cung cấp các bản ghi địa chỉ cơ sở. |
+| 2   | SAL_001 | Quản Lý Khách Hàng | Khách hàng có thể có nhiều thông tin địa chỉ nhận hàng được lưu. |
+| 3   | SAL_004 | Quản Lý Hóa Đơn Bán Hàng | Đơn hàng bán sẽ sử dụng thông tin địa chỉ nhận hàng để giao hàng. |
+| 4   | PUR_002 | Quản Lý Đơn Mua Hàng | Đơn hàng mua có thể chỉ định thông tin địa chỉ nhận hàng của công ty. |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình bao gồm việc tạo mới một bản ghi "Thông Tin Địa Chỉ Nhận Hàng" bằng cách chọn một địa chỉ cơ sở (từ GEO_006) và điền các thông tin giao nhận cụ thể. Người dùng cũng có thể xem, cập nhật và xóa (logic) các bản ghi này.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Người dùng yêu cầu thao tác quản lý thông tin địa chỉ nhận hàng] --> B{Chọn thao tác};
+    B -->|Thêm mới| C[Chọn Địa chỉ cơ sở (GEO_006) & Nhập thông tin người nhận, SĐT, tên gợi nhớ, hướng dẫn...];
+    B -->|Cập nhật| D[Chọn bản ghi thông tin & Nhập thông tin mới];
+    B -->|Xóa| E[Chọn bản ghi thông tin & Xác nhận xóa];
+    B -->|Xem danh sách| F[Hệ thống hiển thị danh sách thông tin địa chỉ nhận hàng (có thể lọc)];
+    B -->|Xem chi tiết| G[Chọn bản ghi thông tin & Hệ thống hiển thị chi tiết];
+    C --> H[Hệ thống kiểm tra dữ liệu (Địa chỉ cơ sở tồn tại, ...)];
+    D --> H;
+    H -->|Hợp lệ| I[Lưu thông tin vào CSDL];
+    H -->|Không hợp lệ| J[Thông báo lỗi];
+    I --> K[Thông báo thành công];
+    E --> L[Hệ thống kiểm tra ràng buộc (Đang được sử dụng trong Đơn hàng?)];
+    L -->|Không có ràng buộc / Cho phép xóa logic| M[Xóa bản ghi khỏi CSDL hoặc cập nhật trạng thái];
+    L -->|Có ràng buộc| N[Thông báo lỗi không thể xóa];
+    M --> K;
+    F --> Z[Kết thúc];
+    G --> Z;
+    J --> A;
+    K --> A;
+    N --> A;
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Thêm Mới Thông Tin Địa Chỉ Nhận Hàng
+- **Mô tả**: Người dùng tạo một bản ghi mới chứa thông tin chi tiết cho việc nhận/giao hàng tại một địa chỉ cụ thể.
+- **Đầu vào**: UUID của địa chỉ cơ sở (`dia_chi_uuid`), tên người nhận, SĐT người nhận, email người nhận (tùy chọn), tên gợi nhớ địa chỉ, hướng dẫn giao hàng (tùy chọn), trạng thái (mặc định là hoạt động).
+- **Đầu ra**: Bản ghi "Thông Tin Địa Chỉ Nhận Hàng" mới được tạo.
+- **Người thực hiện**: Người dùng có quyền.
+- **Điều kiện tiên quyết**: Người dùng đã đăng nhập. Địa chỉ cơ sở (`DiaChiModel`) phải tồn tại.
+- **Xử lý ngoại lệ**:
+    - Nếu địa chỉ cơ sở không tồn tại: Thông báo lỗi.
+    - Nếu thông tin không hợp lệ: Thông báo lỗi.
+
+#### 2.3.2. Cập Nhật Thông Tin Địa Chỉ Nhận Hàng
+- **Mô tả**: Người dùng thay đổi thông tin của một bản ghi đã tồn tại.
+- **Đầu vào**: UUID của bản ghi "Thông Tin Địa Chỉ Nhận Hàng" cần cập nhật, thông tin mới.
+- **Đầu ra**: Thông tin bản ghi được cập nhật.
+- **Người thực hiện**: Người dùng có quyền.
+- **Điều kiện tiên quyết**: Bản ghi tồn tại trong hệ thống.
+- **Xử lý ngoại lệ**:
+    - Nếu bản ghi không tồn tại: Thông báo lỗi.
+    - Nếu thông tin không hợp lệ: Thông báo lỗi.
+
+#### 2.3.3. Xóa Thông Tin Địa Chỉ Nhận Hàng
+- **Mô tả**: Người dùng xóa một bản ghi "Thông Tin Địa Chỉ Nhận Hàng".
+- **Đầu vào**: UUID của bản ghi cần xóa.
+- **Đầu ra**: Bản ghi bị xóa (hoặc đánh dấu không hoạt động).
+- **Người thực hiện**: Người dùng có quyền.
+- **Điều kiện tiên quyết**: Bản ghi tồn tại.
+- **Xử lý ngoại lệ**:
+    - Nếu bản ghi không tồn tại: Thông báo lỗi.
+    - Nếu bản ghi đang được tham chiếu (ví dụ: trong một đơn hàng chưa hoàn thành): Cân nhắc chỉ cho phép xóa logic.
+
+#### 2.3.4. Xem Danh Sách Thông Tin Địa Chỉ Nhận Hàng
+- **Mô tả**: Người dùng xem danh sách các thông tin địa chỉ nhận hàng. Có thể lọc theo địa chỉ cơ sở, tên người nhận, v.v.
+- **Đầu vào**: Entity slug, tùy chọn: các tiêu chí lọc, phân trang.
+- **Đầu ra**: Danh sách các bản ghi "Thông Tin Địa Chỉ Nhận Hàng".
+- **Người thực hiện**: Bất kỳ người dùng nào có quyền truy cập chức năng.
+
+#### 2.3.5. Xem Chi Tiết Thông Tin Địa Chỉ Nhận Hàng
+- **Mô tả**: Người dùng xem thông tin chi tiết của một bản ghi cụ thể.
+- **Đầu vào**: UUID của bản ghi.
+- **Đầu ra**: Thông tin chi tiết của bản ghi, bao gồm cả thông tin địa chỉ cơ sở liên quan.
+- **Người thực hiện**: Bất kỳ người dùng nào có quyền truy cập chức năng.
+- **Điều kiện tiên quyết**: Bản ghi tồn tại.
+- **Xử lý ngoại lệ**: Nếu bản ghi không tồn tại: Thông báo lỗi.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram) - Thêm Mới Thông Tin Địa Chỉ Nhận Hàng
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant System as Hệ thống (API)
+    participant Service as DiaChiNhanHangModelService
+    participant Repository as DiaChiNhanHangRepository
+    participant DiaChiRepo as DiaChiRepository
+    participant DB as Cơ sở dữ liệu
+
+    User->>System: POST /api/{entity_slug}/dia-chi-nhan-hang/ (data: dia_chi_uuid, ten_nguoi_nhan, ...)
+    System->>Service: create_dia_chi_nhan_hang(entity_slug, data)
+    Service->>Service: _get_entity_model(entity_slug)
+    Service-->>Service: entity_model
+    Service->>DiaChiRepo: get_dia_chi_by_uuid(data['dia_chi_uuid'])
+    DiaChiRepo->>DB: SELECT * FROM DiaChiModel WHERE uuid = ... AND entity_id = ...
+    DB-->>DiaChiRepo: dia_chi_model (or null)
+    DiaChiRepo-->>Service: dia_chi_model (or null)
+    alt Địa chỉ cơ sở không tồn tại
+        Service-->>System: Error: "Base Address not found"
+        System-->>User: Response 400 (Error message)
+    else Địa chỉ cơ sở tồn tại
+        Service->>Service: validate_dia_chi_nhan_hang_data(data)
+        Service-->>Service: validated_data
+        Service->>Repository: create_dia_chi_nhan_hang(entity_model, dia_chi_model, validated_data)
+        Repository->>DB: INSERT INTO DiaChiNhanHangModel (...) VALUES (...)
+        DB-->>Repository: new_object
+        Repository-->>Service: new_object
+        Service-->>System: new_object_with_details
+        System-->>User: Response 201 (new_data)
+    end
+```
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | GEO_007_F01 | Thêm mới thông tin địa chỉ nhận hàng | Cho phép tạo một bản ghi thông tin nhận hàng mới, liên kết với một địa chỉ cơ sở. | Cao |
+| 2   | GEO_007_F02 | Cập nhật thông tin địa chỉ nhận hàng | Cho phép sửa thông tin của một bản ghi đã có. | Cao |
+| 3   | GEO_007_F03 | Xóa thông tin địa chỉ nhận hàng | Cho phép xóa một bản ghi. | Cao |
+| 4   | GEO_007_F04 | Xem danh sách thông tin địa chỉ nhận hàng | Hiển thị danh sách, hỗ trợ phân trang và lọc. | Cao |
+| 5   | GEO_007_F05 | Xem chi tiết thông tin địa chỉ nhận hàng | Hiển thị thông tin chi tiết của một bản ghi. | Cao |
+| 6   | GEO_007_F06 | Tìm kiếm thông tin địa chỉ nhận hàng | Cho phép tìm kiếm dựa trên tên người nhận, SĐT, tên gợi nhớ. | Trung bình |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. GEO_007_F01: Thêm mới thông tin địa chỉ nhận hàng
+- **Mô tả**: Tạo mới một bản ghi thông tin địa chỉ nhận hàng.
+- **Đầu vào**:
+    - `entity_slug`: Slug của Entity.
+    - `data`: Đối tượng chứa thông tin:
+        - `dia_chi_uuid` (bắt buộc): UUID của `DiaChiModel` (địa chỉ cơ sở).
+        - `ten_nguoi_nhan` (bắt buộc): Tên người nhận (string, max 255).
+        - `so_dien_thoai_nguoi_nhan` (bắt buộc): SĐT người nhận (string, max 20).
+        - `email_nguoi_nhan` (tùy chọn): Email người nhận (string, max 255).
+        - `ten_goi_nho_dia_chi` (tùy chọn): Tên gợi nhớ (string, max 255).
+        - `huong_dan_giao_hang` (tùy chọn): Hướng dẫn giao hàng (text).
+        - `status` (tùy chọn): Trạng thái (integer). Mặc định là 1.
+- **Đầu ra**: Đối tượng `DiaChiNhanHangModel` vừa được tạo.
+- **Điều kiện tiên quyết**: `entity_slug` và `dia_chi_uuid` hợp lệ.
+- **Luồng xử lý chính**:
+  1. Service lấy `EntityModel` và `DiaChiModel`.
+  2. Service validate dữ liệu.
+  3. Service gọi Repository để tạo mới.
+- **Giao diện liên quan**: Form thêm mới thông tin địa chỉ nhận hàng.
+
+#### 3.2.2. GEO_007_F02: Cập nhật thông tin địa chỉ nhận hàng
+- **Mô tả**: Cập nhật thông tin.
+- **Đầu vào**: `entity_slug`, `uuid` của bản ghi, `data` cập nhật.
+- **Đầu ra**: Đối tượng `DiaChiNhanHangModel` đã cập nhật.
+- **Giao diện liên quan**: Form cập nhật.
+
+#### 3.2.3. GEO_007_F03: Xóa thông tin địa chỉ nhận hàng
+- **Mô tả**: Xóa một bản ghi.
+- **Đầu vào**: `entity_slug`, `uuid` của bản ghi.
+- **Đầu ra**: HTTP 204 No Content hoặc đối tượng đã cập nhật trạng thái.
+- **Điều kiện tiên quyết**: Kiểm tra ràng buộc tham chiếu.
+- **Giao diện liên quan**: Nút xóa.
+
+#### 3.2.4. GEO_007_F04: Xem danh sách thông tin địa chỉ nhận hàng
+- **Mô tả**: Lấy danh sách, có phân trang và lọc.
+- **Đầu vào**: `entity_slug`, `page`, `page_size`, các tham số lọc.
+- **Đầu ra**: Danh sách `DiaChiNhanHangModel`.
+- **Giao diện liên quan**: Trang danh sách.
+
+#### 3.2.5. GEO_007_F05: Xem chi tiết thông tin địa chỉ nhận hàng
+- **Mô tả**: Lấy chi tiết một bản ghi.
+- **Đầu vào**: `entity_slug`, `uuid` của bản ghi.
+- **Đầu ra**: Đối tượng `DiaChiNhanHangModel` với chi tiết địa chỉ cơ sở.
+- **Giao diện liên quan**: Trang chi tiết.
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+Sử dụng Views/APIs, Services (`DiaChiNhanHangModelService`), Repositories (`DiaChiNhanHangRepository`), Models (`DiaChiNhanHangModel`, `DiaChiModel`, `EntityModel`).
+
+### 4.2. API Endpoints
+
+- **Base URL**: `/api/{entity_slug}/dia-chi-nhan-hang/`
+- **Endpoints**:
+    - `GET /`: Lấy danh sách. (GEO_007_F04)
+        - Query params: `page`, `page_size`, `dia_chi_uuid`, `ten_nguoi_nhan`, `status`.
+    - `POST /`: Tạo mới. (GEO_007_F01)
+        - Request body: `{ "dia_chi_uuid": "uuid_dia_chi_co_so", "ten_nguoi_nhan": "Nguyễn Văn A", ... }`
+    - `GET /{uuid}/`: Lấy chi tiết. (GEO_007_F05)
+    - `PUT /{uuid}/`: Cập nhật. (GEO_007_F02)
+    - `PATCH /{uuid}/`: Cập nhật một phần. (GEO_007_F02)
+    - `DELETE /{uuid}/`: Xóa. (GEO_007_F03)
+
+### 4.3. Service Logic (`DiaChiNhanHangModelService`)
+- Kiểm tra sự tồn tại của `DiaChiModel` khi tạo/cập nhật.
+- Xử lý việc xóa (kiểm tra tham chiếu từ Đơn hàng, Khách hàng, etc.).
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    ENTITY ||--|{ DIA_CHI : "quản lý"
+    ENTITY ||--|{ DIA_CHI_NHAN_HANG : "quản lý"
+
+    DIA_CHI ||--o{ DIA_CHI_NHAN_HANG : "là cơ sở cho"
+
+    KHACH_HANG {
+        uuid uuid PK
+        string ten_kh
+        <em>(các trường khác)</em>
+    }
+    KHACH_HANG ||--o{ DIA_CHI_NHAN_HANG : "có nhiều địa chỉ nhận hàng"
+    
+    DON_HANG_BAN {
+        uuid uuid PK
+        string ma_don_hang
+        uuid dia_chi_giao_hang_id FK "Thông tin địa chỉ giao hàng"
+        <em>(các trường khác)</em>
+    }
+    DON_HANG_BAN }o--|| DIA_CHI_NHAN_HANG : "giao tới"
+
+
+    ENTITY {
+        uuid uuid PK
+        string slug
+        string name
+        <em>(các trường khác)</em>
+    }
+
+    DIA_CHI {
+        uuid uuid PK
+        string dia_chi_day_du
+        uuid xa_phuong_id FK
+        <em>(các trường khác của Địa Chỉ)</em>
+    }
+
+    DIA_CHI_NHAN_HANG {
+        uuid uuid PK
+        string ten_nguoi_nhan
+        string so_dien_thoai_nguoi_nhan
+        string email_nguoi_nhan
+        string ten_goi_nho_dia_chi
+        text huong_dan_giao_hang
+        integer status
+        datetime created
+        datetime updated
+        uuid entity_id FK "Khóa ngoại tới ENTITY"
+        uuid dia_chi_id FK "Khóa ngoại tới DIA_CHI (Địa chỉ cơ sở)"
+    }
+```
+*Lưu ý: Mối quan hệ từ `KHACH_HANG` và `DON_HANG_BAN` tới `DIA_CHI_NHAN_HANG` là ví dụ. `DIA_CHI_NHAN_HANG` có thể được liên kết bởi nhiều đối tượng khác nhau cần thông tin giao nhận.*
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: `DiaChiNhanHangModel` (django_ledger_diachinhanhangmodel)
+- **Mô tả**: Lưu trữ thông tin chi tiết cho việc nhận/giao hàng, liên kết với một địa chỉ cơ sở.
+- **Các cột chính**:
+    - `uuid` (UUID, Khóa chính).
+    - `dia_chi` (ForeignKey đến `DiaChiModel`, on_delete=models.PROTECT).
+    - `entity_model` (ForeignKey đến `EntityModel`).
+    - `ten_nguoi_nhan` (CharField, max_length=255).
+    - `so_dien_thoai_nguoi_nhan` (CharField, max_length=20).
+    - `email_nguoi_nhan` (EmailField, max_length=255, null=True, blank=True).
+    - `ten_goi_nho_dia_chi` (CharField, max_length=255, null=True, blank=True).
+    - `huong_dan_giao_hang` (TextField, null=True, blank=True).
+    - `status` (IntegerField, default=1).
+    - `created` (DateTimeField, auto_now_add=True).
+    - `updated` (DateTimeField, auto_now=True).
+- **Indexes**:
+    - Index trên (`entity_model`, `dia_chi`).
+    - Index trên (`entity_model`, `ten_nguoi_nhan`).
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- CRUD cho Thông Tin Địa Chỉ Nhận Hàng.
+- Liên kết chính xác với `DiaChiModel`.
+- Validation dữ liệu.
+- Xử lý xóa và kiểm tra tham chiếu.
+
+### 5.2. Kịch Bản Kiểm Thử (Ví dụ)
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | GEO_007_TC01 | Thêm mới thông tin địa chỉ nhận hàng thành công | Kiểm tra thêm mới với dữ liệu hợp lệ. | User đăng nhập, có quyền. Entity "E1", Địa chỉ cơ sở "DC1" (uuid_dc1) tồn tại. | 1. POST `/api/E1/dia-chi-nhan-hang/`. 2. Payload: `{"dia_chi_uuid": "uuid_dc1", "ten_nguoi_nhan": "Chị Lan", "so_dien_thoai_nguoi_nhan": "0909123456", "ten_goi_nho_dia_chi": "Văn phòng Q1"}`. | 1. HTTP 201. 2. Dữ liệu được trả về. 3. Bản ghi được lưu vào CSDL. |
+| 2   | GEO_007_TC02 | Thêm mới với địa chỉ cơ sở không tồn tại | Kiểm tra thêm mới với `dia_chi_uuid` không tồn tại. | Như TC01. `invalid_uuid_dc` không tồn tại. | 1. POST `/api/E1/dia-chi-nhan-hang/`. 2. Payload: `{"dia_chi_uuid": "invalid_uuid_dc", ...}`. | 1. HTTP 400. 2. Lỗi "Base Address not found". |
+| 3   | GEO_007_TC03 | Cập nhật thông tin | Thay đổi SĐT người nhận. | Bản ghi "DCNH1" (uuid_dcnh1) tồn tại. | 1. PATCH `/api/E1/dia-chi-nhan-hang/uuid_dcnh1/`. 2. Payload: `{"so_dien_thoai_nguoi_nhan": "0987654321"}`. | 1. HTTP 200. 2. SĐT được cập nhật. |
+| 4   | GEO_007_TC04 | Xóa thông tin đang được sử dụng | Cố gắng xóa "DCNH1" đang được một Đơn hàng "DH001" sử dụng. | "DCNH1" được "DH001" tham chiếu. | 1. DELETE `/api/E1/dia-chi-nhan-hang/uuid_dcnh1/`. | 1. HTTP 400 (hoặc 200 nếu xóa logic). 2. Thông báo lỗi "Shipping Address Info is in use" hoặc trạng thái được cập nhật. |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Mã nguồn Django Ledger: `django_ledger/services/dia_chi_nhan_hang/dia_chi_nhan_hang.py` (dự kiến)
+- Mã nguồn Django Ledger: `django_ledger/repositories/dia_chi_nhan_hang/dia_chi_nhan_hang.py` (dự kiến)
+- Mã nguồn Django Ledger: `django_ledger/models/dia_chi_nhan_hang.py` (dự kiến)
+
+### 6.2. Danh Mục Thuật Ngữ
+(Đã định nghĩa ở mục 1.3)
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 13/05/2025 | Cline | Tạo mới tài liệu. |

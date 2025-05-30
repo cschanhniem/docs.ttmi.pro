@@ -1,0 +1,116 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T92a,# Sơ Đồ Cấu Trúc Tài Khoản
+
+## 1. Cấu Trúc Hệ Thống Tài Khoản
+
+```mermaid
+graph TD
+    A[Hệ Thống Tài Khoản] --> B[Tài Sản]
+    A --> C[Nợ Phải Trả]
+    A --> D[Vốn Chủ Sở Hữu]
+    A --> E[Doanh Thu]
+    A --> F[Chi Phí]
+
+    B --> B1[Tiền và Tương Đương Tiền]
+    B --> B2[Phải Thu]
+    B --> B3[Hàng Tồn Kho]
+    B --> B4[TSCĐ]
+    
+    C --> C1[Phải Trả Người Bán]
+    C --> C2[Vay và Nợ]
+    C --> C3[Thuế và Các Khoản Phải Nộp]
+    
+    D --> D1[Vốn Góp]
+    D --> D2[Thặng Dư Vốn]
+    D --> D3[Lợi Nhuận Chưa Phân Phối]
+    
+    E --> E1[Doanh Thu Bán Hàng]
+    E --> E2[Doanh Thu Tài Chính]
+    E --> E3[Thu Nhập Khác]
+    
+    F --> F1[Giá Vốn Hàng Bán]
+    F --> F2[Chi Phí Bán Hàng]
+    F --> F3[Chi Phí Quản Lý]
+```
+
+## 2. Phân Loại Tài Khoản
+
+```mermaid
+graph LR
+    A[Tài Khoản] --> B[TK Tổng Hợp]
+    A --> C[TK Chi Tiết]
+    
+    B --> B1[TK Cấp 1]
+    B1 --> B2[TK Cấp 2]
+    B2 --> B3[TK Cấp 3]
+    
+    C --> C1[TK Theo Đối Tượng]
+    C --> C2[TK Theo Khoản Mục]
+```
+
+## 3. Quan Hệ Số Dư
+
+```mermaid
+graph TD
+    A[Loại Tài Khoản] --> B[TK Dư Nợ]
+    A --> C[TK Dư Có]
+    A --> D[TK Lưỡng Tính]
+    
+    B --> B1[Tài Sản]
+    B --> B2[Chi Phí]
+    
+    C --> C1[Nguồn Vốn]
+    C --> C2[Doanh Thu]
+    
+    D --> D1[Phải Thu]
+    D --> D2[Phải Trả]
+```
+
+## 4. Cấu Trúc Mã Tài Khoản
+
+```mermaid
+graph TD
+    A[Mã TK] --> B[Cấp 1: X]
+    B --> C[Cấp 2: XX]
+    C --> D[Cấp 3: XXX]
+    D --> E[Cấp 4: XXXX]
+    
+    B1[1: Tài Sản] --> B11[11: Tiền]
+    B11 --> B111[111: Tiền Mặt]
+    B111 --> B1111[1111: Tiền VND]
+```
+
+## 5. Luồng Ghi Sổ
+
+```mermaid
+graph TB
+    A[Chứng Từ Gốc] --> B[Nhật Ký Chung]
+    B --> C[Sổ Cái]
+    C --> D1[Báo Cáo Tài Chính]
+    C --> D2[Báo Cáo Thuế]
+    
+    B --> E[Sổ Chi Tiết]
+    E --> F1[Báo Cáo Chi Tiết]
+    E --> F2[Đối Chiếu Công Nợ]
+```
+
+## 6. Quy Trình Khóa Sổ
+
+```mermaid
+graph TB
+    A[Đầu Kỳ] --> B[Ghi Sổ Hàng Ngày]
+    B --> C[Khóa Sổ Tạm]
+    C --> D[Bút Toán Điều Chỉnh]
+    D --> E[Khóa Sổ Cuối Kỳ]
+    E --> F[Lập Báo Cáo]
+    F --> G[Bút Toán Kết Chuyển]
+    G --> H[Mở Sổ Kỳ Mới]
+6:["slug","erp/diagrams/account_structure","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/diagrams/account_structure","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"diagrams\",\"account_structure\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/diagrams/account_structure","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

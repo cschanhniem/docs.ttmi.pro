@@ -1,0 +1,231 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T1061,# Sơ Đồ Triển Khai và Tích Hợp Hệ Thống
+
+## 1. Kiến Trúc Tổng Thể
+
+```mermaid
+graph TD
+    subgraph Client
+        A[Web Browser] --> B[SPA Frontend]
+        C[Mobile App] --> D[Mobile API Client]
+    end
+    
+    subgraph API_Gateway
+        E[API Gateway] --> F[Load Balancer]
+        F --> G1[API Server 1]
+        F --> G2[API Server 2]
+    end
+    
+    subgraph Services
+        G1 --> H1[Auth Service]
+        G1 --> H2[Accounting Service]
+        G1 --> H3[Report Service]
+        
+        G2 --> H1
+        G2 --> H2
+        G2 --> H3
+    end
+    
+    subgraph Database
+        H2 --> I1[(Primary DB)]
+        I1 --> I2[(Replica DB)]
+    end
+    
+    subgraph Cache
+        H2 --> J[Redis Cache]
+    end
+```
+
+## 2. Tích Hợp Ngân Hàng
+
+```mermaid
+sequenceDiagram
+    participant A as System
+    participant B as Bank Gateway
+    participant C as Bank Core
+    
+    A->>B: Gửi lệnh chuyển khoản
+    B->>B: Validate yêu cầu
+    B->>C: Forward request
+    C->>C: Xử lý giao dịch
+    C-->>B: Kết quả giao dịch
+    B-->>A: Response
+    
+    Note over A,C: Secure connection (HTTPS/VPN)
+```
+
+## 3. Tích Hợp HĐDT
+
+```mermaid
+graph TD
+    subgraph System
+        A[Invoice Module] --> B[E-Invoice Adapter]
+    end
+    
+    subgraph Provider
+        B --> C[E-Invoice API]
+        C --> D[Sign Service]
+        C --> E[Storage Service]
+    end
+    
+    subgraph Tax_Authority
+        C --> F[Tax Integration]
+        F --> G[Tax Authority System]
+    end
+```
+
+## 4. Xử Lý Báo Cáo
+
+```mermaid
+graph TD
+    subgraph Data_Processing
+        A[Data Collector] --> B[Data Transform]
+        B --> C[Data Warehouse]
+    end
+    
+    subgraph Report_Generation
+        C --> D[Report Engine]
+        D --> E[Excel Generator]
+        D --> F[PDF Generator]
+        D --> G[Data API]
+    end
+    
+    subgraph Distribution
+        E --> H[File Storage]
+        F --> H
+        G --> I[API Gateway]
+    end
+```
+
+## 5. Bảo Mật Hệ Thống
+
+```mermaid
+graph TD
+    subgraph Security_Layers
+        A[WAF] --> B[API Gateway]
+        B --> C[Auth Service]
+        C --> D[Application]
+    end
+    
+    subgraph Access_Control
+        D --> E[RBAC]
+        D --> F[Data Access]
+        D --> G[Audit Log]
+    end
+    
+    subgraph Encryption
+        H[TLS] --> I[Data in Transit]
+        J[AES] --> K[Data at Rest]
+    end
+```
+
+## 6. Monitoring & Logging
+
+```mermaid
+graph TD
+    subgraph System_Monitoring
+        A[App Metrics] --> B[Prometheus]
+        B --> C[Grafana]
+        
+        D[System Logs] --> E[ELK Stack]
+        E --> F[Kibana]
+    end
+    
+    subgraph Alerts
+        C --> G[Alert Manager]
+        F --> G
+        G --> H[Email]
+        G --> I[SMS]
+    end
+```
+
+## 7. Backup & Recovery
+
+```mermaid
+graph TD
+    subgraph Backup_Strategy
+        A[Database] --> B[Daily Backup]
+        A --> C[Transaction Log]
+        
+        D[File Storage] --> E[Periodic Backup]
+    end
+    
+    subgraph Storage
+        B --> F[Local Storage]
+        B --> G[Cloud Storage]
+        C --> H[Log Archive]
+    end
+    
+    subgraph Recovery
+        I[Point-in-Time] --> A
+        J[Disaster Recovery] --> A
+    end
+```
+
+## 8. CI/CD Pipeline
+
+```mermaid
+graph LR
+    A[Code] --> B[Build]
+    B --> C[Test]
+    C --> D[Package]
+    D --> E[Deploy Stage]
+    E --> F[Deploy Prod]
+    
+    subgraph Automation
+        G[Jenkins] --> H[Docker]
+        H --> I[Kubernetes]
+    end
+```
+
+## 9. Khả Năng Mở Rộng
+
+```mermaid
+graph TD
+    subgraph Horizontal_Scaling
+        A[Load Balancer] --> B1[Server 1]
+        A --> B2[Server 2]
+        A --> B3[Server N]
+    end
+    
+    subgraph Database_Scaling
+        C[Master] --> D1[Slave 1]
+        C --> D2[Slave 2]
+    end
+    
+    subgraph Cache_Scaling
+        E[Redis Cluster] --> F1[Node 1]
+        E --> F2[Node 2]
+    end
+```
+
+## 10. Môi Trường Triển Khai
+
+```mermaid
+graph TD
+    subgraph Development
+        A[Local Dev] --> B[Dev Server]
+    end
+    
+    subgraph Testing
+        B --> C[Test Server]
+        C --> D[UAT Server]
+    end
+    
+    subgraph Production
+        D --> E[Staging]
+        E --> F[Production]
+    end
+    
+    subgraph DR
+        F --> G[DR Site]
+    end
+6:["slug","erp/diagrams/system_deployment","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/diagrams/system_deployment","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"diagrams\",\"system_deployment\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/diagrams/system_deployment","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

@@ -1,0 +1,448 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T3472,# Hướng Dẫn Đối Chiếu Ngân Hàng và Xử Lý Thanh Toán
+
+## 1. Đối Chiếu Ngân Hàng
+
+### 1.1. Import Sao Kê Ngân Hàng
+```python
+def import_bank_statement(entity_model, bank_account, statement_file):
+    """
+    Import sao kê từ file ngân hàng
+    Hỗ trợ các định dạng:
+    - Vietcombank (.xlsx)
+    - BIDV (.xls)
+    - Techcombank (.csv)
+    - VietinBank (.xlsx)
+    """
+    from pandas import read_excel, read_csv
+    
+    # Xác định ngân hàng và đọc file
+    bank_type = bank_account.bank_type
+    if bank_type == 'vcb':
+        df = read_excel(statement_file, sheet_name=0)
+        mapping = {
+            'date': 'Ngày giao dịch',
+            'description': 'Mô tả',
+            'amount': 'Số tiền',
+            'type': 'Loại giao dịch'
+        }
+    elif bank_type == 'bidv':
+        # Mapping tương tự cho BIDV
+        pass
+        
+    # Chuẩn hóa dữ liệu
+    transactions = []
+    for _, row in df.iterrows():
+        transactions.append({
+            'date': parse_date(row[mapping['date']]),
+            'description': row[mapping['description']],
+            'amount': parse_amount(row[mapping['amount']]),
+            'type': parse_transaction_type(row[mapping['type']])
+        })
+    
+    return transactions
+```
+
+### 1.2. Đối Chiếu Tự Động
+```python
+def auto_reconcile(entity_model, bank_account, start_date, end_date):
+    """
+    Đối chiếu tự động giao dịch ngân hàng
+    """
+    # Lấy giao dịch từ sổ kế toán
+    accounting_entries = TransactionModel.objects.filter(
+        journal_entry__ledger__entity=entity_model,
+        account_id='112',  # TK Tiền gửi ngân hàng
+        bank_account=bank_account,
+        journal_entry__date__range=[start_date, end_date]
+    )
+    
+    # Lấy giao dịch từ sao kê
+    bank_entries = BankStatementModel.objects.filter(
+        entity=entity_model,
+        bank_account=bank_account,
+        date__range=[start_date, end_date]
+    )
+    
+    matches = []
+    unmatched_accounting = []
+    unmatched_bank = []
+    
+    # Đối chiếu theo số tiền và ngày
+    for acc_entry in accounting_entries:
+        found = False
+        for bank_entry in bank_entries:
+            if (abs(acc_entry.amount - bank_entry.amount) < Decimal('0.01') and
+                abs(acc_entry.date - bank_entry.date).days <= 1):
+                matches.append({
+                    'accounting': acc_entry,
+                    'bank': bank_entry
+                })
+                found = True
+                break
+        if not found:
+            unmatched_accounting.append(acc_entry)
+            
+    # Tìm các giao dịch ngân hàng chưa đối chiếu
+    matched_bank_ids = [m['bank'].id for m in matches]
+    unmatched_bank = bank_entries.exclude(id__in=matched_bank_ids)
+    
+    return {
+        'matches': matches,
+        'unmatched_accounting': unmatched_accounting,
+        'unmatched_bank': unmatched_bank
+    }
+```
+
+### 1.3. Xử Lý Chênh Lệch
+```python
+def xu_ly_chenh_lech(entity_model, bank_account, reconciliation_date):
+    """
+    Xử lý chênh lệch số dư ngân hàng
+    """
+    # Lấy số dư kế toán
+    so_du_ke_toan = get_account_balance(
+        entity_model,
+        '112',
+        bank_account,
+        reconciliation_date
+    )
+    
+    # Lấy số dư ngân hàng
+    so_du_ngan_hang = get_bank_balance(
+        bank_account,
+        reconciliation_date
+    )
+    
+    # Tìm các nguyên nhân chênh lệch
+    chenh_lech = []
+    
+    # 1. Séc chờ thanh toán
+    sec_cho_thanh_toan = get_outstanding_checks(
+        entity_model,
+        bank_account,
+        reconciliation_date
+    )
+    
+    # 2. Tiền gửi trên đường
+    tien_gui_tren_duong = get_deposits_in_transit(
+        entity_model,
+        bank_account,
+        reconciliation_date
+    )
+    
+    # 3. Phí ngân hàng chưa ghi nhận
+    phi_chua_ghi_nhan = get_unrecorded_bank_fees(
+        entity_model,
+        bank_account,
+        reconciliation_date
+    )
+    
+    # Tính toán chênh lệch còn lại
+    chenh_lech_con_lai = (
+        so_du_ngan_hang -
+        so_du_ke_toan -
+        sum(c.amount for c in sec_cho_thanh_toan) +
+        sum(t.amount for t in tien_gui_tren_duong) -
+        sum(p.amount for p in phi_chua_ghi_nhan)
+    )
+    
+    return {
+        'so_du_ke_toan': so_du_ke_toan,
+        'so_du_ngan_hang': so_du_ngan_hang,
+        'sec_cho_thanh_toan': sec_cho_thanh_toan,
+        'tien_gui_tren_duong': tien_gui_tren_duong,
+        'phi_chua_ghi_nhan': phi_chua_ghi_nhan,
+        'chenh_lech_con_lai': chenh_lech_con_lai
+    }
+```
+
+## 2. Quy Trình Thanh Toán
+
+### 2.1. Thanh Toán Nhà Cung Cấp
+```python
+def tao_de_nghi_thanh_toan(entity_model, payment_data):
+    """
+    Tạo đề nghị thanh toán cho nhà cung cấp
+    """
+    # Tạo chứng từ
+    payment_request = PaymentRequestModel.objects.create(
+        entity=entity_model,
+        vendor=payment_data['vendor'],
+        amount=payment_data['amount'],
+        due_date=payment_data['due_date'],
+        payment_method=payment_data['payment_method'],
+        description=payment_data['description']
+    )
+    
+    # Thêm các hóa đơn cần thanh toán
+    for bill in payment_data['bills']:
+        PaymentRequestLineModel.objects.create(
+            payment_request=payment_request,
+            bill=bill,
+            amount=bill.amount_due
+        )
+    
+    return payment_request
+```
+
+### 2.2. Xử Lý Phê Duyệt
+```python
+def xu_ly_phe_duyet_thanh_toan(payment_request, approver, action, notes=None):
+    """
+    Xử lý phê duyệt đề nghị thanh toán
+    """
+    if action == 'approve':
+        # Kiểm tra thẩm quyền
+        if not has_approval_authority(approver, payment_request.amount):
+            raise ValidationError('Không đủ thẩm quyền phê duyệt')
+            
+        # Tạo bản ghi phê duyệt
+        PaymentApprovalModel.objects.create(
+            payment_request=payment_request,
+            approver=approver,
+            action='approve',
+            notes=notes
+        )
+        
+        # Cập nhật trạng thái
+        payment_request.status = 'approved'
+        payment_request.save()
+        
+        # Tạo Ủy nhiệm chi nếu là chuyển khoản
+        if payment_request.payment_method == 'bank_transfer':
+            create_bank_payment_order(payment_request)
+            
+    elif action == 'reject':
+        PaymentApprovalModel.objects.create(
+            payment_request=payment_request,
+            approver=approver,
+            action='reject',
+            notes=notes
+        )
+        payment_request.status = 'rejected'
+        payment_request.save()
+```
+
+### 2.3. Xuất Ủy Nhiệm Chi
+```python
+def tao_uy_nhiem_chi(payment_request):
+    """
+    Tạo ủy nhiệm chi từ đề nghị thanh toán
+    """
+    unc = BankPaymentOrderModel.objects.create(
+        entity=payment_request.entity,
+        payment_request=payment_request,
+        beneficiary_name=payment_request.vendor.name,
+        beneficiary_account=payment_request.vendor.bank_account,
+        beneficiary_bank=payment_request.vendor.bank_name,
+        amount=payment_request.amount,
+        description=payment_request.description
+    )
+    
+    return unc
+
+def xuat_unc_xml(unc):
+    """
+    Xuất ủy nhiệm chi dạng XML theo chuẩn ngân hàng
+    """
+    root = Element('UyNhiemChi')
+    
+    # Thông tin chung
+    info = SubElement(root, 'ThongTinChung')
+    SubElement(info, 'MaUNC').text = unc.number
+    SubElement(info, 'NgayLap').text = unc.created_at.strftime('%Y-%m-%d')
+    
+    # Thông tin người chuyển
+    sender = SubElement(root, 'NguoiChuyen')
+    SubElement(sender, 'TenTaiKhoan').text = unc.entity.name
+    SubElement(sender, 'SoTaiKhoan').text = unc.entity.bank_account
+    
+    # Thông tin người nhận
+    receiver = SubElement(root, 'NguoiNhan')
+    SubElement(receiver, 'TenTaiKhoan').text = unc.beneficiary_name
+    SubElement(receiver, 'SoTaiKhoan').text = unc.beneficiary_account
+    SubElement(receiver, 'NganHang').text = unc.beneficiary_bank
+    
+    # Thông tin giao dịch
+    transaction = SubElement(root, 'ThongTinGiaoDich')
+    SubElement(transaction, 'SoTien').text = str(unc.amount)
+    SubElement(transaction, 'NoiDung').text = unc.description
+    
+    return tostring(root, encoding='utf-8', xml_declaration=True)
+```
+
+## 3. Báo Cáo Thanh Toán
+
+### 3.1. Báo Cáo Tuổi Nợ
+```python
+def bao_cao_tuoi_no_nha_cung_cap(entity_model, as_of_date):
+    """
+    Báo cáo tuổi nợ nhà cung cấp
+    """
+    vendors = VendorModel.objects.filter(entity=entity_model)
+    report = []
+    
+    for vendor in vendors:
+        bills = BillModel.objects.filter(
+            entity=entity_model,
+            vendor=vendor,
+            due_date__lte=as_of_date,
+            status='unpaid'
+        )
+        
+        aging_buckets = {
+            'current': Decimal('0'),
+            '1_30': Decimal('0'),
+            '31_60': Decimal('0'),
+            '61_90': Decimal('0'),
+            'over_90': Decimal('0')
+        }
+        
+        for bill in bills:
+            days_overdue = (as_of_date - bill.due_date).days
+            
+            if days_overdue <= 0:
+                aging_buckets['current'] += bill.amount_due
+            elif days_overdue <= 30:
+                aging_buckets['1_30'] += bill.amount_due
+            elif days_overdue <= 60:
+                aging_buckets['31_60'] += bill.amount_due
+            elif days_overdue <= 90:
+                aging_buckets['61_90'] += bill.amount_due
+            else:
+                aging_buckets['over_90'] += bill.amount_due
+                
+        report.append({
+            'vendor': vendor,
+            'aging': aging_buckets,
+            'total': sum(aging_buckets.values())
+        })
+    
+    return report
+```
+
+### 3.2. Dự Báo Dòng Tiền
+```python
+def du_bao_dong_tien(entity_model, from_date, to_date):
+    """
+    Dự báo dòng tiền theo tuần
+    """
+    # Thu từ khách hàng
+    invoices = InvoiceModel.objects.filter(
+        entity=entity_model,
+        due_date__range=[from_date, to_date],
+        status='unpaid'
+    )
+    
+    # Chi trả nhà cung cấp
+    bills = BillModel.objects.filter(
+        entity=entity_model,
+        due_date__range=[from_date, to_date],
+        status='unpaid'
+    )
+    
+    # Chi trả lương
+    payroll = PayrollModel.objects.filter(
+        entity=entity_model,
+        payment_date__range=[from_date, to_date]
+    )
+    
+    # Chi trả thuế
+    tax_payments = TaxPaymentModel.objects.filter(
+        entity=entity_model,
+        due_date__range=[from_date, to_date]
+    )
+    
+    # Tổng hợp theo tuần
+    weeks = []
+    current_date = from_date
+    while current_date <= to_date:
+        week_end = current_date + timedelta(days=6)
+        
+        week_data = {
+            'from_date': current_date,
+            'to_date': week_end,
+            'inflows': {
+                'customer_payments': sum(
+                    inv.amount_due for inv in invoices
+                    if current_date <= inv.due_date <= week_end
+                )
+            },
+            'outflows': {
+                'vendor_payments': sum(
+                    bill.amount_due for bill in bills
+                    if current_date <= bill.due_date <= week_end
+                ),
+                'payroll': sum(
+                    pay.amount for pay in payroll
+                    if current_date <= pay.payment_date <= week_end
+                ),
+                'tax_payments': sum(
+                    tax.amount for tax in tax_payments
+                    if current_date <= tax.due_date <= week_end
+                )
+            }
+        }
+        
+        week_data['net_cash_flow'] = (
+            sum(week_data['inflows'].values()) -
+            sum(week_data['outflows'].values())
+        )
+        
+        weeks.append(week_data)
+        current_date += timedelta(days=7)
+        
+    return weeks
+```
+
+### 3.3. Báo Cáo Thanh Toán
+```python
+def bao_cao_trang_thai_thanh_toan(entity_model, from_date, to_date):
+    """
+    Báo cáo trạng thái thanh toán
+    """
+    payment_requests = PaymentRequestModel.objects.filter(
+        entity=entity_model,
+        created_at__range=[from_date, to_date]
+    )
+    
+    # Thống kê theo trạng thái
+    stats = {
+        'draft': {'count': 0, 'amount': Decimal('0')},
+        'pending_approval': {'count': 0, 'amount': Decimal('0')},
+        'approved': {'count': 0, 'amount': Decimal('0')},
+        'rejected': {'count': 0, 'amount': Decimal('0')},
+        'completed': {'count': 0, 'amount': Decimal('0')}
+    }
+    
+    for pr in payment_requests:
+        stats[pr.status]['count'] += 1
+        stats[pr.status]['amount'] += pr.amount
+        
+    # Thống kê theo phương thức
+    by_method = {
+        'cash': {'count': 0, 'amount': Decimal('0')},
+        'bank_transfer': {'count': 0, 'amount': Decimal('0')},
+        'check': {'count': 0, 'amount': Decimal('0')}
+    }
+    
+    for pr in payment_requests:
+        by_method[pr.payment_method]['count'] += 1
+        by_method[pr.payment_method]['amount'] += pr.amount
+        
+    return {
+        'by_status': stats,
+        'by_method': by_method,
+        'total_count': payment_requests.count(),
+        'total_amount': sum(pr.amount for pr in payment_requests)
+    }
+6:["slug","erp/bank_reconciliation","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/bank_reconciliation","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"bank_reconciliation\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/bank_reconciliation","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

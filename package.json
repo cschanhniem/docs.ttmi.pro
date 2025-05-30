@@ -1,0 +1,28 @@
+{
+  "name": "erp-docs",
+  "version": "1.0.0",
+  "description": "Technical documentation repository with GitHub Pages support",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "dev": "pnpm --filter docs dev",
+    "build": "pnpm --filter docs build",
+    "start": "pnpm --filter docs start",
+    "lint": "pnpm --filter docs lint",
+    "export": "pnpm --filter docs export",
+    "deploy": "pnpm build && pnpm export"
+  },
+  "keywords": [
+    "documentation",
+    "markdown",
+    "mermaid",
+    "github-pages",
+    "nextjs"
+  ],
+  "author": "",
+  "license": "MIT"
+}

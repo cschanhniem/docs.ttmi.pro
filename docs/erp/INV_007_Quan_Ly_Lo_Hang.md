@@ -1,0 +1,354 @@
+# INV_007_Quản Lý Lô Hàng
+
+*Phiên bản: 1.0*
+*Người tạo: Gemini AI Assistant*
+*Ngày tạo: 2024-07-31*
+*Cập nhật lần cuối: 2024-07-31*
+*Người cập nhật: Gemini AI Assistant*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Nghiệp vụ Quản Lý Lô Hàng (trong mã nguồn là `LoModel`) cho phép người dùng định nghĩa và quản lý các lô hàng của vật tư/sản phẩm trong hệ thống. Mỗi lô hàng bao gồm các thông tin như mã lô, tên lô, ngày nhập, ngày sản xuất, hạn sử dụng, và các thông tin liên quan khác. Mục đích là theo dõi chi tiết các lô hàng để quản lý hiệu quả hàng tồn kho, đặc biệt là hàng hóa có thời hạn sử dụng, cần theo dõi nguồn gốc xuất xứ, hoặc theo lô sản xuất.
+
+### 1.2. Phạm Vi Áp Dụng
+- Áp dụng cho từng Đơn vị (Entity) trong hệ thống.
+- Các bộ phận liên quan đến quản lý kho hàng, vật tư, sản xuất, và kiểm soát chất lượng.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Lô Hàng | Một nhóm vật tư/sản phẩm cùng loại, có chung đặc tính về thời gian sản xuất, hạn sử dụng, v.v. Trong mã nguồn là `LoModel`. |
+| Đơn vị (Entity) | Tổ chức hoặc công ty mà lô hàng được định nghĩa và áp dụng. |
+| `ma_lo` | Mã định danh duy nhất cho một lô hàng trong một đơn vị. |
+| `ten_lo` | Tên chính của lô hàng. |
+| `ten_lo2` | Tên thay thế/phụ của lô hàng. |
+| `ma_vt` | Mã vật tư liên kết đến lô hàng (liên kết đến `VatTuModel`). |
+| `ma_vt2` | Mã vật tư thay thế (dạng chuỗi). |
+| `ngay_nhap` | Ngày nhập lô hàng vào kho. |
+| `ngay_sx` | Ngày sản xuất của lô hàng. |
+| `ngay_hhsd` | Ngày hết hạn sử dụng của lô hàng. |
+| `ngay_hhbh` | Ngày hết hạn bảo hành của lô hàng. |
+| `ghi_chu` | Ghi chú bổ sung cho lô hàng. |
+| `status` | Trạng thái của lô hàng. |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | `django_ledger/models/lo.py` | Model Định Nghĩa Lô Hàng | Định nghĩa cấu trúc dữ liệu cho `LoModel`. |
+| 2   | `django_ledger/api/views/lo.py` | API Endpoints Lô Hàng | Các điểm cuối API để tương tác với nghiệp vụ Quản Lý Lô Hàng. |
+| 3   | `django_ledger/api/serializers/lo.py` | Serializers Lô Hàng | Định dạng dữ liệu JSON cho API, thực hiện validation. |
+| 4   | `django_ledger/services/lo/lo.py` | Service Logic Lô Hàng | Logic nghiệp vụ cho việc tạo, cập nhật, xóa, truy vấn Lô Hàng. |
+| 5   | `django_ledger/repositories/lo/lo.py` | Repository Lô Hàng | Lớp truy cập dữ liệu cho Lô Hàng. |
+| 6   | `django_ledger/api/urls.py` | URL Configuration | Đăng ký endpoint `/api/{entity_slug}/lots/` cho Lô Hàng. |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Người dùng có thẩm quyền (ví dụ: quản trị viên, quản lý kho) tương tác với hệ thống thông qua giao diện người dùng hoặc API để thực hiện các thao tác CRUD (Create, Read, Update, Delete) đối với các Lô Hàng. Hệ thống sẽ xử lý các yêu cầu này thông qua `LoModelViewSet`, sử dụng `LoModelService` để thực thi logic nghiệp vụ và `LoRepository` để tương tác với cơ sở dữ liệu. Dữ liệu đầu vào sẽ được kiểm tra (validate) bởi `LoModelSerializer` và `LoModelService`.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Người dùng yêu cầu thao tác Lô Hàng] --> B{API Gateway nhận yêu cầu};
+    B --> C[Xác thực & Ủy quyền (IsAuthenticated)];
+    C --> D[LoModelViewSet];
+    D --> E[LoModelService];
+    E --> F[LoRepository];
+    F --> G[(Cơ sở dữ liệu - Bảng lo)];
+    G --> F;
+    F --> E;
+    E --> D;
+    subgraph "Validation"
+        direction LR
+        H[Request Data] --> I[LoModelSerializer];
+        I --> J[LoModelService.validate_lo_data];
+    end
+    D --> H;
+    J -- Dữ liệu hợp lệ --> E;
+    J -- Dữ liệu không hợp lệ --> K[Báo lỗi cho ViewSet];
+    K --> B;
+    D --> L[Trả kết quả cho người dùng];
+    B --> L;
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Tạo Mới Lô Hàng
+- **Mô tả**: Người dùng cung cấp thông tin để tạo một Lô Hàng mới cho một Đơn vị và một Vật tư cụ thể.
+- **Đầu vào**: Dữ liệu Lô Hàng (`ma_lo`, `ten_lo`, `ma_vt`, các ngày và các thông tin khác). `entity_slug` được lấy từ URL.
+- **Đầu ra**: Lô Hàng mới được tạo thành công hoặc thông báo lỗi.
+- **Người thực hiện**: Quản trị viên, quản lý kho.
+- **Điều kiện tiên quyết**: Đăng nhập hệ thống, có quyền truy cập vào Đơn vị. `ma_lo` phải là duy nhất trong Đơn vị đó.
+- **Xử lý ngoại lệ**: Dữ liệu không hợp lệ (thiếu trường, sai định dạng, `ma_lo` bị trùng), Đơn vị không tồn tại, Vật tư không tồn tại.
+
+#### 2.3.2. Xem/Tìm Kiếm Lô Hàng
+- **Mô tả**: Người dùng xem danh sách các Lô Hàng của một Đơn vị hoặc chi tiết một Lô Hàng cụ thể.
+- **Đầu vào**: `entity_slug` (từ URL). Tùy chọn: `uuid` của Lô Hàng (để xem chi tiết), `ma_vt` (để lọc theo vật tư).
+- **Đầu ra**: Danh sách các Lô Hàng hoặc thông tin chi tiết của một Lô Hàng.
+- **Người thực hiện**: Mọi người dùng có quyền xem.
+- **Điều kiện tiên quyết**: Đăng nhập hệ thống.
+- **Xử lý ngoại lệ**: Lô Hàng không tồn tại, Đơn vị không tồn tại.
+
+#### 2.3.3. Cập Nhật Lô Hàng
+- **Mô tả**: Người dùng thay đổi thông tin của một Lô Hàng đã tồn tại.
+- **Đầu vào**: `entity_slug`, `uuid` của Lô Hàng, và dữ liệu cần cập nhật.
+- **Đầu ra**: Lô Hàng được cập nhật thành công hoặc thông báo lỗi.
+- **Người thực hiện**: Quản trị viên, quản lý kho.
+- **Điều kiện tiên quyết**: Đăng nhập, Lô Hàng phải tồn tại và thuộc Đơn vị chỉ định.
+- **Xử lý ngoại lệ**: Dữ liệu không hợp lệ, Lô Hàng không tồn tại.
+
+#### 2.3.4. Xóa Lô Hàng
+- **Mô tả**: Người dùng xóa một Lô Hàng khỏi hệ thống.
+- **Đầu vào**: `entity_slug`, `uuid` của Lô Hàng.
+- **Đầu ra**: Thông báo xóa thành công hoặc thông báo lỗi.
+- **Người thực hiện**: Quản trị viên, quản lý kho.
+- **Điều kiện tiên quyết**: Đăng nhập, Lô Hàng phải tồn tại và thuộc Đơn vị chỉ định.
+- **Xử lý ngoại lệ**: Lô Hàng không tồn tại, Lô Hàng đang được sử dụng.
+
+#### 2.3.5. Xem Lô Hàng Đã Hết Hạn
+- **Mô tả**: Người dùng xem danh sách các Lô Hàng đã hết hạn sử dụng.
+- **Đầu vào**: `entity_slug` (từ URL).
+- **Đầu ra**: Danh sách các Lô Hàng đã hết hạn.
+- **Người thực hiện**: Quản trị viên, quản lý kho.
+- **Điều kiện tiên quyết**: Đăng nhập, có quyền truy cập vào Đơn vị.
+- **Xử lý ngoại lệ**: Đơn vị không tồn tại.
+
+#### 2.3.6. Xem Lô Hàng Sắp Hết Hạn
+- **Mô tả**: Người dùng xem danh sách các Lô Hàng sắp hết hạn trong một khoảng thời gian.
+- **Đầu vào**: `entity_slug` (từ URL), `start_date` (tùy chọn), `end_date` (bắt buộc).
+- **Đầu ra**: Danh sách các Lô Hàng sắp hết hạn.
+- **Người thực hiện**: Quản trị viên, quản lý kho.
+- **Điều kiện tiên quyết**: Đăng nhập, có quyền truy cập vào Đơn vị.
+- **Xử lý ngoại lệ**: Đơn vị không tồn tại, thiếu tham số `end_date`.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram) - Tạo mới Lô Hàng
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant APIView as LoModelViewSet
+    participant Service as LoModelService
+    participant Serializer as LoModelSerializer
+    participant Repository as LoRepository
+    participant Model as LoModel
+    participant DB as Database
+
+    User->>APIView: POST /api/{entity_slug}/lots/ (data)
+    APIView->>Serializer: validate(data)
+    Serializer-->>APIView: validated_data
+    APIView->>Service: get_service()
+    Service-->>APIView: service_instance
+    APIView->>Service: validate_lo_data(data)
+    Service-->>APIView: validated_data
+    APIView->>Service: create_lo(entity_slug, validated_data)
+    Service->>Repository: get_entity_model(entity_slug)
+    Repository-->>Service: entity_model
+    Service->>Repository: create_lo(validated_data)
+    Repository->>Model: objects.create(**validated_data)
+    Model->>DB: INSERT INTO lo
+    DB-->>Model: created_instance
+    Model-->>Repository: created_instance
+    Repository-->>Service: created_instance
+    Service-->>APIView: created_instance
+    APIView->>Serializer: serialize(created_instance)
+    Serializer-->>APIView: serialized_data
+    APIView-->>User: HTTP 201 (serialized_data)
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+- **Lọc theo vật tư**: Người dùng có thể lọc danh sách lô hàng theo mã vật tư cụ thể (thông qua tham số `ma_vt`).
+- **Lọc theo trạng thái**: Người dùng có thể lọc lô hàng theo trạng thái hoạt động (thông qua tham số `active_only`).
+- **Quản lý hàng hết hạn**: Hệ thống cung cấp các API endpoint đặc biệt để kiểm tra các lô hàng đã hết hạn hoặc sắp hết hạn.
+- **Nhập kho theo lô**: Khi nhập kho, người dùng có thể chỉ định thông tin lô hàng để theo dõi chi tiết.
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | INV007-LIST | Xem danh sách Lô Hàng | Lấy danh sách Lô Hàng theo Đơn vị, hỗ trợ phân trang và lọc. | Cao |
+| 2   | INV007-CREATE | Tạo mới Lô Hàng | Tạo một Lô Hàng mới cho một Đơn vị và một Vật tư cụ thể. | Cao |
+| 3   | INV007-RETRIEVE | Xem chi tiết Lô Hàng | Lấy thông tin chi tiết của một Lô Hàng bằng UUID. | Cao |
+| 4   | INV007-UPDATE | Cập nhật Lô Hàng | Cập nhật thông tin của một Lô Hàng đã có. | Cao |
+| 5   | INV007-DELETE | Xóa Lô Hàng | Xóa một Lô Hàng. | Cao |
+| 6   | INV007-EXPIRED | Xem Lô Hàng đã hết hạn | Lấy danh sách Lô Hàng đã hết hạn sử dụng. | Trung bình |
+| 7   | INV007-EXPIRING | Xem Lô Hàng sắp hết hạn | Lấy danh sách Lô Hàng sắp hết hạn trong một khoảng thời gian. | Trung bình |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. INV007-CREATE: Tạo mới Lô Hàng
+- **Mô tả**: Cho phép tạo một Lô Hàng mới.
+- **Đầu vào**: `entity_slug` (trong URL). Dữ liệu JSON body: `ma_lo` (string, bắt buộc), `ten_lo` (string, bắt buộc), `ma_vt` (UUID, bắt buộc), `ngay_nhap` (date, bắt buộc), `ngay_sx` (date, bắt buộc), `ngay_hhsd` (date, bắt buộc), `ngay_hhbh` (date, bắt buộc), và các trường khác.
+- **Đầu ra**: Dữ liệu JSON của Lô Hàng vừa tạo.
+- **Điều kiện tiên quyết**: `ma_lo` phải là duy nhất cho `entity_model`.
+- **Luồng xử lý chính**:
+  1. Gửi POST request với dữ liệu hợp lệ.
+  2. Hệ thống validate dữ liệu.
+  3. Hệ thống kiểm tra tính duy nhất của `ma_lo`.
+  4. Hệ thống tạo Lô Hàng mới.
+  5. Hệ thống trả về dữ liệu Lô Hàng đã tạo.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  - Dữ liệu không hợp lệ: Trả về HTTP 400 với thông báo lỗi.
+  - `ma_lo` bị trùng: Trả về HTTP 400 với thông báo lỗi.
+- **Giao diện liên quan**: Form tạo mới Lô Hàng.
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+Nghiệp vụ này tuân theo kiến trúc 3 lớp với sự hỗ trợ của Repository pattern:
+- **View (API Layer)**: `LoModelViewSet` xử lý HTTP request/response, xác thực, phân trang, và gọi các services.
+- **Service Layer**: `LoModelService` chứa logic nghiệp vụ chính, điều phối hoạt động giữa View và Repository, thực hiện validation nghiệp vụ.
+- **Repository Layer**: `LoRepository` chịu trách nhiệm tương tác trực tiếp với cơ sở dữ liệu thông qua Django ORM (`LoModel`).
+- **Model Layer**: `LoModel` định nghĩa cấu trúc dữ liệu, bao gồm các trường, ràng buộc và custom manager/queryset.
+
+```mermaid
+graph TD
+    Client --> Nginx --> Gunicorn
+    Gunicorn --> DjangoApp[Django Application]
+
+    subgraph DjangoApp
+        APILayer[API Layer: LoModelViewSet]
+        ServiceLayer[Service Layer: LoModelService]
+        RepositoryLayer[Repository Layer: LoRepository]
+        ModelLayer[Model Layer: LoModel]
+        Database[(PostgreSQL Database - lo table)]
+
+        APILayer -->|calls| ServiceLayer
+        ServiceLayer -->|uses| RepositoryLayer
+        RepositoryLayer -->|accesses| ModelLayer
+        ModelLayer -->|maps to| Database
+    end
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Lô Hàng (`LoModel`)
+- **Mô tả**: Quản lý các lô hàng.
+- **Base URL**: `/api/{entity_slug}/lots/`
+- **Endpoints**:
+  - `GET /`: Lấy danh sách Lô Hàng (hỗ trợ phân trang `ERPPagination`).
+    - Query params: `page`, `page_size`, `ma_vt` (lọc theo vật tư), `active_only` (lọc lô hàng đang hoạt động).
+  - `POST /`: Tạo một Lô Hàng mới.
+  - `GET /{uuid}/`: Lấy chi tiết một Lô Hàng.
+  - `PUT /{uuid}/`: Cập nhật toàn bộ một Lô Hàng.
+  - `PATCH /{uuid}/`: Cập nhật một phần một Lô Hàng.
+  - `DELETE /{uuid}/`: Xóa một Lô Hàng.
+  - `GET /expired/`: Lấy danh sách Lô Hàng đã hết hạn.
+  - `GET /expiring/`: Lấy danh sách Lô Hàng sắp hết hạn.
+    - Query params: `start_date` (tùy chọn), `end_date` (bắt buộc).
+
+### 4.3. Service Logic (`LoModelService`)
+- **Mô tả**: Cung cấp logic nghiệp vụ cho `LoModel`.
+- **Chức năng chính**:
+  1. `validate_lo_data(data)`: Kiểm tra các trường bắt buộc và định dạng dữ liệu.
+  2. `create_lo(entity_slug, data)`: Tạo một Lô Hàng mới.
+  3. `update_lo(entity_slug, uuid, data)`: Cập nhật một Lô Hàng hiện có.
+  4. `delete_lo(entity_slug, uuid)`: Xóa một Lô Hàng.
+  5. `get_expired_lots_queryset(entity_slug)`: Lấy danh sách Lô Hàng đã hết hạn.
+  6. `get_expiring_lots_queryset(entity_slug, start_date, end_date)`: Lấy danh sách Lô Hàng sắp hết hạn.
+- **Các dependencies**: `LoRepository`, `EntityModel`, `VatTuModel`.
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    EntityModel ||--o{ LoModel : "has"
+    VatTuModel ||--o{ LoModel : "has lots"
+
+    EntityModel {
+        UUID uuid PK
+        string slug
+        string name
+        # ... other fields
+    }
+
+    VatTuModel {
+        UUID uuid PK
+        string ma_vt
+        string ten_vt
+        # ... other fields
+    }
+
+    LoModel {
+        UUID uuid PK
+        UUID entity_model_id FK
+        UUID ma_vt_id FK "Product ID"
+        string ma_lo "Lot code"
+        string ten_lo "Lot name"
+        string ten_lo2 "Alternative name"
+        string ma_vt2 "Alternative product code"
+        date ngay_nhap "Received date"
+        date ngay_sx "Manufacturing date"
+        date ngay_hhsd "Expiration date"
+        date ngay_hhbh "Warranty expiration date"
+        text ghi_chu "Notes"
+        string status "Status"
+        datetime created
+        datetime updated
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: `lo` (mapped from `LoModel`)
+- **Mô tả**: Lưu trữ thông tin các lô hàng.
+- **Các cột chính**:
+  - `uuid` (PK, UUIDField): Định danh duy nhất.
+  - `entity_model_id` (FK, UUIDField): Liên kết đến bảng `entity`.
+  - `ma_vt_id` (FK, UUIDField): Liên kết đến bảng `vat_tu`.
+  - `ma_lo` (CharField): Mã lô hàng.
+  - `ten_lo` (CharField): Tên lô hàng.
+  - `ten_lo2` (CharField, nullable): Tên thay thế của lô hàng.
+  - `ma_vt2` (CharField, nullable): Mã vật tư thay thế.
+  - `ngay_nhap` (DateField): Ngày nhập lô hàng.
+  - `ngay_sx` (DateField): Ngày sản xuất.
+  - `ngay_hhsd` (DateField): Ngày hết hạn sử dụng.
+  - `ngay_hhbh` (DateField): Ngày hết hạn bảo hành.
+  - `ghi_chu` (TextField, nullable): Ghi chú bổ sung.
+  - `status` (CharField): Trạng thái lô hàng.
+  - `created` (DateTimeField): Thời điểm tạo.
+  - `updated` (DateTimeField): Thời điểm cập nhật cuối.
+- **Indexes**: (`entity_model`, `ma_lo`), (`ma_lo`), (`status`), (`ma_vt`), (`ngay_nhap`), (`ngay_hhsd`).
+- **Unique Together**: (`entity_model`, `ma_lo`).
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- Kiểm thử các chức năng CRUD cho Lô Hàng qua API endpoints.
+- Kiểm thử validation dữ liệu đầu vào (trường bắt buộc, tính duy nhất của `ma_lo`).
+- Kiểm thử logic phân quyền (người dùng chỉ thao tác được Lô Hàng của Entity mình có quyền).
+- Kiểm thử các API endpoint đặc biệt (kiểm tra lô hàng hết hạn, sắp hết hạn).
+- Kiểm thử lọc theo vật tư và trạng thái.
+
+### 5.2. Kịch Bản Kiểm Thử
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC_INV007_001 | Tạo Lô Hàng thành công | Kiểm tra tạo mới Lô Hàng với dữ liệu hợp lệ. | User đăng nhập, có quyền. `entity_slug` hợp lệ. | 1. Gửi POST request tới `/api/{entity_slug}/lots/` với data hợp lệ. | 1. Response status 201. 2. Response body chứa thông tin Lô Hàng đã tạo. 3. Dữ liệu được lưu đúng trong DB. |
+| 2   | TC_INV007_002 | Tạo Lô Hàng thất bại - `ma_lo` trùng | Kiểm tra không cho tạo Lô Hàng nếu `ma_lo` đã tồn tại cho entity. | User đăng nhập. `ma_lo` đã tồn tại cho entity. | 1. Gửi POST request với `ma_lo` đã có. | 1. Response status 400. 2. Thông báo lỗi về `ma_lo` bị trùng. |
+| 3   | TC_INV007_003 | Tạo Lô Hàng thất bại - thiếu trường bắt buộc | Kiểm tra lỗi khi thiếu trường bắt buộc. | User đăng nhập. | 1. Gửi POST request thiếu một trong các trường bắt buộc. | 1. Response status 400. 2. Thông báo lỗi trường bắt buộc. |
+| 4   | TC_INV007_004 | Lấy danh sách Lô Hàng | Kiểm tra lấy danh sách Lô Hàng, có phân trang và lọc. | Có sẵn vài Lô Hàng cho các vật tư khác nhau. | 1. Gửi GET request tới `/api/{entity_slug}/lots/?ma_vt={vat_tu_uuid}`. | 1. Response status 200. 2. Response body chứa danh sách Lô Hàng của vật tư đã chọn. |
+| 5   | TC_INV007_005 | Xem chi tiết Lô Hàng | Kiểm tra xem thông tin chi tiết của một Lô Hàng. | Lô Hàng tồn tại. | 1. Gửi GET request tới `/api/{entity_slug}/lots/{uuid}/`. | 1. Response status 200. 2. Response body chứa thông tin chi tiết của Lô Hàng. |
+| 6   | TC_INV007_006 | Cập nhật Lô Hàng | Kiểm tra cập nhật thông tin Lô Hàng. | Lô Hàng tồn tại. | 1. Gửi PUT request tới `/api/{entity_slug}/lots/{uuid}/` với data mới. | 1. Response status 200. 2. Dữ liệu Lô Hàng được cập nhật trong DB. |
+| 7   | TC_INV007_007 | Xóa Lô Hàng | Kiểm tra xóa Lô Hàng. | Lô Hàng tồn tại. | 1. Gửi DELETE request tới `/api/{entity_slug}/lots/{uuid}/`. | 1. Response status 204. 2. Lô Hàng bị xóa khỏi DB. |
+| 8   | TC_INV007_008 | Xem Lô Hàng đã hết hạn | Kiểm tra lấy danh sách Lô Hàng đã hết hạn. | Có sẵn Lô Hàng đã hết hạn. | 1. Gửi GET request tới `/api/{entity_slug}/lots/expired/`. | 1. Response status 200. 2. Response body chứa danh sách Lô Hàng đã hết hạn. |
+| 9   | TC_INV007_009 | Xem Lô Hàng sắp hết hạn | Kiểm tra lấy danh sách Lô Hàng sắp hết hạn. | Có sẵn Lô Hàng sắp hết hạn. | 1. Gửi GET request tới `/api/{entity_slug}/lots/expiring/?end_date=2024-12-31`. | 1. Response status 200. 2. Response body chứa danh sách Lô Hàng sắp hết hạn trước ngày chỉ định. |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Mã nguồn dự án ERP-BE (các file đã liệt kê ở mục 1.4).
+- Tài liệu Django REST framework.
+- Tài liệu drf-spectacular (cho schema generation).
+
+### 6.2. Danh Mục Thuật Ngữ
+(Xem mục 1.3)
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+| Phiên bản | Ngày       | Người thực hiện      | Mô tả thay đổi                         |
+|-----------|------------|----------------------|----------------------------------------|
+| 1.0       | 2024-07-31 | Gemini AI Assistant  | Tạo tài liệu ban đầu dựa trên source code. |

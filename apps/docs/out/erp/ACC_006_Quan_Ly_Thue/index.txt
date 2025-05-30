@@ -1,0 +1,544 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T717a,# ACC_006_Quản Lý Thuế
+
+*Phiên bản: 1.0*  
+*Người tạo: AI Assistant*  
+*Ngày tạo: 25/07/2024*  
+*Cập nhật lần cuối: 25/07/2024*  
+*Người cập nhật: AI Assistant*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Quản lý thuế là quy trình thiết lập, cấu hình và quản lý các loại thuế áp dụng trong hoạt động kinh doanh của doanh nghiệp. Quy trình này bao gồm việc định nghĩa các loại thuế khác nhau (ví dụ: thuế GTGT, thuế TNDN, thuế TNCN), thiết lập thuế suất, xác định tài khoản kế toán liên quan, và quản lý việc áp dụng thuế trong các giao dịch mua bán.
+
+Trong hệ thống ERP, quản lý thuế đóng vai trò quan trọng trong việc đảm bảo tính chính xác của các báo cáo tài chính, tuân thủ các quy định về thuế, và tự động hóa việc tính toán thuế trong các giao dịch kinh doanh. Phân hệ quản lý thuế cho phép người dùng thiết lập và quản lý các cấu hình thuế phù hợp với quy định của pháp luật và đặc thù kinh doanh của doanh nghiệp.
+
+### 1.2. Phạm Vi Áp Dụng
+Quy trình quản lý thuế áp dụng cho:
+- Kế toán thuế: Người chịu trách nhiệm thiết lập và quản lý các loại thuế.
+- Kế toán viên: Người áp dụng thuế trong các giao dịch kế toán.
+- Quản lý tài chính: Người giám sát và phê duyệt các cấu hình thuế.
+- Nhân viên bán hàng: Người áp dụng thuế trong các giao dịch bán hàng.
+- Nhân viên mua hàng: Người áp dụng thuế trong các giao dịch mua hàng.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Thuế GTGT | Thuế Giá Trị Gia Tăng, được áp dụng trên giá trị gia tăng của hàng hóa và dịch vụ. |
+| Thuế suất | Phần trăm giá trị được áp dụng để tính thuế. |
+| Nhóm thuế | Phân loại các loại thuế theo nhóm để dễ dàng quản lý và báo cáo. |
+| TK thuế đầu ra | Tài khoản kế toán dùng để ghi nhận thuế GTGT đầu ra (thuế phải nộp) từ việc bán hàng. |
+| TK thuế đầu vào | Tài khoản kế toán dùng để ghi nhận thuế GTGT đầu vào (thuế được khấu trừ) từ việc mua hàng. |
+| Thuế đầu ra được giảm | Thuế GTGT đầu ra được giảm do các chính sách ưu đãi hoặc miễn giảm. |
+| Thuế đầu vào được khấu trừ | Thuế GTGT đầu vào được phép khấu trừ khi tính thuế GTGT phải nộp. |
+| Mã thuế | Mã định danh duy nhất cho mỗi loại thuế trong hệ thống. |
+| Loại thuế | Phân loại thuế theo mục đích sử dụng (ví dụ: thuế hàng hóa, thuế dịch vụ). |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | ACC_001 | Sơ Đồ Tài Khoản | Quy trình thiết lập và quản lý hệ thống tài khoản kế toán |
+| 2   | ACC_002 | Sổ Cái | Quy trình quản lý sổ cái và các bút toán kế toán |
+| 3   | ACC_005 | Báo Cáo Tài Chính | Quy trình tạo và xuất báo cáo tài chính |
+| 4   | SAL_004 | Quản Lý Hóa Đơn Bán Hàng | Quy trình tạo và quản lý hóa đơn bán hàng |
+| 5   | PUR_003 | Quản Lý Hóa Đơn Mua Vào | Quy trình quản lý hóa đơn mua vào |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình quản lý thuế bao gồm việc thiết lập các loại thuế, cấu hình thông tin thuế, và quản lý việc áp dụng thuế trong các giao dịch. Người dùng có thể tạo mới, cập nhật, và vô hiệu hóa các loại thuế, cũng như thiết lập các mối quan hệ giữa thuế và tài khoản kế toán. Hệ thống sẽ tự động áp dụng thuế trong các giao dịch dựa trên cấu hình đã thiết lập.
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Bắt đầu] --> B[Tạo nhóm thuế]
+    B --> C[Thiết lập tài khoản kế toán cho thuế]
+    C --> D[Tạo loại thuế mới]
+    D --> E[Cấu hình thông tin thuế]
+    E --> F[Kích hoạt thuế]
+    F --> G[Áp dụng thuế trong giao dịch]
+    G --> H[Tính toán thuế phải nộp]
+    H --> I[Báo cáo thuế]
+    I --> J[Kết thúc]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Tạo nhóm thuế
+- **Mô tả**: Tạo các nhóm thuế để phân loại và quản lý các loại thuế.
+- **Đầu vào**: Tên nhóm thuế, mô tả, thông tin phân loại.
+- **Đầu ra**: Nhóm thuế mới được tạo trong hệ thống.
+- **Người thực hiện**: Kế toán thuế.
+- **Điều kiện tiên quyết**: Người dùng có quyền quản lý thuế.
+- **Xử lý ngoại lệ**: Nếu nhóm thuế đã tồn tại, hiển thị thông báo và yêu cầu chọn tên khác.
+
+#### 2.3.2. Thiết lập tài khoản kế toán cho thuế
+- **Mô tả**: Xác định các tài khoản kế toán sẽ được sử dụng để ghi nhận thuế.
+- **Đầu vào**: Tài khoản thuế đầu ra, tài khoản thuế đầu vào, tài khoản thuế đầu ra được giảm, tài khoản thuế đầu vào được khấu trừ.
+- **Đầu ra**: Cấu hình tài khoản thuế được thiết lập.
+- **Người thực hiện**: Kế toán thuế.
+- **Điều kiện tiên quyết**: Các tài khoản kế toán đã được tạo trong hệ thống.
+- **Xử lý ngoại lệ**: Nếu tài khoản không tồn tại, hiển thị thông báo lỗi.
+
+#### 2.3.3. Tạo loại thuế mới
+- **Mô tả**: Tạo một loại thuế mới với các thông tin cơ bản.
+- **Đầu vào**: Mã thuế, tên thuế, nhóm thuế, loại thuế.
+- **Đầu ra**: Loại thuế mới được tạo trong hệ thống.
+- **Người thực hiện**: Kế toán thuế.
+- **Điều kiện tiên quyết**: Nhóm thuế đã được tạo.
+- **Xử lý ngoại lệ**: Nếu mã thuế đã tồn tại, hiển thị thông báo và yêu cầu chọn mã khác.
+
+#### 2.3.4. Cấu hình thông tin thuế
+- **Mô tả**: Thiết lập các thông tin chi tiết của thuế.
+- **Đầu vào**: Thuế suất, thuế suất HĐĐT, tài khoản thuế đầu ra, tài khoản thuế đầu vào, tài khoản thuế đầu ra được giảm, tài khoản thuế đầu vào được khấu trừ.
+- **Đầu ra**: Thông tin thuế được cấu hình đầy đủ.
+- **Người thực hiện**: Kế toán thuế.
+- **Điều kiện tiên quyết**: Loại thuế đã được tạo.
+- **Xử lý ngoại lệ**: Nếu thuế suất không hợp lệ (ví dụ: âm), hiển thị thông báo lỗi.
+
+#### 2.3.5. Kích hoạt thuế
+- **Mô tả**: Kích hoạt loại thuế để có thể sử dụng trong các giao dịch.
+- **Đầu vào**: Loại thuế cần kích hoạt.
+- **Đầu ra**: Loại thuế được cập nhật trạng thái thành "active".
+- **Người thực hiện**: Kế toán thuế hoặc quản lý tài chính.
+- **Điều kiện tiên quyết**: Loại thuế đã được cấu hình đầy đủ thông tin.
+- **Xử lý ngoại lệ**: Nếu thông tin thuế không đầy đủ, hiển thị thông báo lỗi.
+
+#### 2.3.6. Áp dụng thuế trong giao dịch
+- **Mô tả**: Sử dụng loại thuế đã thiết lập trong các giao dịch mua bán.
+- **Đầu vào**: Loại thuế, giao dịch cần áp dụng thuế.
+- **Đầu ra**: Thuế được áp dụng vào giao dịch và số thuế được tính toán.
+- **Người thực hiện**: Kế toán viên, nhân viên bán hàng, nhân viên mua hàng.
+- **Điều kiện tiên quyết**: Loại thuế đã được kích hoạt.
+- **Xử lý ngoại lệ**: Nếu loại thuế không khả dụng, hiển thị thông báo lỗi.
+
+#### 2.3.7. Tính toán thuế phải nộp
+- **Mô tả**: Tính toán số thuế phải nộp dựa trên thuế đầu ra và thuế đầu vào.
+- **Đầu vào**: Kỳ tính thuế, các giao dịch có thuế.
+- **Đầu ra**: Số thuế phải nộp hoặc được hoàn.
+- **Người thực hiện**: Kế toán thuế.
+- **Điều kiện tiên quyết**: Các giao dịch có thuế đã được ghi nhận đầy đủ.
+- **Xử lý ngoại lệ**: Nếu có sự không khớp giữa sổ sách và hóa đơn, hiển thị cảnh báo.
+
+#### 2.3.8. Báo cáo thuế
+- **Mô tả**: Tạo các báo cáo thuế theo quy định.
+- **Đầu vào**: Kỳ báo cáo, loại báo cáo thuế.
+- **Đầu ra**: Báo cáo thuế được tạo.
+- **Người thực hiện**: Kế toán thuế.
+- **Điều kiện tiên quyết**: Đã tính toán số thuế phải nộp.
+- **Xử lý ngoại lệ**: Nếu dữ liệu không đầy đủ, hiển thị cảnh báo.
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant System as Hệ thống
+    participant TaxGroup as Nhóm thuế
+    participant Tax as Thuế
+    participant Account as Tài khoản
+    participant Transaction as Giao dịch
+    
+    User->>System: Yêu cầu tạo nhóm thuế
+    System->>TaxGroup: Tạo nhóm thuế mới
+    TaxGroup-->>System: Xác nhận tạo thành công
+    System-->>User: Hiển thị thông báo thành công
+    
+    User->>System: Yêu cầu tạo loại thuế mới
+    System->>Tax: Tạo loại thuế mới
+    Tax->>TaxGroup: Kiểm tra nhóm thuế
+    TaxGroup-->>Tax: Xác nhận nhóm thuế hợp lệ
+    Tax-->>System: Xác nhận tạo thành công
+    System-->>User: Hiển thị thông báo thành công
+    
+    User->>System: Cấu hình thông tin thuế
+    System->>Tax: Cập nhật thông tin thuế
+    Tax->>Account: Kiểm tra tài khoản
+    Account-->>Tax: Xác nhận tài khoản hợp lệ
+    Tax-->>System: Xác nhận cập nhật thành công
+    System-->>User: Hiển thị thông báo thành công
+    
+    User->>System: Kích hoạt thuế
+    System->>Tax: Cập nhật trạng thái thành active
+    Tax-->>System: Xác nhận kích hoạt thành công
+    System-->>User: Hiển thị thông báo thành công
+    
+    User->>System: Áp dụng thuế trong giao dịch
+    System->>Transaction: Áp dụng thuế
+    Transaction->>Tax: Lấy thông tin thuế
+    Tax-->>Transaction: Trả về thông tin thuế
+    Transaction-->>System: Xác nhận áp dụng thành công
+    System-->>User: Hiển thị giao dịch với thuế
+    
+    User->>System: Yêu cầu tính thuế phải nộp
+    System->>Transaction: Truy vấn giao dịch có thuế
+    Transaction-->>System: Trả về dữ liệu giao dịch
+    System->>System: Tính toán thuế phải nộp
+    System-->>User: Hiển thị số thuế phải nộp
+    
+    User->>System: Yêu cầu báo cáo thuế
+    System->>System: Tạo báo cáo thuế
+    System-->>User: Hiển thị báo cáo thuế
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+1. **Vô hiệu hóa loại thuế**:
+   - Khi một loại thuế không còn áp dụng, người dùng có thể vô hiệu hóa loại thuế đó.
+   - Hệ thống sẽ cập nhật trạng thái của loại thuế thành "inactive".
+   - Loại thuế đã vô hiệu hóa sẽ không xuất hiện trong danh sách chọn khi tạo giao dịch mới.
+
+2. **Thay đổi thuế suất**:
+   - Khi có thay đổi về thuế suất theo quy định, người dùng cần cập nhật thuế suất mới.
+   - Hệ thống sẽ lưu lịch sử thay đổi thuế suất và áp dụng thuế suất mới cho các giao dịch từ ngày hiệu lực.
+   - Các giao dịch cũ sẽ vẫn giữ thuế suất tại thời điểm tạo giao dịch.
+
+3. **Miễn giảm thuế**:
+   - Trong trường hợp có chính sách miễn giảm thuế, người dùng có thể tạo loại thuế mới với thuế suất đã giảm.
+   - Hoặc người dùng có thể sử dụng tài khoản thuế đầu ra được giảm/thuế đầu vào được khấu trừ để ghi nhận phần thuế được miễn giảm.
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | TAX_001 | Quản lý nhóm thuế | Tạo, cập nhật, xóa nhóm thuế | Cao |
+| 2   | TAX_002 | Quản lý loại thuế | Tạo, cập nhật, xóa, vô hiệu hóa loại thuế | Cao |
+| 3   | TAX_003 | Cấu hình tài khoản thuế | Thiết lập tài khoản kế toán cho thuế | Cao |
+| 4   | TAX_004 | Tìm kiếm thuế | Tìm kiếm và lọc thuế theo nhiều tiêu chí | Trung bình |
+| 5   | TAX_005 | Áp dụng thuế | Áp dụng thuế vào các giao dịch | Cao |
+| 6   | TAX_006 | Tính toán thuế | Tính toán số thuế phải nộp | Cao |
+| 7   | TAX_007 | Báo cáo thuế | Tạo báo cáo thuế | Cao |
+| 8   | TAX_008 | Xuất dữ liệu thuế | Xuất dữ liệu thuế ra file | Trung bình |
+| 9   | TAX_009 | Quản lý lịch sử thuế | Lưu trữ và xem lịch sử thay đổi thuế | Thấp |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. TAX_001: Quản lý nhóm thuế
+- **Mô tả**: Cho phép người dùng tạo, cập nhật, xóa nhóm thuế để phân loại các loại thuế.
+- **Đầu vào**: 
+  - Tên nhóm thuế
+  - Mô tả
+  - Thông tin phân loại
+- **Đầu ra**: Nhóm thuế được tạo, cập nhật hoặc xóa trong hệ thống.
+- **Điều kiện tiên quyết**: Người dùng có quyền quản lý thuế.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chức năng quản lý nhóm thuế.
+  2. Người dùng chọn hành động (tạo mới, cập nhật, xóa).
+  3. Người dùng nhập thông tin cần thiết.
+  4. Hệ thống xác thực thông tin.
+  5. Hệ thống thực hiện hành động và hiển thị kết quả.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu tên nhóm thuế đã tồn tại, hiển thị thông báo lỗi.
+  2. Nếu nhóm thuế đang được sử dụng bởi các loại thuế, không cho phép xóa.
+- **Giao diện liên quan**: Màn hình quản lý nhóm thuế.
+
+#### 3.2.2. TAX_002: Quản lý loại thuế
+- **Mô tả**: Cho phép người dùng tạo, cập nhật, xóa, vô hiệu hóa loại thuế.
+- **Đầu vào**: 
+  - Mã thuế
+  - Tên thuế
+  - Nhóm thuế
+  - Thuế suất
+  - Thuế suất HĐĐT
+  - Loại thuế
+  - Trạng thái
+- **Đầu ra**: Loại thuế được tạo, cập nhật, xóa hoặc vô hiệu hóa trong hệ thống.
+- **Điều kiện tiên quyết**: Người dùng có quyền quản lý thuế, nhóm thuế đã được tạo.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chức năng quản lý loại thuế.
+  2. Người dùng chọn hành động (tạo mới, cập nhật, xóa, vô hiệu hóa).
+  3. Người dùng nhập thông tin cần thiết.
+  4. Hệ thống xác thực thông tin.
+  5. Hệ thống thực hiện hành động và hiển thị kết quả.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu mã thuế đã tồn tại, hiển thị thông báo lỗi.
+  2. Nếu thuế suất không hợp lệ (ví dụ: âm), hiển thị thông báo lỗi.
+  3. Nếu loại thuế đang được sử dụng trong các giao dịch, không cho phép xóa.
+- **Giao diện liên quan**: Màn hình quản lý loại thuế.
+
+#### 3.2.3. TAX_003: Cấu hình tài khoản thuế
+- **Mô tả**: Cho phép người dùng thiết lập tài khoản kế toán cho thuế.
+- **Đầu vào**: 
+  - Loại thuế
+  - Tài khoản thuế đầu ra
+  - Tài khoản thuế đầu vào
+  - Tài khoản thuế đầu ra được giảm
+  - Tài khoản thuế đầu vào được khấu trừ
+- **Đầu ra**: Cấu hình tài khoản thuế được thiết lập hoặc cập nhật.
+- **Điều kiện tiên quyết**: Loại thuế đã được tạo, các tài khoản kế toán đã được tạo.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chức năng cấu hình tài khoản thuế.
+  2. Người dùng chọn loại thuế cần cấu hình.
+  3. Người dùng chọn các tài khoản kế toán tương ứng.
+  4. Hệ thống xác thực thông tin.
+  5. Hệ thống lưu cấu hình và hiển thị kết quả.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu tài khoản không tồn tại, hiển thị thông báo lỗi.
+  2. Nếu tài khoản không phù hợp với loại thuế, hiển thị cảnh báo.
+- **Giao diện liên quan**: Màn hình cấu hình tài khoản thuế.
+
+#### 3.2.4. TAX_005: Áp dụng thuế
+- **Mô tả**: Cho phép người dùng áp dụng thuế vào các giao dịch.
+- **Đầu vào**: 
+  - Giao dịch (hóa đơn bán, hóa đơn mua)
+  - Loại thuế
+  - Giá trị giao dịch
+- **Đầu ra**: Thuế được áp dụng vào giao dịch và số thuế được tính toán.
+- **Điều kiện tiên quyết**: Loại thuế đã được kích hoạt, giao dịch đã được tạo.
+- **Luồng xử lý chính**:
+  1. Người dùng tạo hoặc chỉnh sửa giao dịch.
+  2. Người dùng chọn loại thuế áp dụng.
+  3. Hệ thống tự động tính toán số thuế dựa trên giá trị giao dịch và thuế suất.
+  4. Hệ thống hiển thị số thuế và tổng giá trị giao dịch sau thuế.
+  5. Người dùng xác nhận giao dịch.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu loại thuế không khả dụng, hiển thị thông báo lỗi.
+  2. Nếu giá trị giao dịch không hợp lệ, hiển thị thông báo lỗi.
+- **Giao diện liên quan**: Màn hình tạo/chỉnh sửa giao dịch.
+
+#### 3.2.5. TAX_006: Tính toán thuế
+- **Mô tả**: Cho phép người dùng tính toán số thuế phải nộp dựa trên thuế đầu ra và thuế đầu vào.
+- **Đầu vào**: 
+  - Kỳ tính thuế
+  - Loại thuế
+- **Đầu ra**: Số thuế phải nộp hoặc được hoàn.
+- **Điều kiện tiên quyết**: Các giao dịch có thuế đã được ghi nhận đầy đủ.
+- **Luồng xử lý chính**:
+  1. Người dùng truy cập chức năng tính toán thuế.
+  2. Người dùng chọn kỳ tính thuế và loại thuế.
+  3. Hệ thống truy vấn tất cả giao dịch có thuế trong kỳ.
+  4. Hệ thống tính toán tổng thuế đầu ra và tổng thuế đầu vào.
+  5. Hệ thống tính toán số thuế phải nộp hoặc được hoàn.
+  6. Hệ thống hiển thị kết quả tính toán.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Nếu không có giao dịch trong kỳ, hiển thị thông báo.
+  2. Nếu có sự không khớp giữa sổ sách và hóa đơn, hiển thị cảnh báo.
+- **Giao diện liên quan**: Màn hình tính toán thuế.
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+
+```mermaid
+flowchart TD
+    A[Client] --> B[API Gateway]
+    B --> C[Tax Service]
+    B --> D[Entity Service]
+    B --> E[Account Service]
+    B --> F[Group Service]
+    C --> G[(Database)]
+    D --> G
+    E --> G
+    F --> G
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Quản lý nhóm thuế
+- **Mô tả**: API để quản lý nhóm thuế
+- **URL**: `GET /api/v1/entity/{entity_slug}/tax/groups/` - Lấy danh sách nhóm thuế
+- **URL**: `POST /api/v1/entity/{entity_slug}/tax/groups/` - Tạo nhóm thuế mới
+- **URL**: `GET /api/v1/entity/{entity_slug}/tax/groups/{group_uuid}/` - Lấy thông tin nhóm thuế
+- **URL**: `PUT /api/v1/entity/{entity_slug}/tax/groups/{group_uuid}/` - Cập nhật nhóm thuế
+- **URL**: `DELETE /api/v1/entity/{entity_slug}/tax/groups/{group_uuid}/` - Xóa nhóm thuế
+
+#### 4.2.2. Quản lý loại thuế
+- **Mô tả**: API để quản lý loại thuế
+- **URL**: `GET /api/v1/entity/{entity_slug}/tax/` - Lấy danh sách loại thuế
+- **URL**: `POST /api/v1/entity/{entity_slug}/tax/` - Tạo loại thuế mới
+- **URL**: `GET /api/v1/entity/{entity_slug}/tax/{tax_uuid}/` - Lấy thông tin loại thuế
+- **URL**: `PUT /api/v1/entity/{entity_slug}/tax/{tax_uuid}/` - Cập nhật loại thuế
+- **URL**: `DELETE /api/v1/entity/{entity_slug}/tax/{tax_uuid}/` - Xóa loại thuế
+- **URL**: `PATCH /api/v1/entity/{entity_slug}/tax/{tax_uuid}/activate/` - Kích hoạt loại thuế
+- **URL**: `PATCH /api/v1/entity/{entity_slug}/tax/{tax_uuid}/deactivate/` - Vô hiệu hóa loại thuế
+
+#### 4.2.3. Tìm kiếm thuế
+- **Mô tả**: API để tìm kiếm thuế
+- **URL**: `GET /api/v1/entity/{entity_slug}/tax/search/` - Tìm kiếm loại thuế theo nhiều tiêu chí
+- **URL**: `GET /api/v1/entity/{entity_slug}/tax/search/code/{ma_thue}/` - Tìm kiếm loại thuế theo mã
+- **URL**: `GET /api/v1/entity/{entity_slug}/tax/search/name/{ten_thue}/` - Tìm kiếm loại thuế theo tên
+- **URL**: `GET /api/v1/entity/{entity_slug}/tax/groups/{group_uuid}/taxes/` - Lấy danh sách thuế theo nhóm
+
+### 4.3. Service Logic
+
+#### 4.3.1. Tax Service
+- **Mô tả**: Service xử lý logic liên quan đến thuế
+- **Chức năng chính**:
+  1. Tạo và quản lý thuế
+  2. Tìm kiếm và lọc thuế
+  3. Kích hoạt và vô hiệu hóa thuế
+  4. Xác thực dữ liệu thuế
+- **Các dependencies**:
+  1. Entity Service
+  2. Account Service
+  3. Group Service
+- **Sơ đồ luồng xử lý**:
+
+```mermaid
+flowchart TD
+    A[Nhận request] --> B[Xác thực người dùng và quyền truy cập]
+    B --> C{Hợp lệ?}
+    C -->|Có| D[Xác thực dữ liệu thuế]
+    C -->|Không| E[Trả về lỗi xác thực]
+    D --> F{Dữ liệu hợp lệ?}
+    F -->|Có| G[Thực hiện thao tác với thuế]
+    F -->|Không| H[Trả về lỗi dữ liệu]
+    G --> I[Ghi log]
+    E --> I
+    H --> I
+    I --> J[Trả về kết quả]
+```
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    ENTITY ||--o{ TAX : contains
+    TAX }o--|| TAX_GROUP : belongs_to
+    TAX }o--|| ACCOUNT_OUTPUT : has
+    TAX }o--|| ACCOUNT_INPUT : has
+    TAX }o--|| ACCOUNT_OUTPUT_DISCOUNT : has
+    TAX }o--|| ACCOUNT_INPUT_DEDUCT : has
+    
+    ENTITY {
+        uuid uuid PK
+        name string
+        slug string
+    }
+    
+    TAX {
+        uuid uuid PK
+        entity_model uuid FK
+        ma_thue string
+        ten_thue string
+        ten_thue2 string
+        thue_suat decimal
+        thue_suat_hddt decimal
+        nhom_thue uuid FK
+        tk_thue_dau_ra uuid FK
+        tk_thue_dau_ra_duoc_gia uuid FK
+        tk_thue_dau_vao uuid FK
+        tk_thue_dau_vao_duoc_gia uuid FK
+        stt integer
+        loai_thue string
+        status string
+    }
+    
+    TAX_GROUP {
+        uuid uuid PK
+        name string
+        description string
+    }
+    
+    ACCOUNT_OUTPUT {
+        uuid uuid PK
+        code string
+        name string
+    }
+    
+    ACCOUNT_INPUT {
+        uuid uuid PK
+        code string
+        name string
+    }
+    
+    ACCOUNT_OUTPUT_DISCOUNT {
+        uuid uuid PK
+        code string
+        name string
+    }
+    
+    ACCOUNT_INPUT_DEDUCT {
+        uuid uuid PK
+        code string
+        name string
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: TaxModel
+- **Mô tả**: Lưu trữ thông tin về thuế
+- **Các trường chính**:
+  - `uuid`: UUID - Khóa chính
+  - `entity_model`: ForeignKey - Liên kết với Entity
+  - `ma_thue`: CharField - Mã thuế
+  - `ten_thue`: CharField - Tên thuế
+  - `ten_thue2`: CharField - Tên thuế 2
+  - `thue_suat`: DecimalField - Thuế suất
+  - `thue_suat_hddt`: DecimalField - Thuế suất HĐĐT
+  - `nhom_thue`: ForeignKey - Liên kết với GroupModel
+  - `tk_thue_dau_ra`: ForeignKey - Liên kết với AccountModel
+  - `tk_thue_dau_ra_duoc_gia`: ForeignKey - Liên kết với AccountModel
+  - `tk_thue_dau_vao`: ForeignKey - Liên kết với AccountModel
+  - `tk_thue_dau_vao_duoc_gia`: ForeignKey - Liên kết với AccountModel
+  - `stt`: IntegerField - Số thứ tự
+  - `loai_thue`: CharField - Loại thuế
+  - `status`: CharField - Trạng thái
+
+##### Bảng: GroupModel
+- **Mô tả**: Lưu trữ thông tin về nhóm thuế
+- **Các trường chính**:
+  - `uuid`: UUID - Khóa chính
+  - `name`: CharField - Tên nhóm
+  - `description`: TextField - Mô tả
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+Kiểm thử sẽ tập trung vào các chức năng chính của quản lý thuế, bao gồm:
+- Tạo và quản lý nhóm thuế
+- Tạo và quản lý loại thuế
+- Cấu hình tài khoản thuế
+- Kích hoạt và vô hiệu hóa thuế
+- Tìm kiếm và lọc thuế
+- Áp dụng thuế trong giao dịch
+- Tính toán thuế phải nộp
+
+### 5.2. Kịch Bản Kiểm Thử
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TAX_TEST_001 | Tạo nhóm thuế | Kiểm tra việc tạo nhóm thuế mới | Người dùng có quyền quản lý thuế | 1. Truy cập chức năng quản lý nhóm thuế<br>2. Nhập thông tin nhóm thuế<br>3. Lưu nhóm thuế | Nhóm thuế mới được tạo thành công |
+| 2   | TAX_TEST_002 | Tạo loại thuế | Kiểm tra việc tạo loại thuế mới | Nhóm thuế đã tồn tại | 1. Truy cập chức năng quản lý loại thuế<br>2. Nhập thông tin loại thuế<br>3. Lưu loại thuế | Loại thuế mới được tạo thành công |
+| 3   | TAX_TEST_003 | Cấu hình tài khoản thuế | Kiểm tra việc cấu hình tài khoản cho thuế | Loại thuế và tài khoản kế toán đã tồn tại | 1. Truy cập chức năng cấu hình tài khoản thuế<br>2. Chọn loại thuế<br>3. Chọn các tài khoản kế toán<br>4. Lưu cấu hình | Cấu hình tài khoản thuế được lưu thành công |
+| 4   | TAX_TEST_004 | Kích hoạt thuế | Kiểm tra việc kích hoạt loại thuế | Loại thuế đã được tạo và cấu hình | 1. Truy cập chức năng quản lý loại thuế<br>2. Chọn loại thuế<br>3. Kích hoạt thuế | Loại thuế được kích hoạt thành công |
+| 5   | TAX_TEST_005 | Vô hiệu hóa thuế | Kiểm tra việc vô hiệu hóa loại thuế | Loại thuế đã được kích hoạt | 1. Truy cập chức năng quản lý loại thuế<br>2. Chọn loại thuế<br>3. Vô hiệu hóa thuế | Loại thuế được vô hiệu hóa thành công |
+| 6   | TAX_TEST_006 | Tìm kiếm thuế | Kiểm tra việc tìm kiếm thuế | Có nhiều loại thuế trong hệ thống | 1. Truy cập chức năng tìm kiếm thuế<br>2. Nhập tiêu chí tìm kiếm<br>3. Thực hiện tìm kiếm | Kết quả tìm kiếm chính xác |
+| 7   | TAX_TEST_007 | Áp dụng thuế trong giao dịch | Kiểm tra việc áp dụng thuế vào giao dịch | Loại thuế đã được kích hoạt | 1. Tạo giao dịch mới<br>2. Chọn loại thuế<br>3. Nhập giá trị giao dịch | Thuế được áp dụng và số thuế được tính toán chính xác |
+| 8   | TAX_TEST_008 | Tính toán thuế phải nộp | Kiểm tra việc tính toán thuế phải nộp | Có các giao dịch có thuế trong kỳ | 1. Truy cập chức năng tính toán thuế<br>2. Chọn kỳ tính thuế và loại thuế<br>3. Thực hiện tính toán | Số thuế phải nộp được tính toán chính xác |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+- Luật thuế GTGT Việt Nam
+- Quy định kế toán thuế GTGT
+- Django Ledger Documentation
+- Quy định về hóa đơn điện tử
+
+### 6.2. Danh Mục Thuật Ngữ
+- **Thuế GTGT**: Thuế Giá Trị Gia Tăng, áp dụng trên giá trị gia tăng của hàng hóa và dịch vụ.
+- **Thuế đầu ra**: Thuế GTGT phải nộp từ việc bán hàng hóa, dịch vụ.
+- **Thuế đầu vào**: Thuế GTGT đã trả khi mua hàng hóa, dịch vụ.
+- **Thuế TNDN**: Thuế Thu Nhập Doanh Nghiệp, áp dụng trên lợi nhuận của doanh nghiệp.
+- **Thuế TNCN**: Thuế Thu Nhập Cá Nhân, áp dụng trên thu nhập của cá nhân.
+- **HĐĐT**: Hóa Đơn Điện Tử, hóa đơn được tạo, lập, gửi, nhận, lưu trữ và quản lý theo định dạng điện tử.
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 25/07/2024 | AI Assistant | Tạo tài liệu ban đầu |6:["slug","erp/ACC_006_Quan_Ly_Thue","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/ACC_006_Quan_Ly_Thue","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"ACC_006_Quan_Ly_Thue\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/ACC_006_Quan_Ly_Thue","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

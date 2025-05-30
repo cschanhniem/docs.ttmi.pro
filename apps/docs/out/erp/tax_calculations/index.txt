@@ -1,0 +1,440 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T32df,# Hướng Dẫn Tính Toán và Kê Khai Thuế
+
+## 1. Thuế Giá Trị Gia Tăng (VAT)
+
+### 1.1. Tính Thuế GTGT Đầu Ra
+```python
+def tinh_thue_gtgt_dau_ra(entity_model, period_month, period_year):
+    """
+    Tính thuế GTGT đầu ra theo từng loại thuế suất
+    """
+    # Lấy doanh thu chịu thuế theo từng thuế suất
+    doanh_thu = {
+        '0': get_revenue_by_vat_rate(entity_model, 0, period_month, period_year),
+        '5': get_revenue_by_vat_rate(entity_model, 0.05, period_month, period_year),
+        '8': get_revenue_by_vat_rate(entity_model, 0.08, period_month, period_year),
+        '10': get_revenue_by_vat_rate(entity_model, 0.1, period_month, period_year)
+    }
+    
+    # Tính thuế GTGT
+    thue_gtgt = {
+        '0': Decimal('0'),
+        '5': doanh_thu['5'] * Decimal('0.05'),
+        '8': doanh_thu['8'] * Decimal('0.08'),
+        '10': doanh_thu['10'] * Decimal('0.1')
+    }
+    
+    return {
+        'doanh_thu': doanh_thu,
+        'thue_gtgt': thue_gtgt,
+        'tong_thue': sum(thue_gtgt.values())
+    }
+```
+
+### 1.2. Tính Thuế GTGT Được Khấu Trừ
+```python
+def tinh_thue_gtgt_duoc_khau_tru(entity_model, period_month, period_year):
+    """
+    Tính thuế GTGT đầu vào được khấu trừ
+    """
+    # Lọc các hóa đơn hợp lệ
+    bills = BillModel.objects.filter(
+        entity=entity_model,
+        date__year=period_year,
+        date__month=period_month,
+        status='approved',
+        vat_document_valid=True
+    )
+    
+    thue_duoc_khau_tru = Decimal('0')
+    thue_khong_duoc_khau_tru = Decimal('0')
+    
+    for bill in bills:
+        if bill.is_deductible():
+            thue_duoc_khau_tru += bill.vat_amount
+        else:
+            thue_khong_duoc_khau_tru += bill.vat_amount
+            
+    return {
+        'thue_duoc_khau_tru': thue_duoc_khau_tru,
+        'thue_khong_duoc_khau_tru': thue_khong_duoc_khau_tru,
+        'chi_tiet_hoa_don': list(bills.values(
+            'number', 'date', 'vendor__name', 'amount', 'vat_amount'
+        ))
+    }
+```
+
+### 1.3. Kê Khai Thuế GTGT
+```python
+def ke_khai_thue_gtgt(entity_model, period_month, period_year):
+    """
+    Lập tờ khai thuế GTGT tháng/quý
+    """
+    # Tính toán các chỉ tiêu
+    dau_ra = tinh_thue_gtgt_dau_ra(entity_model, period_month, period_year)
+    dau_vao = tinh_thue_gtgt_duoc_khau_tru(entity_model, period_month, period_year)
+    
+    # Tính thuế phải nộp
+    thue_phai_nop = dau_ra['tong_thue'] - dau_vao['thue_duoc_khau_tru']
+    
+    return {
+        'ky_tinh_thue': {
+            'thang': period_month,
+            'nam': period_year
+        },
+        'chi_tieu_[29]': dau_ra['tong_thue'],
+        'chi_tieu_[32]': dau_vao['thue_duoc_khau_tru'],
+        'chi_tieu_[40]': max(thue_phai_nop, 0),
+        'chi_tieu_[43]': abs(min(thue_phai_nop, 0))
+    }
+```
+
+## 2. Thuế Thu Nhập Doanh Nghiệp (CIT)
+
+### 2.1. Tính Thu Nhập Chịu Thuế
+```python
+def tinh_thu_nhap_chiu_thue(entity_model, period_year):
+    """
+    Tính thu nhập chịu thuế TNDN
+    """
+    # Lấy kết quả kinh doanh
+    loi_nhuan_ke_toan = get_accounting_profit(entity_model, period_year)
+    
+    # Các khoản điều chỉnh tăng
+    dieu_chinh_tang = {
+        'chi_phi_khong_hop_le': get_invalid_expenses(entity_model, period_year),
+        'chi_phi_khong_co_hoa_don': get_expenses_without_invoice(entity_model, period_year),
+        'trich_truoc_chua_chi': get_accrued_expenses(entity_model, period_year)
+    }
+    
+    # Các khoản điều chỉnh giảm
+    dieu_chinh_giam = {
+        'co_tuc_loi_nhuan': get_dividend_income(entity_model, period_year),
+        'chuyen_lo': get_loss_carried_forward(entity_model, period_year)
+    }
+    
+    thu_nhap_tinh_thue = (
+        loi_nhuan_ke_toan + 
+        sum(dieu_chinh_tang.values()) - 
+        sum(dieu_chinh_giam.values())
+    )
+    
+    return {
+        'loi_nhuan_ke_toan': loi_nhuan_ke_toan,
+        'dieu_chinh_tang': dieu_chinh_tang,
+        'dieu_chinh_giam': dieu_chinh_giam,
+        'thu_nhap_tinh_thue': thu_nhap_tinh_thue
+    }
+```
+
+### 2.2. Tính Thuế TNDN
+```python
+def tinh_thue_tndn(entity_model, period_year):
+    """
+    Tính thuế TNDN phải nộp
+    """
+    # Tính thu nhập chịu thuế
+    tnct = tinh_thu_nhap_chiu_thue(entity_model, period_year)
+    
+    # Xác định thuế suất
+    thue_suat = get_tax_rate(entity_model, period_year)
+    
+    # Tính thuế TNDN
+    thue_tndn = tnct['thu_nhap_tinh_thue'] * thue_suat
+    
+    # Ưu đãi thuế (nếu có)
+    uu_dai_thue = calculate_tax_incentives(entity_model, period_year)
+    
+    return {
+        'thu_nhap_chiu_thue': tnct['thu_nhap_tinh_thue'],
+        'thue_suat': thue_suat,
+        'thue_tndn_tam_tinh': thue_tndn,
+        'uu_dai_thue': uu_dai_thue,
+        'thue_tndn_phai_nop': thue_tndn - uu_dai_thue
+    }
+```
+
+### 2.3. Kê Khai Thuế TNDN
+```python
+def ke_khai_thue_tndn(entity_model, period_year):
+    """
+    Lập tờ khai quyết toán thuế TNDN năm
+    """
+    # Tính toán các chỉ tiêu
+    tnct = tinh_thu_nhap_chiu_thue(entity_model, period_year)
+    thue = tinh_thue_tndn(entity_model, period_year)
+    
+    # Tính số thuế đã tạm nộp
+    thue_tam_nop = get_prepaid_tax(entity_model, period_year)
+    
+    return {
+        'chi_tieu_[A1]': tnct['loi_nhuan_ke_toan'],
+        'chi_tieu_[A2]': sum(tnct['dieu_chinh_tang'].values()),
+        'chi_tieu_[A3]': sum(tnct['dieu_chinh_giam'].values()),
+        'chi_tieu_[A4]': tnct['thu_nhap_tinh_thue'],
+        'chi_tieu_[A5]': thue['thue_tndn_tam_tinh'],
+        'chi_tieu_[A6]': thue['uu_dai_thue'],
+        'chi_tieu_[A7]': thue['thue_tndn_phai_nop'],
+        'chi_tieu_[A8]': thue_tam_nop,
+        'chi_tieu_[A9]': max(thue['thue_tndn_phai_nop'] - thue_tam_nop, 0),
+        'chi_tieu_[A10]': abs(min(thue['thue_tndn_phai_nop'] - thue_tam_nop, 0))
+    }
+```
+
+## 3. Thuế Thu Nhập Cá Nhân (PIT)
+
+### 3.1. Tính Thuế TNCN Từ Tiền Lương
+```python
+def tinh_thue_tncn_luong(entity_model, employee_id, period_month, period_year):
+    """
+    Tính thuế TNCN từ tiền lương, tiền công
+    """
+    # Lấy thông tin lương
+    luong = get_salary_info(entity_model, employee_id, period_month, period_year)
+    
+    # Các khoản giảm trừ
+    giam_tru = {
+        'giam_tru_gia_canh': Decimal('11000000'),  # Mức cơ bản 2024
+        'nguoi_phu_thuoc': luong['so_nguoi_phu_thuoc'] * Decimal('4400000'),
+        'bao_hiem_bat_buoc': luong['bhxh'] + luong['bhyt'] + luong['bhtn']
+    }
+    
+    # Tính thu nhập tính thuế
+    tntt = (
+        luong['tong_thu_nhap'] - 
+        sum(giam_tru.values())
+    )
+    
+    # Tính thuế theo biểu thuế lũy tiến
+    thue = calculate_progressive_tax(tntt)
+    
+    return {
+        'tong_thu_nhap': luong['tong_thu_nhap'],
+        'cac_khoan_giam_tru': giam_tru,
+        'thu_nhap_tinh_thue': tntt,
+        'thue_phai_nop': thue
+    }
+```
+
+### 3.2. Kê Khai Thuế TNCN
+```python
+def ke_khai_thue_tncn(entity_model, period_month, period_year):
+    """
+    Lập tờ khai thuế TNCN tháng/quý
+    """
+    # Lấy danh sách nhân viên
+    employees = get_active_employees(entity_model, period_month, period_year)
+    
+    # Tính thuế cho từng nhân viên
+    details = []
+    tong_thu_nhap = Decimal('0')
+    tong_thue = Decimal('0')
+    
+    for emp in employees:
+        thue = tinh_thue_tncn_luong(
+            entity_model,
+            emp.id,
+            period_month,
+            period_year
+        )
+        
+        details.append({
+            'ma_so_thue': emp.tax_code,
+            'ho_ten': emp.full_name,
+            'tong_thu_nhap': thue['tong_thu_nhap'],
+            'giam_tru': sum(thue['cac_khoan_giam_tru'].values()),
+            'thu_nhap_tinh_thue': thue['thu_nhap_tinh_thue'],
+            'thue_phai_nop': thue['thue_phai_nop']
+        })
+        
+        tong_thu_nhap += thue['tong_thu_nhap']
+        tong_thue += thue['thue_phai_nop']
+    
+    return {
+        'chi_tiet': details,
+        'tong_hop': {
+            'tong_thu_nhap': tong_thu_nhap,
+            'tong_thue_phai_nop': tong_thue
+        }
+    }
+```
+
+## 4. Thuế Khác
+
+### 4.1. Thuế Môn Bài
+```python
+def tinh_thue_mon_bai(entity_model, period_year):
+    """
+    Tính thuế môn bài theo vốn điều lệ
+    """
+    von_dieu_le = get_charter_capital(entity_model, period_year)
+    
+    if von_dieu_le > Decimal('10000000000'):
+        muc_thue = Decimal('3000000')
+    elif von_dieu_le > Decimal('2000000000'):
+        muc_thue = Decimal('2000000')
+    else:
+        muc_thue = Decimal('1000000')
+        
+    return {
+        'von_dieu_le': von_dieu_le,
+        'muc_thue': muc_thue
+    }
+```
+
+### 4.2. Các Loại Thuế Khác
+```python
+def tinh_thue_khac(entity_model, tax_type, period):
+    """
+    Tính các loại thuế khác (thuế tài nguyên, thuế nhà đất...)
+    """
+    if tax_type == 'tai_nguyen':
+        return calculate_natural_resource_tax(entity_model, period)
+    elif tax_type == 'nha_dat':
+        return calculate_property_tax(entity_model, period)
+    elif tax_type == 'bao_ve_moi_truong':
+        return calculate_environmental_tax(entity_model, period)
+    else:
+        raise ValueError(f'Không hỗ trợ loại thuế: {tax_type}')
+```
+
+## 5. Báo Cáo Thuế
+
+### 5.1. Sổ Theo Dõi Thuế
+```python
+def so_theo_doi_thue(entity_model, tax_type, period_year):
+    """
+    In sổ theo dõi thuế theo từng loại
+    """
+    entries = TaxEntryModel.objects.filter(
+        entity=entity_model,
+        tax_type=tax_type,
+        date__year=period_year
+    ).order_by('date')
+    
+    so_du_dk = get_tax_opening_balance(
+        entity_model,
+        tax_type,
+        period_year
+    )
+    
+    details = []
+    balance = so_du_dk
+    
+    for entry in entries:
+        if entry.entry_type == 'declare':
+            balance += entry.amount
+        else:
+            balance -= entry.amount
+            
+        details.append({
+            'ngay_chung_tu': entry.date,
+            'so_chung_tu': entry.document_number,
+            'dien_giai': entry.description,
+            'so_phai_nop': entry.amount if entry.entry_type == 'declare' else 0,
+            'so_da_nop': entry.amount if entry.entry_type == 'payment' else 0,
+            'con_phai_nop': balance
+        })
+    
+    return {
+        'so_du_dau_ky': so_du_dk,
+        'chi_tiet': details,
+        'so_du_cuoi_ky': balance
+    }
+```
+
+### 5.2. Báo Cáo Tình Hình Thuế
+```python
+def bao_cao_tinh_hinh_thue(entity_model, period_year):
+    """
+    Báo cáo tổng hợp tình hình thuế
+    """
+    tax_types = ['gtgt', 'tndn', 'tncn', 'mon_bai', 'khac']
+    report = {}
+    
+    for tax_type in tax_types:
+        so_theo_doi = so_theo_doi_thue(entity_model, tax_type, period_year)
+        
+        report[tax_type] = {
+            'so_du_dau_ky': so_theo_doi['so_du_dau_ky'],
+            'phat_sinh_trong_ky': sum(
+                entry['so_phai_nop'] for entry in so_theo_doi['chi_tiet']
+            ),
+            'da_nop_trong_ky': sum(
+                entry['so_da_nop'] for entry in so_theo_doi['chi_tiet']
+            ),
+            'so_du_cuoi_ky': so_theo_doi['so_du_cuoi_ky']
+        }
+    
+    return report
+```
+
+## 6. Tiện Ích Hỗ Trợ
+
+### 6.1. Tính Thuế Lũy Tiến
+```python
+def calculate_progressive_tax(income: Decimal) -> Decimal:
+    """
+    Tính thuế theo biểu thuế lũy tiến
+    """
+    tax_brackets = [
+        (0, 5000000, Decimal('0.05')),
+        (5000000, 10000000, Decimal('0.1')),
+        (10000000, 18000000, Decimal('0.15')),
+        (18000000, 32000000, Decimal('0.2')),
+        (32000000, 52000000, Decimal('0.25')),
+        (52000000, 80000000, Decimal('0.3')),
+        (80000000, float('inf'), Decimal('0.35'))
+    ]
+    
+    tax = Decimal('0')
+    remaining_income = income
+    
+    for lower, upper, rate in tax_brackets:
+        if remaining_income <= 0:
+            break
+            
+        bracket_income = min(
+            remaining_income,
+            Decimal(str(upper - lower))
+        )
+        tax += bracket_income * rate
+        remaining_income -= bracket_income
+        
+    return tax
+```
+
+### 6.2. Xuất File XML
+```python
+def export_tax_declaration_xml(entity_model, declaration_data, template_code):
+    """
+    Xuất tờ khai thuế dạng XML
+    """
+    from xml.etree.ElementTree import Element, SubElement, tostring
+    
+    # Tạo cấu trúc XML
+    root = Element('HSoThueDTu')
+    
+    # Thông tin chung
+    info = SubElement(root, 'TTinChung')
+    SubElement(info, 'MaHSo').text = generate_declaration_code(template_code)
+    SubElement(info, 'TenHSo').text = get_template_name(template_code)
+    SubElement(info, 'MST').text = entity_model.tax_code
+    
+    # Nội dung tờ khai
+    content = SubElement(root, 'NDungTKhai')
+    for field, value in declaration_data.items():
+        SubElement(content, field).text = str(value)
+    
+    # Format XML
+    return tostring(root, encoding='utf-8', xml_declaration=True)
+6:["slug","erp/tax_calculations","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/tax_calculations","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"tax_calculations\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/tax_calculations","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

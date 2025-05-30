@@ -1,0 +1,300 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T2408,# FIN_004_Quản Lý Phí
+
+*Phiên bản: 1.0*  
+*Người tạo: ChatGPT*  
+*Ngày tạo: 13/05/2025*  
+*Cập nhật lần cuối: 13/05/2025*  
+*Người cập nhật: ChatGPT*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Quy trình Quản Lý Phí là một phần quan trọng trong phân hệ Tài Chính của hệ thống ERP, cho phép doanh nghiệp thiết lập, theo dõi và quản lý các loại phí phát sinh trong hoạt động kinh doanh. Quy trình này bao gồm việc quản lý phí ngân hàng, phí giao dịch và các loại phí khác, giúp doanh nghiệp kiểm soát chi phí hiệu quả.
+
+### 1.2. Phạm Vi Áp Dụng
+- **Phòng Tài Chính**: Quản lý và theo dõi các loại phí
+- **Phòng Kế Toán**: Hạch toán và đối soát phí
+- **Các Bộ Phận**: Đề xuất và sử dụng phí
+- **Ban Lãnh Đạo**: Phê duyệt chính sách phí
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Phí ngân hàng | Phí phát sinh từ các giao dịch ngân hàng |
+| Nhóm phí | Nhóm các loại phí có cùng tính chất |
+| Chi phí không hợp lệ | Các khoản phí không đủ điều kiện ghi nhận |
+| Bộ phận chịu phí | Bộ phận chịu trách nhiệm về khoản phí |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | FIN_001 | Quản Lý Ngân Hàng | Quy trình quản lý tài khoản ngân hàng |
+| 2   | FIN_002 | Quản Lý Thanh Toán | Quy trình quản lý thanh toán |
+| 3   | ACC_002 | Sổ Cái | Quy trình ghi nhận bút toán |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+Quy trình Quản Lý Phí bao gồm các phần chính:
+1. Thiết lập danh mục phí
+2. Phân nhóm và phân loại phí
+3. Thiết lập mức phí
+4. Ghi nhận và theo dõi phí phát sinh
+5. Kiểm soát và phê duyệt phí
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Bắt đầu] --> B[Tạo danh mục phí]
+    B --> C[Phân nhóm phí]
+    C --> D[Thiết lập mức phí]
+    D --> E[Ghi nhận phí phát sinh]
+    E --> F{Kiểm tra hợp lệ}
+    F -->|Hợp lệ| G[Phê duyệt phí]
+    F -->|Không hợp lệ| H[Ghi nhận không hợp lệ]
+    G --> I[Hạch toán phí]
+    H --> J[Yêu cầu điều chỉnh]
+    J --> E
+    I --> K[Kết thúc]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Thiết Lập Danh Mục Phí
+- **Mô tả**: Tạo và quản lý danh mục các loại phí
+- **Đầu vào**: 
+  - Mã phí
+  - Tên phí
+  - Loại phí
+  - Mô tả phí
+- **Đầu ra**: Danh mục phí được thiết lập
+- **Người thực hiện**: Quản trị viên tài chính
+- **Điều kiện tiên quyết**: Có quyền quản lý phí
+- **Xử lý ngoại lệ**: Kiểm tra trùng mã phí
+
+#### 2.3.2. Ghi Nhận và Phê Duyệt Phí
+- **Mô tả**: Ghi nhận và phê duyệt các khoản phí phát sinh
+- **Đầu vào**: 
+  - Thông tin phí phát sinh
+  - Thời gian phát sinh
+  - Bộ phận chịu phí
+- **Đầu ra**: Phí được ghi nhận và phê duyệt
+- **Người thực hiện**: Kế toán viên
+- **Điều kiện tiên quyết**: Có danh mục phí
+- **Xử lý ngoại lệ**: Kiểm tra tính hợp lệ của phí
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant U as Người dùng
+    participant F as Quản lý Phí
+    participant V as Kiểm tra hợp lệ
+    participant A as Phê duyệt
+    
+    U->>F: Tạo khoản phí
+    F->>V: Kiểm tra hợp lệ
+    V-->>F: Kết quả kiểm tra
+    alt Hợp lệ
+        F->>A: Gửi phê duyệt
+        A-->>F: Xác nhận phê duyệt
+        F-->>U: Thông báo thành công
+    else Không hợp lệ
+        F-->>U: Thông báo lỗi
+    end
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+1. **Xử lý phí không hợp lệ**:
+   - Ghi nhận lý do không hợp lệ
+   - Yêu cầu bổ sung chứng từ
+   - Điều chỉnh thông tin
+   - Gửi lại phê duyệt
+
+2. **Điều chỉnh mức phí**:
+   - Đề xuất điều chỉnh
+   - Phê duyệt thay đổi
+   - Cập nhật mức phí mới
+   - Thông báo các bên liên quan
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | FEE_001 | Quản lý danh mục phí | Quản lý thông tin các loại phí | Cao |
+| 2   | FEE_002 | Quản lý nhóm phí | Quản lý các nhóm phí | Cao |
+| 3   | FEE_003 | Ghi nhận phí | Ghi nhận và theo dõi phí phát sinh | Cao |
+| 4   | FEE_004 | Báo cáo phí | Xuất báo cáo tổng hợp phí | Trung bình |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. FEE_001: Quản lý danh mục phí
+- **Mô tả**: Quản lý thông tin các loại phí
+- **Đầu vào**: Thông tin phí
+- **Đầu ra**: Phí được tạo/cập nhật
+- **Điều kiện tiên quyết**: Quyền quản lý phí
+- **Luồng xử lý chính**:
+  1. Nhập thông tin phí
+  2. Kiểm tra tính hợp lệ
+  3. Lưu vào hệ thống
+- **Luồng xử lý thay thế/ngoại lệ**:
+  1. Kiểm tra trùng mã
+  2. Xử lý lỗi validate
+- **Giao diện liên quan**: Màn hình quản lý phí
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+
+```mermaid
+flowchart TD
+    A[Web Interface] --> B[API Gateway]
+    B --> C[Fee Service]
+    B --> D[Bank Fee Service]
+    B --> E[Invalid Fee Service]
+    C --> F[(Database)]
+    D --> F
+    E --> F
+```
+
+### 4.2. API Endpoints
+
+#### 4.2.1. Quản Lý Phí
+- **Mô tả**: API quản lý phí
+- **URL**: 
+  - `GET /api/v1/fees/`
+  - `POST /api/v1/fees/`
+  - `PUT /api/v1/fees/{uuid}/`
+  - `DELETE /api/v1/fees/{uuid}/`
+
+#### 4.2.2. Quản Lý Phí Ngân Hàng
+- **Mô tả**: API quản lý phí ngân hàng
+- **URL**:
+  - `GET /api/v1/bank-fees/`
+  - `POST /api/v1/bank-fees/`
+  - `PUT /api/v1/bank-fees/{uuid}/`
+  - `DELETE /api/v1/bank-fees/{uuid}/`
+
+### 4.3. Service Logic
+
+#### 4.3.1. Fee Service
+- **Mô tả**: Xử lý logic phí
+- **Chức năng chính**:
+  1. Quản lý danh mục phí
+  2. Xử lý phí phát sinh
+  3. Kiểm tra hợp lệ
+- **Các dependencies**:
+  1. Database Service
+  2. Validation Service
+  3. Notification Service
+- **Sơ đồ luồng xử lý**:
+
+```mermaid
+flowchart TD
+    A[Nhận request] --> B[Validate dữ liệu]
+    B --> C{Dữ liệu hợp lệ?}
+    C -->|Có| D[Xử lý nghiệp vụ]
+    C -->|Không| E[Trả về lỗi]
+    D --> F[Lưu vào DB]
+    F --> G[Gửi thông báo]
+    G --> H[Trả về kết quả]
+    E --> H
+```
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    PHI ||--o{ NHOM_PHI : belongs_to
+    PHI ||--o{ BO_PHAN : used_by
+    PHI {
+        uuid id
+        string ma_phi
+        string ten_phi
+        string ten_khac
+        uuid nhom_phi_1
+        uuid nhom_phi_2
+        uuid nhom_phi_3
+        uuid bo_phan
+        boolean trang_thai
+    }
+    NHOM_PHI {
+        uuid id
+        string ma_nhom
+        string ten_phan_nhom
+        string ten_2
+        boolean trang_thai
+    }
+    BO_PHAN {
+        uuid id
+        string ma_bp
+        string ten_bp
+        boolean trang_thai
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: PHI
+- **Mô tả**: Lưu trữ thông tin phí
+- **Các trường chính**:
+  - id: UUID (Khóa chính)
+  - ma_phi: VARCHAR(50)
+  - ten_phi: VARCHAR(255)
+  - trang_thai: BOOLEAN
+
+##### Bảng: NHOM_PHI
+- **Mô tả**: Lưu trữ thông tin nhóm phí
+- **Các trường chính**:
+  - id: UUID (Khóa chính)
+  - ma_nhom: VARCHAR(50)
+  - ten_phan_nhom: VARCHAR(255)
+  - trang_thai: BOOLEAN
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- Kiểm thử tạo/sửa/xóa phí
+- Kiểm thử phân nhóm phí
+- Kiểm thử ghi nhận phí
+- Kiểm thử báo cáo phí
+
+### 5.2. Kịch Bản Kiểm Thử
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC001 | Tạo phí | Tạo mới phí | Đăng nhập admin | 1. Nhập thông tin<br>2. Submit form | Tạo thành công |
+| 2   | TC002 | Ghi nhận phí | Ghi nhận phí phát sinh | Có danh mục phí | 1. Chọn loại phí<br>2. Nhập số tiền<br>3. Submit | Ghi nhận thành công |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+1. Tài liệu thiết kế hệ thống ERP
+2. Quy định về quản lý phí
+3. Chuẩn mực kế toán về chi phí
+
+### 6.2. Danh Mục Thuật Ngữ
+- ERP: Enterprise Resource Planning
+- API: Application Programming Interface
+- UUID: Universally Unique Identifier
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 13/05/2025 | ChatGPT | Tạo mới tài liệu |
+6:["slug","erp/FIN_004_Quan_Ly_Phi","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/FIN_004_Quan_Ly_Phi","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"FIN_004_Quan_Ly_Phi\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/FIN_004_Quan_Ly_Phi","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

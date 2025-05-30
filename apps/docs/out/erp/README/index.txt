@@ -1,0 +1,102 @@
+2:I[3040,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"DocLayout"]
+3:I[1276,["135","static/chunks/d550ec10-485e3f71f5def856.js","993","static/chunks/993-1b6a71072be86da4.js","410","static/chunks/410-1ece2fcedd156d2f.js","877","static/chunks/app/%5B...slug%5D/page-7978846c0e32abf5.js"],"MDXContent"]
+5:I[6472,[],""]
+7:I[9190,[],""]
+8:I[4550,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"ThemeProvider"]
+9:I[8910,["185","static/chunks/app/layout-b6ef60bec0ff2cf2.js"],"AuthProvider"]
+4:T8f9,# Tài Liệu Hệ Thống Tài Khoản Django Ledger
+
+## Giới Thiệu
+Đây là tài liệu chi tiết về hệ thống tài khoản trong Django Ledger, được thiết kế theo chuẩn kế toán Việt Nam (TT200). 
+
+## Cấu Trúc Tài Liệu
+
+1. **[Cơ Chế Tạo Hệ Thống Tài Khoản](chart_of_accounts.md)**
+   - Tổng quan
+   - Cấu trúc hệ thống
+   - Quy trình sử dụng
+   - Best practices
+
+2. **[Sơ Đồ & Mô Hình](diagrams/)**
+   - [Cấu trúc tài khoản](diagrams/account_structure.md)
+   - [Luồng API](diagrams/api_flow.md)
+
+3. **[API Endpoints](api_endpoints.md)**
+   - Danh sách API
+   - Cấu trúc Request/Response
+   - Xử lý lỗi
+   - Bảo mật
+
+## Bắt Đầu Sử Dụng
+
+### 1. Cài Đặt
+```bash
+pip install django-ledger
+```
+
+### 2. Cấu Hình
+Thêm vào settings.py:
+```python
+INSTALLED_APPS = [
+    ...
+    'django_ledger',
+]
+```
+
+### 3. Tạo Entity và Chart of Accounts
+```python
+from django_ledger.models import EntityModel, ChartOfAccountModel
+
+# Tạo entity
+entity = EntityModel.objects.create(
+    name='Công ty của tôi',
+    admin=user_model
+)
+
+# Tạo chart of accounts
+coa = ChartOfAccountModel.objects.create(
+    name='Hệ thống tài khoản',
+    entity=entity
+)
+```
+
+## Hướng Dẫn Đóng Góp
+
+1. **Báo Lỗi**
+   - Tạo issue trên GitHub
+   - Mô tả chi tiết vấn đề
+   - Cung cấp các bước tái hiện
+
+2. **Đóng Góp Code**
+   - Fork repository
+   - Tạo branch mới
+   - Commit thay đổi
+   - Tạo pull request
+
+3. **Cải Thiện Tài Liệu**
+   - Sửa lỗi chính tả
+   - Thêm ví dụ
+   - Cập nhật thông tin mới
+
+## Hỗ Trợ
+
+- **Email**: support@djangoledger.com
+- **Discord**: [Link tham gia](https://discord.gg/djangoledger)
+- **GitHub Issues**: [Tạo issue mới](https://github.com/djangoledger/issues)
+
+## License
+
+Django Ledger được phát hành dưới giấy phép GPLv3. Xem file [LICENSE](../../LICENSE) để biết thêm chi tiết.
+
+## Tác Giả và Cộng Tác Viên
+
+- **Miguel Sanda** - *Tác giả chính* - [GitHub](https://github.com/miguelsanda)
+- Xem thêm danh sách [cộng tác viên](../../AUTHORS.md)
+
+## Phiên Bản
+
+Xem [CHANGELOG.md](../../CHANGELOG.md) để biết chi tiết các thay đổi trong từng phiên bản.
+6:["slug","erp/README","c"]
+0:["X5KF-BjlTdL2YCafX7ACW",[[["",{"children":[["slug","erp/README","c"],{"children":["__PAGE__?{\"slug\":[\"erp\",\"README\"]}",{}]}]},"$undefined","$undefined",true],["",{"children":[["slug","erp/README","c"],{"children":["__PAGE__",{},[["$L1",["$","$L2",null,{"children":["$","article",null,{"className":"prose prose-slate dark:prose-invert max-w-none","children":[["$","header",null,{"className":"mb-8","children":[["$","h1",null,{"className":"mb-2","children":"$undefined"}],"$undefined","$undefined"]}],["$","$L3",null,{"content":"$4"}]]}]}]],null],null]},["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children","$6","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","notFoundStyles":"$undefined","styles":null}],null]},[["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":["$","body",null,{"className":"__className_985585","children":["$","$L8",null,{"attribute":"class","defaultTheme":"system","enableSystem":true,"disableTransitionOnChange":true,"children":["$","$L9",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":"404"}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],"notFoundStyles":[],"styles":null}]}]}]}]}],null],null],[[["$","link","0",{"rel":"stylesheet","href":"/erp-docs/_next/static/css/4b73dfd0f7bdc629.css","precedence":"next","crossOrigin":"$undefined"}]],"$La"]]]]
+a:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}],["$","title","2",{"children":"undefined | ERP Documentation"}],["$","meta","3",{"name":"keywords","content":"documentation,ERP,technical,mermaid,markdown"}],["$","meta","4",{"name":"next-size-adjust"}]]
+1:null

@@ -1,0 +1,274 @@
+# SAL_007_Quản Lý Mẫu Số Hóa Đơn
+
+*Phiên bản: 1.0*  
+*Người tạo: ChatGPT*  
+*Ngày tạo: 13/05/2025*  
+*Cập nhật lần cuối: 13/05/2025*  
+*Người cập nhật: ChatGPT*
+
+## 1. Tổng Quan Nghiệp Vụ
+
+### 1.1. Mô Tả Nghiệp Vụ
+Quy trình Quản Lý Mẫu Số Hóa Đơn cho phép doanh nghiệp định nghĩa và quản lý các mẫu số hóa đơn được sử dụng trong hệ thống. Mẫu số hóa đơn là một phần quan trọng trong việc phát hành hóa đơn, đặc biệt là hóa đơn điện tử (HĐĐT), tuân thủ các quy định về hóa đơn của cơ quan thuế. Quy trình bao gồm việc đăng ký mẫu số, quản lý ký hiệu hóa đơn, theo dõi việc sử dụng và đảm bảo tính hợp lệ của hóa đơn phát hành.
+
+### 1.2. Phạm Vi Áp Dụng
+- **Phòng Kế Toán**: Đăng ký và quản lý mẫu số, ký hiệu hóa đơn với cơ quan thuế.
+- **Phòng Bán Hàng**: Sử dụng mẫu số khi phát hành hóa đơn bán hàng.
+- **Ban Giám Đốc**: Phê duyệt việc đăng ký và sử dụng mẫu số hóa đơn.
+- **Bộ phận IT**: Cấu hình và đảm bảo tính khả dụng của mẫu số trong hệ thống.
+
+### 1.3. Định Nghĩa Thuật Ngữ
+| Thuật ngữ | Định nghĩa |
+|-----------|------------|
+| Mẫu số hóa đơn | Ký hiệu định danh loại hóa đơn, quy định bởi cơ quan thuế (ví dụ: 01GTKT0/001 cho hóa đơn GTGT). |
+| Ký hiệu hóa đơn | Chuỗi ký tự phân biệt các lô hóa đơn trong cùng một mẫu (ví dụ: AA/22E). |
+| Hóa đơn điện tử (HĐĐT) | Hóa đơn được khởi tạo, lập, xử lý trên hệ thống máy tính, thiết bị điện tử. |
+| Mã số thuế (MST) | Mã số định danh doanh nghiệp với cơ quan thuế. |
+| Số hóa đơn | Số thứ tự của hóa đơn trong một mẫu số và ký hiệu cụ thể. |
+
+### 1.4. Tài Liệu Liên Quan
+| STT | Mã tài liệu | Tên tài liệu | Mô tả |
+|-----|-------------|--------------|-------|
+| 1   | SAL_004 | Quản Lý Hóa Đơn Bán Hàng | Quy trình phát hành hóa đơn sử dụng mẫu số. |
+| 2   | SAL_008 | Quản Lý Nhóm Loại Hóa Đơn | Phân loại hóa đơn và áp dụng mẫu số phù hợp. |
+| 3   | DOC_002 | Quản Lý Quyền Hóa Đơn Điện Tử | Phân quyền sử dụng và phát hành HĐĐT. |
+| 4   | ACC_006 | Quản Lý Thuế | Quy định về hóa đơn thuế GTGT và báo cáo thuế. |
+
+## 2. Quy Trình Nghiệp Vụ
+
+### 2.1. Tổng Quan Quy Trình
+1.  Đăng ký mẫu số hóa đơn với cơ quan thuế.
+2.  Thiết lập mẫu số và ký hiệu trong hệ thống.
+3.  Sử dụng mẫu số khi phát hành hóa đơn.
+4.  Theo dõi và quản lý việc sử dụng mẫu số.
+5.  Xử lý các trường hợp đặc biệt (hủy mẫu số, thay đổi mẫu số, v.v.).
+
+### 2.2. Sơ Đồ Quy Trình (Business Flow)
+
+```mermaid
+flowchart TD
+    A[Bắt đầu] --> B[Đăng ký mẫu số với cơ quan thuế]
+    B --> C[Thiết lập mẫu số trong hệ thống]
+    C --> D[Nhập thông tin: Mã mẫu, Tên mẫu, Ký hiệu, Ngày hiệu lực]
+    D --> E[Kích hoạt mẫu số]
+    E --> F[Sử dụng cho hóa đơn bán hàng]
+    F --> G{Còn hiệu lực?}
+    G --Có--> F
+    G --Không--> H[Ngừng sử dụng mẫu số]
+    H --> I[Lưu trữ thông tin]
+    I --> J[Kết thúc]
+```
+
+### 2.3. Chi Tiết Các Bước Quy Trình
+
+#### 2.3.1. Đăng Ký và Thiết Lập Mẫu Số
+- **Mô tả**: Khởi tạo một mẫu số hóa đơn mới trong hệ thống.
+- **Đầu vào**:
+    - Mã mẫu số hóa đơn (`ma_mau_so`)
+    - Tên mẫu số (`ten_mau_so`)
+    - Ký hiệu hóa đơn (`ky_hieu`)
+    - Loại hóa đơn (`loai_hoa_don`)
+    - Ngày bắt đầu sử dụng (`ngay_bat_dau`)
+    - Ngày kết thúc sử dụng (`ngay_ket_thuc`) (nếu có)
+    - Trạng thái (`status`)
+- **Đầu ra**: Mẫu số hóa đơn được tạo và kích hoạt trong hệ thống.
+- **Người thực hiện**: Nhân viên Kế toán được ủy quyền.
+- **Điều kiện tiên quyết**: Đã được cơ quan thuế cấp mẫu số.
+- **Xử lý ngoại lệ**:
+    - Mẫu số đã tồn tại.
+    - Thông tin không hợp lệ theo quy định.
+
+#### 2.3.2. Sử Dụng Mẫu Số Trong Hóa Đơn
+- **Mô tả**: Áp dụng mẫu số khi phát hành hóa đơn bán hàng.
+- **Đầu vào**: 
+    - Mẫu số hóa đơn đang hoạt động
+    - Thông tin hóa đơn cần phát hành
+- **Đầu ra**: 
+    - Hóa đơn được phát hành với mẫu số và số hóa đơn hợp lệ
+    - Cập nhật trạng thái sử dụng của mẫu số
+- **Điều kiện tiên quyết**: 
+    - Mẫu số còn hiệu lực
+    - Người dùng có quyền phát hành hóa đơn
+- **Xử lý ngoại lệ**:
+    - Mẫu số hết hiệu lực
+    - Số hóa đơn đã được sử dụng
+
+### 2.4. Sơ Đồ Tuần Tự (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant MauSoHD_Service as Dịch vụ Mẫu số HĐ
+    participant HoaDon_Service as Dịch vụ Hóa đơn
+    
+    User->>MauSoHD_Service: Yêu cầu tạo Mẫu số HĐ
+    MauSoHD_Service-->>User: Form nhập thông tin
+    User->>MauSoHD_Service: Gửi thông tin (Mã, Tên, Ký hiệu,...)
+    MauSoHD_Service->>MauSoHD_Service: Validate dữ liệu
+    MauSoHD_Service-->>User: Xác nhận tạo Mẫu số HĐ thành công
+    
+    User->>HoaDon_Service: Tạo Hóa đơn bán hàng
+    HoaDon_Service->>MauSoHD_Service: Kiểm tra Mẫu số HĐ hợp lệ
+    MauSoHD_Service-->>HoaDon_Service: Xác nhận Mẫu số HĐ
+    HoaDon_Service-->>User: Hiển thị Mẫu số HĐ trên hóa đơn
+```
+
+### 2.5. Luồng Nghiệp Vụ Thay Thế
+1.  **Hủy mẫu số hóa đơn**:
+    *   Chỉ cho phép hủy khi mẫu số chưa được sử dụng.
+    *   Cần ghi nhận lý do hủy và người thực hiện.
+2.  **Thay đổi thông tin mẫu số**:
+    *   Một số thông tin có thể được cập nhật (ví dụ: tên mẫu).
+    *   Một số thông tin không được phép thay đổi sau khi đã sử dụng (ví dụ: mã mẫu, ký hiệu).
+
+## 3. Yêu Cầu Chức Năng
+
+### 3.1. Danh Sách Chức Năng
+
+| STT | Mã chức năng | Tên chức năng | Mô tả | Độ ưu tiên |
+|-----|--------------|---------------|-------|------------|
+| 1   | IFM_001 | Quản lý Mẫu số HĐ | Tạo, sửa, xóa, xem danh sách mẫu số hóa đơn. | Cao |
+| 2   | IFM_002 | Kích hoạt/Vô hiệu hóa | Thay đổi trạng thái hoạt động của mẫu số. | Cao |
+| 3   | IFM_003 | Áp dụng Mẫu số vào HĐ | Sử dụng mẫu số khi phát hành hóa đơn. | Cao |
+| 4   | IFM_004 | Báo cáo sử dụng | Xem báo cáo về việc sử dụng mẫu số. | Trung bình |
+
+### 3.2. Chi Tiết Chức Năng
+
+#### 3.2.1. IFM_001: Quản lý Mẫu số HĐ
+- **Mô tả**: Cho phép người dùng quản lý các mẫu số hóa đơn trong hệ thống.
+- **Đầu vào**: Thông tin mẫu số (mã, tên, ký hiệu, ngày hiệu lực, v.v.).
+- **Đầu ra**: Danh sách mẫu số, form tạo/sửa mẫu số.
+- **Điều kiện tiên quyết**: Người dùng có quyền quản lý mẫu số.
+- **Luồng xử lý chính**:
+  1.  Truy cập màn hình quản lý Mẫu số HĐ.
+  2.  Hiển thị danh sách mẫu số hiện có.
+  3.  Cho phép thêm mới, sửa thông tin, thay đổi trạng thái.
+- **Luồng xử lý thay thế/ngoại lệ**:
+  -   Lỗi khi lưu (trùng mã, dữ liệu không hợp lệ).
+  -   Xử lý khi xóa mẫu số đã được sử dụng.
+- **Giao diện liên quan**: Màn hình danh sách Mẫu số HĐ, Form chi tiết Mẫu số HĐ.
+
+## 4. Thiết Kế Kỹ Thuật
+
+### 4.1. Kiến Trúc Hệ Thống
+
+```mermaid
+flowchart TD
+    WebApp[Giao diện Web] --> APIGateway[API Gateway]
+    
+    APIGateway --> MauSoHDAPI[/api/v1/invoice-templates/]
+    
+    MauSoHDAPI --> MauSoHDService[Dịch vụ Mẫu Số HĐ]
+    MauSoHDService --> MauSoHDRepository[Repository Mẫu Số HĐ]
+    MauSoHDRepository --> Database[(Cơ sở dữ liệu)]
+
+    Database --> MauSoHD[MauSoHDModel]
+    MauSoHD --> HoaDonBanHang[HoaDonBanHangModel]
+```
+
+### 4.2. API Endpoints
+- **URL**: `/api/v1/entity/{entity_slug}/erp/invoice-templates/`
+- **Phương thức**:
+  - `GET /`: Lấy danh sách mẫu số
+  - `POST /`: Tạo mẫu số mới
+  - `GET /{uuid}/`: Xem chi tiết một mẫu số
+  - `PUT /{uuid}/`: Cập nhật mẫu số
+  - `DELETE /{uuid}/`: Xóa mẫu số
+  - `PATCH /{uuid}/activate/`: Kích hoạt mẫu số
+  - `PATCH /{uuid}/deactivate/`: Vô hiệu hóa mẫu số
+
+### 4.3. Service Logic
+
+#### 4.3.1. MauSoHDModelService
+- **Mô tả**: Xử lý logic nghiệp vụ cho Mẫu số hóa đơn.
+- **Chức năng chính**:
+  1.  Validate dữ liệu (ví dụ: mã mẫu số hợp lệ, ngày hiệu lực hợp lý).
+  2.  CRUD operations cho `MauSoHDModel`.
+  3.  Kiểm tra điều kiện trước khi cho phép thay đổi trạng thái.
+  4.  Đảm bảo tính duy nhất của mã mẫu số trong một entity.
+- **Dependencies**: `MauSoHDRepository`.
+
+### 4.4. Mô Hình Dữ Liệu
+
+#### 4.4.1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    MAU_SO_HOA_DON ||--o{ HOA_DON_BAN_HANG : "được sử dụng trong"
+    MAU_SO_HOA_DON }|--|| ENTITY : "thuộc về"
+
+    MAU_SO_HOA_DON {
+        uuid uuid PK
+        string ma_mau_so "Mã mẫu số"
+        string ten_mau_so "Tên mẫu số"
+        string ky_hieu "Ký hiệu"
+        string loai_hoa_don "Loại hóa đơn"
+        date ngay_bat_dau "Ngày bắt đầu"
+        date ngay_ket_thuc "Ngày kết thúc (nullable)"
+        integer status "Trạng thái"
+        uuid entity_model_id FK
+    }
+
+    HOA_DON_BAN_HANG {
+        uuid uuid PK
+        string ma_mau_ct_hddt "Mã mẫu số"
+        -- các trường khác của hóa đơn
+    }
+
+    ENTITY {
+        uuid uuid PK
+        string name
+        string mst "Mã số thuế"
+    }
+```
+
+#### 4.4.2. Chi Tiết Bảng Dữ Liệu
+
+##### Bảng: MAU_SO_HOA_DON (MauSoHDModel)
+- **Mô tả**: Lưu trữ thông tin các mẫu số hóa đơn được sử dụng.
+- **Các trường chính**:
+  - `uuid`: Khóa chính.
+  - `ma_mau_so`: Mã mẫu số hóa đơn (unique trong một entity).
+  - `ten_mau_so`: Tên/mô tả mẫu số.
+  - `ky_hieu`: Ký hiệu hóa đơn.
+  - `loai_hoa_don`: Loại hóa đơn áp dụng.
+  - `ngay_bat_dau`: Ngày bắt đầu sử dụng.
+  - `ngay_ket_thuc`: Ngày kết thúc sử dụng (nullable).
+  - `status`: Trạng thái (ví dụ: 1-Active, 0-Inactive).
+  - `entity_model_id`: Khóa ngoại, liên kết đến ENTITY.
+
+## 5. Kế Hoạch Kiểm Thử
+
+### 5.1. Phạm Vi Kiểm Thử
+- Tạo, sửa, xóa mẫu số hóa đơn.
+- Kích hoạt và vô hiệu hóa mẫu số.
+- Sử dụng mẫu số trong hóa đơn bán hàng.
+- Kiểm tra các ràng buộc về ngày hiệu lực.
+- Kiểm tra tính duy nhất của mã mẫu số.
+
+### 5.2. Kịch Bản Kiểm Thử
+
+| STT | Mã kịch bản | Tên kịch bản | Mô tả | Điều kiện tiên quyết | Các bước | Kết quả mong đợi |
+|-----|------------|--------------|-------|---------------------|----------|-----------------|
+| 1   | TC_IFM_001 | Tạo Mẫu số HĐ mới | Tạo mẫu số với mã "01GTKT0/001" và ký hiệu "AA/22E". | Đăng nhập, có quyền. | 1. Vào QL Mẫu số HĐ.<br>2. Nhấn "Thêm mới".<br>3. Nhập thông tin mẫu số.<br>4. Lưu. | Mẫu số được tạo thành công. |
+| 2   | TC_IFM_002 | Sửa thông tin Mẫu số | Thay đổi tên mẫu số hiện có. | Mẫu số đã tồn tại. | 1. Chọn mẫu số.<br>2. Nhấn "Sửa".<br>3. Thay đổi tên.<br>4. Lưu. | Tên mẫu số được cập nhật. |
+| 3   | TC_IFM_003 | Vô hiệu hóa Mẫu số | Chuyển trạng thái mẫu số thành không hoạt động. | Mẫu số đang hoạt động. | 1. Chọn mẫu số.<br>2. Nhấn "Vô hiệu hóa".<br>3. Xác nhận. | Mẫu số chuyển sang trạng thái không hoạt động. |
+
+## 6. Phụ Lục
+
+### 6.1. Danh Sách Tài Liệu Tham Khảo
+1.  Thông tư quy định về hóa đơn, chứng từ.
+2.  Tài liệu hướng dẫn sử dụng hóa đơn điện tử.
+3.  Mô hình dữ liệu: `MauSoHDModel`.
+
+### 6.2. Danh Mục Thuật Ngữ
+- HĐĐT: Hóa Đơn Điện Tử
+- MST: Mã Số Thuế
+- GTGT: Giá Trị Gia Tăng (VAT)
+- HĐ: Hóa Đơn
+
+### 6.3. Lịch Sử Thay Đổi Tài Liệu
+
+| Phiên bản | Ngày | Người thực hiện | Mô tả thay đổi |
+|-----------|------|-----------------|---------------|
+| 1.0 | 13/05/2025 | ChatGPT | Tạo mới tài liệu |
