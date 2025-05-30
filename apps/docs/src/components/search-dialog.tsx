@@ -102,19 +102,17 @@ export function SearchDialog({ children }: SearchDialogProps) {
 
         {results.length > 0 && (
           <div className="max-h-80 overflow-y-auto p-2">
-            {results.map((doc) => (
+            {results.map((item) => (
               <div
-                key={doc.slug}
+                key={item.slug}
                 className="flex items-center space-x-3 rounded-md px-3 py-2 text-sm hover:bg-accent cursor-pointer"
-                onClick={() => handleSelect(doc.slug)}
+                onClick={() => handleSelect(item.slug)}
               >
                 <div className="flex-1">
-                  <div className="font-medium">{doc.meta.title}</div>
-                  {doc.meta.description && (
-                    <div className="text-muted-foreground text-xs">
-                      {doc.meta.description}
-                    </div>
-                  )}
+                  <div className="font-medium">{item.title}</div>
+                  <div className="text-muted-foreground text-xs">
+                    {item.description}
+                  </div>
                 </div>
               </div>
             ))}

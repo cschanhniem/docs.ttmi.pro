@@ -18,16 +18,23 @@ const components = {
   MermaidDiagram,
 
   // Override default components
-  pre: ({ children, ...props }: any) => {
-    // Extract code content and language
-    const code = children?.props?.children || '';
-    const language = children?.props?.className?.replace('language-', '') || '';
+  code: ({ node, inline, className, children, ...props }: any) => {
+    const match = /language-(\w+)/.exec(className || '');
+    const language = match ? match[1] : '';
 
-    if (language === 'mermaid') {
-      return <MermaidDiagram chart={code} />;
+    if (!inline && language === 'mermaid') {
+      return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
     }
 
-    return <CodeBlock code={code} language={language} {...props} />;
+    if (!inline) {
+      return <CodeBlock code={String(children).replace(/\n$/, '')} language={language} {...props} />;
+    }
+
+    return (
+      <code className={className} {...props}>
+        {children}
+      </code>
+    );
   },
 
   // Custom heading with anchor links
